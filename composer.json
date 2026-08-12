@@ -1,0 +1,45 @@
+{
+    "name": "alihabibian/hamkharid",
+    "description": "Category-based complementary product recommendations for WooCommerce.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "phpunit/phpunit": "^9.6",
+        "wp-coding-standards/wpcs": "^3.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hamkharid\\SmartCategoryComplement\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Hamkharid\\SmartCategoryComplement\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "lint": [
+            "@php -l hamkharid.php",
+            "@php -l src/Plugin.php",
+            "@php -l tests/Unit/PluginTest.php"
+        ],
+        "cs": "phpcs --standard=phpcs.xml.dist",
+        "test": "phpunit --configuration phpunit.xml.dist",
+        "check": [
+            "@lint",
+            "@cs",
+            "@test"
+        ]
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        },
+        "sort-packages": true
+    }
+}
