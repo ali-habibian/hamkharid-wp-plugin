@@ -26,16 +26,21 @@
         "lint": [
             "@php -l hamkharid.php",
             "@php -l src/Plugin.php",
+            "@php -l src/Admin/RuleAdmin.php",
+            "@php -l src/Admin/RuleMetaBox.php",
+            "@php -l src/Admin/RuleListTable.php",
             "@php -l src/Rules/Rule.php",
             "@php -l src/Rules/RulePostType.php",
             "@php -l src/Rules/RuleRepository.php",
             "@php -l tests/Unit/PluginTest.php",
             "@php -l tests/Unit/Rules/RuleTest.php",
-            "@php -l tests/integration-rule-storage.php"
+            "@php -l tests/integration-rule-storage.php",
+            "@php -l tests/integration-admin-crud.php"
         ],
         "cs": "phpcs --standard=phpcs.xml.dist",
         "test": "phpunit --configuration phpunit.xml.dist",
         "test:integration": "@php tests/integration-rule-storage.php",
+        "test:admin": "@php tests/integration-admin-crud.php",
         "check": [
             "@lint",
             "@cs",

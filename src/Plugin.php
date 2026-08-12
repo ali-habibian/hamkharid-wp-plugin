@@ -7,7 +7,9 @@
 
 namespace Hamkharid\SmartCategoryComplement;
 
+use Hamkharid\SmartCategoryComplement\Admin\RuleAdmin;
 use Hamkharid\SmartCategoryComplement\Rules\RulePostType;
+use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,6 +43,11 @@ final class Plugin {
 
 		$rule_post_type = new RulePostType();
 		$rule_post_type->register_hooks();
+
+		if ( is_admin() ) {
+			$rule_admin = new RuleAdmin( new RuleRepository() );
+			$rule_admin->register_hooks();
+		}
 
 		/**
 		 * Fires after Hamkharid has verified its runtime dependencies.
