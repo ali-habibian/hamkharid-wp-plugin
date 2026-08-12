@@ -7,6 +7,8 @@
 
 namespace Hamkharid\SmartCategoryComplement;
 
+use Hamkharid\SmartCategoryComplement\Rules\RulePostType;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -36,6 +38,9 @@ final class Plugin {
 
 			return;
 		}
+
+		$rule_post_type = new RulePostType();
+		$rule_post_type->register_hooks();
 
 		/**
 		 * Fires after Hamkharid has verified its runtime dependencies.
