@@ -145,6 +145,43 @@ final class RuleRepository {
 	}
 
 	/**
+	 * Finds the first enabled rule whose source includes one of the given categories.
+	 *
+	 * Callers control category specificity by querying one priority tier at a time.
+	 * Rules within the same tier use ascending post ID as the deterministic tie-breaker.
+	 *
+	 * @param int[] $source_category_ids Product category IDs at the same priority tier.
+	 */
+	public function find_first_enabled_matching_source_categories( array $source_category_ids ): ?Rule {
+		$source_category_ids = array_values( array_unique( array_filter( array_map( 'absint', $source_category_ids ) ) ) );
+
+		if ( array() === $source_category_ids ) {
+			return null;
+		}
+
+		$rule_ids = get_posts(
+			array(
+				'post_type'      => RulePostType::POST_TYPE,
+				'post_status'    => 'publish',
+				'fields'         => 'ids',
+				'posts_per_page' => 1,
+				'orderby'        => 'ID',
+				'order'          => 'ASC',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Rule source categories are stored as repeated post meta and this query returns only one rule.
+				'meta_query'     => array(
+					array(
+						'key'     => RulePostType::META_SOURCE_CATEGORY,
+						'value'   => $source_category_ids,
+						'compare' => 'IN',
+					),
+				),
+			)
+		);
+
+		return isset( $rule_ids[0] ) ? $this->find( (int) $rule_ids[0] ) : null;
+	}
+
+	/**
 	 * Deletes or trashes a complement rule.
 	 *
 	 * @param int  $rule_id Rule post ID.
