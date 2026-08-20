@@ -8,6 +8,9 @@
 namespace Hamkharid\SmartCategoryComplement;
 
 use Hamkharid\SmartCategoryComplement\Admin\RuleAdmin;
+use Hamkharid\SmartCategoryComplement\Frontend\ProductRecommendations;
+use Hamkharid\SmartCategoryComplement\Matching\RuleMatcher;
+use Hamkharid\SmartCategoryComplement\Recommendations\RecommendationEngine;
 use Hamkharid\SmartCategoryComplement\Rules\RulePostType;
 use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
@@ -41,12 +44,19 @@ final class Plugin {
 			return;
 		}
 
-		$rule_post_type = new RulePostType();
+		$rule_post_type  = new RulePostType();
+		$rule_repository = new RuleRepository();
 		$rule_post_type->register_hooks();
 
 		if ( is_admin() ) {
-			$rule_admin = new RuleAdmin( new RuleRepository() );
+			$rule_admin = new RuleAdmin( $rule_repository );
 			$rule_admin->register_hooks();
+		} else {
+			$product_recommendations = new ProductRecommendations(
+				new RuleMatcher( $rule_repository ),
+				new RecommendationEngine()
+			);
+			$product_recommendations->register_hooks();
 		}
 
 		/**
