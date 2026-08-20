@@ -23,6 +23,19 @@ define( 'HAMKHARID_VERSION', '0.1.0' );
 define( 'HAMKHARID_FILE', __FILE__ );
 define( 'HAMKHARID_PATH', plugin_dir_path( __FILE__ ) );
 
+add_action(
+	'before_woocommerce_init',
+	static function (): void {
+		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+				'custom_order_tables',
+				__FILE__,
+				true
+			);
+		}
+	}
+);
+
 $hamkharid_autoloader = HAMKHARID_PATH . 'vendor/autoload.php';
 
 if ( ! is_readable( $hamkharid_autoloader ) ) {
