@@ -1,0 +1,61 @@
+.hamkharid-complements {
+	clear: both;
+	margin-block-start: 2rem;
+}
+
+.hamkharid-complements > h2,
+.hamkharid-complements .woocommerce-loop-product__title {
+	overflow-wrap: anywhere;
+}
+
+.hamkharid-complements.related.products ul.products {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1.5rem;
+	margin-block: 1.5rem 0;
+	margin-inline: 0;
+	padding-inline: 0;
+}
+
+.hamkharid-complements.related.products ul.products::before,
+.hamkharid-complements.related.products ul.products::after {
+	display: none;
+}
+
+.hamkharid-complements.related.products ul.products li.product {
+	box-sizing: border-box;
+	float: none;
+	inline-size: auto;
+	max-inline-size: 100%;
+	min-inline-size: 0;
+	margin: 0;
+}
+
+.hamkharid-complements.related.products ul.products li.product img {
+	block-size: auto;
+	max-inline-size: 100%;
+}
+
+.hamkharid-complements .button {
+	max-inline-size: 100%;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+.hamkharid-complements a:focus-visible,
+.hamkharid-complements button:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
+}
+
+@media (max-width: 782px) {
+	.hamkharid-complements.related.products ul.products {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 480px) {
+	.hamkharid-complements.related.products ul.products {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

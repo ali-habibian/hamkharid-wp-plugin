@@ -56,8 +56,27 @@ final class ProductRecommendations {
 	 * @return void
 	 */
 	public function register_hooks(): void {
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 		add_action( 'woocommerce_after_single_product_summary', array( $this, 'render' ), 18 );
 		add_action( 'woocommerce_after_main_content', array( $this, 'render' ), 5 );
+	}
+
+	/**
+	 * Enqueues the small complement stylesheet only on product pages.
+	 *
+	 * @return void
+	 */
+	public function enqueue_styles(): void {
+		if ( ! is_product() ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'hamkharid-complements',
+			plugins_url( 'assets/css/frontend.css', HAMKHARID_FILE ),
+			array(),
+			HAMKHARID_VERSION
+		);
 	}
 
 	/**

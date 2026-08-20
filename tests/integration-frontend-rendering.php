@@ -130,6 +130,15 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'The complement section heading was not rendered.' );
 		}
 
+		$heading_id = 'hamkharid-complements-title-' . $current_product_id;
+
+		if (
+			false === strpos( $html, 'aria-labelledby="' . esc_attr( $heading_id ) . '"' )
+			|| false === strpos( $html, 'id="' . esc_attr( $heading_id ) . '"' )
+		) {
+			throw new RuntimeException( 'The complement section is not labelled by its visible heading.' );
+		}
+
 		foreach ( array( $recommended_one_id, $recommended_two_id ) as $recommended_product_id ) {
 			$recommended_product = wc_get_product( $recommended_product_id );
 
