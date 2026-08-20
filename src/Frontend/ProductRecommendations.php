@@ -117,8 +117,8 @@ final class ProductRecommendations {
 	/**
 	 * Outputs recommendations using WooCommerce's standard product loop template.
 	 *
-	 * The native loop Add-to-Cart callback is temporarily removed so Phase 8 only
-	 * renders product cards. Add-to-Cart behavior is introduced in Phase 9.
+	 * WooCommerce's native loop callbacks are left intact so each product type
+	 * receives the standard catalog Add-to-Cart behavior.
 	 *
 	 * @param int          $current_product_id Current product ID.
 	 * @param WC_Product[] $products           Recommended products.
@@ -131,16 +131,11 @@ final class ProductRecommendations {
 		$had_previous_product    = isset( $GLOBALS['product'] );
 		$previous_loop_name      = wc_get_loop_prop( 'name' );
 		$previous_loop_columns   = wc_get_loop_prop( 'columns' );
-		$add_to_cart_priority    = has_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' );
 		$heading_id              = 'hamkharid-complements-title-' . $current_product_id;
 		$recommendation_columns  = min( 4, max( 1, count( $products ) ) );
 
 		wc_set_loop_prop( 'name', 'hamkharid_complements' );
 		wc_set_loop_prop( 'columns', $recommendation_columns );
-
-		if ( false !== $add_to_cart_priority ) {
-			remove_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', $add_to_cart_priority );
-		}
 
 		try {
 			printf(
@@ -173,10 +168,6 @@ final class ProductRecommendations {
 			woocommerce_product_loop_end();
 			echo '</section>';
 		} finally {
-			if ( false !== $add_to_cart_priority ) {
-				add_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart', $add_to_cart_priority );
-			}
-
 			wc_set_loop_prop( 'name', $previous_loop_name );
 			wc_set_loop_prop( 'columns', $previous_loop_columns );
 

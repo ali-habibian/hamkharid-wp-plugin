@@ -142,12 +142,8 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'The current product appeared in its own complement section.' );
 		}
 
-		if ( false !== strpos( $html, 'add_to_cart_button' ) ) {
-			throw new RuntimeException( 'Phase 8 unexpectedly rendered native Add-to-Cart controls.' );
-		}
-
 		if ( false === has_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_add_to_cart' ) ) {
-			throw new RuntimeException( 'The native WooCommerce Add-to-Cart loop callback was not restored after rendering.' );
+			throw new RuntimeException( 'The native WooCommerce Add-to-Cart loop callback is unavailable.' );
 		}
 
 		if ( ! isset( $GLOBALS['post'] ) || (int) $GLOBALS['post']->ID !== $current_product_id ) {
