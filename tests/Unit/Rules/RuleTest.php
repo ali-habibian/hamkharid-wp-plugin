@@ -34,6 +34,23 @@ final class RuleTest extends TestCase {
 	}
 
 	/**
+	 * The public minimum recommendation count remains valid.
+	 */
+	public function test_rule_preserves_minimum_recommendation_count(): void {
+		$rule = new Rule(
+			8,
+			'Accessories',
+			true,
+			array( 5 ),
+			12,
+			Rule::MIN_RECOMMENDATION_COUNT,
+			Rule::SORT_NEWEST
+		);
+
+		self::assertSame( Rule::MIN_RECOMMENDATION_COUNT, $rule->recommendation_count() );
+	}
+
+	/**
 	 * Corrupt persisted values fall back to safe defaults.
 	 */
 	public function test_rule_uses_safe_defaults_for_corrupt_values(): void {

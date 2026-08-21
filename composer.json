@@ -64,7 +64,23 @@
         "test:presentation": "@php tests/integration-frontend-presentation.php",
         "test:compatibility": "@php tests/integration-compatibility.php",
         "test:security": "@php tests/integration-security.php",
-        "test:performance": "@php tests/integration-performance.php"
+        "test:performance": "@php tests/integration-performance.php",
+        "test:integration-all": [
+            "@test:integration",
+            "@test:admin",
+            "@test:matching",
+            "@test:recommendations",
+            "@test:frontend",
+            "@test:add-to-cart",
+            "@test:presentation",
+            "@test:compatibility",
+            "@test:security",
+            "@test:performance"
+        ],
+        "test:all": [
+            "@check",
+            "@test:integration-all"
+        ]
     },
     "config": {
         "allow-plugins": {

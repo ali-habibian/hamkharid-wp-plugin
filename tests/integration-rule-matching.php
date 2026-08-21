@@ -97,6 +97,22 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		$created_posts[] = (int) $outside_product_id;
 		wp_set_object_terms( $outside_product_id, array( $created_terms[4] ), 'product_cat' );
 
+		$uncategorized_product_id = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_title'  => 'Uncategorized Matching Product ' . wp_generate_uuid4(),
+				'post_status' => 'publish',
+			),
+			true
+		);
+
+		if ( is_wp_error( $uncategorized_product_id ) ) {
+			throw new RuntimeException( $uncategorized_product_id->get_error_message() );
+		}
+
+		$created_posts[] = (int) $uncategorized_product_id;
+		wp_set_object_terms( $uncategorized_product_id, array(), 'product_cat' );
+
 		$repository = new RuleRepository();
 		$matcher    = new RuleMatcher( $repository );
 
@@ -181,6 +197,10 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'A product outside every source category matched a rule.' );
 		}
 
+		if ( null !== $matcher->match( $uncategorized_product_id ) ) {
+			throw new RuntimeException( 'A product without source categories matched a rule.' );
+		}
+
 		if ( null !== $matcher->match( 0 ) ) {
 			throw new RuntimeException( 'An invalid product ID matched a rule.' );
 		}
@@ -190,6 +210,49 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
 		if ( null !== $matcher->match( $product_id ) ) {
 			throw new RuntimeException( 'A disabled rule matched a product.' );
+		}
+
+		$deleted_source_result = wp_insert_term( 'Deleted Source ' . wp_generate_uuid4(), 'product_cat' );
+
+		if ( is_wp_error( $deleted_source_result ) ) {
+			throw new RuntimeException( $deleted_source_result->get_error_message() );
+		}
+
+		$deleted_source_id         = (int) $deleted_source_result['term_id'];
+		$created_terms[]           = $deleted_source_id;
+		$deleted_source_product_id = wp_insert_post(
+			array(
+				'post_type'   => 'product',
+				'post_title'  => 'Deleted Source Product ' . wp_generate_uuid4(),
+				'post_status' => 'publish',
+			),
+			true
+		);
+
+		if ( is_wp_error( $deleted_source_product_id ) ) {
+			throw new RuntimeException( $deleted_source_product_id->get_error_message() );
+		}
+
+		$created_posts[] = (int) $deleted_source_product_id;
+		wp_set_object_terms( $deleted_source_product_id, array( $deleted_source_id ), 'product_cat' );
+
+		$deleted_source_rule_id = $repository->create(
+			'Deleted Source Rule',
+			true,
+			array( $deleted_source_id ),
+			$created_terms[3]
+		);
+
+		if ( is_wp_error( $deleted_source_rule_id ) ) {
+			throw new RuntimeException( $deleted_source_rule_id->get_error_message() );
+		}
+
+		$created_rules[] = (int) $deleted_source_rule_id;
+		wp_delete_term( $deleted_source_id, 'product_cat' );
+		$created_terms = array_values( array_diff( $created_terms, array( $deleted_source_id ) ) );
+
+		if ( null !== $matcher->match( $deleted_source_product_id ) ) {
+			throw new RuntimeException( 'A rule with a deleted source category matched a product.' );
 		}
 
 		$deleted_target_rule_id = $repository->create(

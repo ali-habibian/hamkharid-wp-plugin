@@ -116,6 +116,21 @@ use Hamkharid\SmartCategoryComplement\Rules\Rule;
 			throw new RuntimeException( 'Newest recommendations did not respect date ordering, descendants, or exclusions.' );
 		}
 
+		$single_rule     = new Rule(
+			6,
+			'Single Recommendation',
+			true,
+			array( $other_id ),
+			$target_id,
+			1,
+			Rule::SORT_NEWEST
+		);
+		$single_products = $engine->recommend( $current_product_id, $single_rule );
+
+		if ( 1 !== count( $single_products ) || $child_product_id !== $single_products[0]->get_id() ) {
+			throw new RuntimeException( 'Recommendation Count = 1 was not respected.' );
+		}
+
 		$best_selling_rule        = new Rule( 2, 'Best Selling', true, array( $other_id ), $target_id, 3, Rule::SORT_BEST_SELLING );
 		$best_selling_products    = $engine->recommend( $current_product_id, $best_selling_rule );
 		$best_selling_product_ids = array_map(
