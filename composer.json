@@ -45,7 +45,8 @@
             "@php -l tests/integration-add-to-cart.php",
             "@php -l tests/integration-frontend-presentation.php",
             "@php -l tests/integration-compatibility.php",
-            "@php -l tests/integration-security.php"
+            "@php -l tests/integration-security.php",
+            "@php -l tests/integration-performance.php"
         ],
         "cs": "phpcs --standard=phpcs.xml.dist",
         "test": "phpunit --configuration phpunit.xml.dist",
@@ -62,7 +63,8 @@
         "test:add-to-cart": "@php tests/integration-add-to-cart.php",
         "test:presentation": "@php tests/integration-frontend-presentation.php",
         "test:compatibility": "@php tests/integration-compatibility.php",
-        "test:security": "@php tests/integration-security.php"
+        "test:security": "@php tests/integration-security.php",
+        "test:performance": "@php tests/integration-performance.php"
     },
     "config": {
         "allow-plugins": {

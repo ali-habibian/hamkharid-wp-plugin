@@ -22,11 +22,11 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 	require rtrim( $wordpress_root, '/\\' ) . '/wp-load.php';
 	require_once ABSPATH . 'wp-admin/includes/user.php';
 
-	$created_terms      = array();
-	$rule_id            = 0;
-	$administrator_id   = 0;
-	$subscriber_id      = 0;
-	$original_user_id   = get_current_user_id();
+	$created_terms    = array();
+	$rule_id          = 0;
+	$administrator_id = 0;
+	$subscriber_id    = 0;
+	$original_user_id = get_current_user_id();
 	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Test harness restores the request global after exercising nonce handling.
 	$original_post      = $_POST;
 	$expected_meta_keys = array(
