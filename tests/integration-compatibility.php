@@ -80,7 +80,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 	foreach ( array( '.storefront', '.astra', '.elementor', '.woodmart' ) as $theme_selector ) {
 		if ( false !== stripos( $css, $theme_selector ) ) {
 			throw new RuntimeException(
-				'The frontend stylesheet contains a theme/page-builder-specific selector: ' . $theme_selector
+				'The frontend stylesheet contains a theme/page-builder-specific selector: ' . esc_html( $theme_selector )
 			);
 		}
 	}

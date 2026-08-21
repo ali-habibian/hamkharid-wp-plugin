@@ -47,7 +47,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( $parent_result->get_error_message() );
 		}
 
-		$child_result = wp_insert_term(
+		$child_result  = wp_insert_term(
 			'Match Child ' . wp_generate_uuid4(),
 			'product_cat',
 			array( 'parent' => $parent_result['term_id'] )

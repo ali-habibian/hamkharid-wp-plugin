@@ -144,14 +144,14 @@ final class ProductRecommendations {
 	 * @return void
 	 */
 	private function render_product_loop( int $current_product_id, array $products ): void {
-		$previous_post           = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
-		$had_previous_post       = isset( $GLOBALS['post'] );
-		$previous_product        = isset( $GLOBALS['product'] ) ? $GLOBALS['product'] : null;
-		$had_previous_product    = isset( $GLOBALS['product'] );
-		$previous_loop_name      = wc_get_loop_prop( 'name' );
-		$previous_loop_columns   = wc_get_loop_prop( 'columns' );
-		$heading_id              = 'hamkharid-complements-title-' . $current_product_id;
-		$recommendation_columns  = min( 4, max( 1, count( $products ) ) );
+		$previous_post          = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+		$had_previous_post      = isset( $GLOBALS['post'] );
+		$previous_product       = isset( $GLOBALS['product'] ) ? $GLOBALS['product'] : null;
+		$had_previous_product   = isset( $GLOBALS['product'] );
+		$previous_loop_name     = wc_get_loop_prop( 'name' );
+		$previous_loop_columns  = wc_get_loop_prop( 'columns' );
+		$heading_id             = 'hamkharid-complements-title-' . $current_product_id;
+		$recommendation_columns = min( 4, max( 1, count( $products ) ) );
 
 		wc_set_loop_prop( 'name', 'hamkharid_complements' );
 		wc_set_loop_prop( 'columns', $recommendation_columns );
@@ -165,6 +165,7 @@ final class ProductRecommendations {
 
 			woocommerce_product_loop_start();
 
+			// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- WooCommerce loop templates require the canonical post/product globals.
 			foreach ( $products as $recommended_product ) {
 				if ( ! $recommended_product instanceof WC_Product ) {
 					continue;
@@ -204,6 +205,7 @@ final class ProductRecommendations {
 			} else {
 				unset( $GLOBALS['product'] );
 			}
+			// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
 		}
 	}
 }

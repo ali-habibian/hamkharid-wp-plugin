@@ -11,6 +11,7 @@ use Hamkharid\SmartCategoryComplement\Recommendations\RecommendationEngine;
 use Hamkharid\SmartCategoryComplement\Rules\Rule;
 use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Integration test intentionally emulates WordPress/WooCommerce global request context.
 ( static function (): void {
 	$wordpress_root = getenv( 'HAMKHARID_WP_ROOT' );
 
@@ -201,3 +202,4 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		}
 	}
 } )();
+// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound

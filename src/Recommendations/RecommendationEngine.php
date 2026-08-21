@@ -181,7 +181,7 @@ final class RecommendationEngine {
 			return array();
 		}
 
-		$pool_size = min(
+		$pool_size  = min(
 			$total,
 			max( self::RANDOM_MINIMUM_CANDIDATE_POOL, $limit * self::RANDOM_CANDIDATE_MULTIPLIER )
 		);

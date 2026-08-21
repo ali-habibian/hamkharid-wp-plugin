@@ -11,6 +11,7 @@ use Hamkharid\SmartCategoryComplement\Recommendations\RecommendationEngine;
 use Hamkharid\SmartCategoryComplement\Rules\Rule;
 use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Integration test intentionally emulates WordPress/WooCommerce global request context.
 ( static function (): void {
 	$wordpress_root = getenv( 'HAMKHARID_WP_ROOT' );
 
@@ -68,7 +69,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		$simple_product->set_category_ids( array( $target_id ) );
 		$simple_product->set_stock_status( 'instock' );
 		$simple_product->set_catalog_visibility( 'visible' );
-		$simple_product_id = $simple_product->save();
+		$simple_product_id  = $simple_product->save();
 		$created_products[] = (int) $simple_product_id;
 
 		$variable_product = new \WC_Product_Variable();
@@ -239,3 +240,4 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		}
 	}
 } )();
+// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound

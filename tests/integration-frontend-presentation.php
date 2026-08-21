@@ -10,6 +10,7 @@ use Hamkharid\SmartCategoryComplement\Matching\RuleMatcher;
 use Hamkharid\SmartCategoryComplement\Recommendations\RecommendationEngine;
 use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
+// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Integration test intentionally emulates WordPress/WooCommerce global request context.
 ( static function (): void {
 	$wordpress_root = getenv( 'HAMKHARID_WP_ROOT' );
 
@@ -28,9 +29,9 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 	}
 
 	$created_product_id = 0;
-	$previous_post       = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
-	$previous_product    = isset( $GLOBALS['product'] ) ? $GLOBALS['product'] : null;
-	$previous_query      = isset( $GLOBALS['wp_query'] ) ? clone $GLOBALS['wp_query'] : null;
+	$previous_post      = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+	$previous_product   = isset( $GLOBALS['product'] ) ? $GLOBALS['product'] : null;
+	$previous_query     = isset( $GLOBALS['wp_query'] ) ? clone $GLOBALS['wp_query'] : null;
 
 	try {
 		$renderer = new ProductRecommendations(
@@ -89,7 +90,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		}
 
 		$wp_styles = wp_styles();
-		$style = isset( $wp_styles->registered['hamkharid-complements'] )
+		$style     = isset( $wp_styles->registered['hamkharid-complements'] )
 			? $wp_styles->registered['hamkharid-complements']
 			: null;
 
@@ -166,3 +167,4 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		}
 	}
 } )();
+// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited,WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound
