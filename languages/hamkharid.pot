@@ -1,0 +1,226 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Smart Category Complement – Hamkharid 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-23 21:20+0330\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: hamkharid\n"
+
+#: src/Rules/RuleRepository.php:228
+msgid "A rule name is required."
+msgstr ""
+
+#: src/Rules/RuleRepository.php:238
+msgid "A valid target category is required."
+msgstr ""
+
+#: src/Rules/RulePostType.php:42
+msgid "Add New"
+msgstr ""
+
+#: src/Rules/RulePostType.php:43
+msgid "Add New Complement Rule"
+msgstr ""
+
+#: src/Rules/RuleRepository.php:234
+msgid "At least one valid source category is required."
+msgstr ""
+
+#: src/Admin/RuleListTable.php:192 src/Admin/RuleMetaBox.php:220
+msgid "Best Selling"
+msgstr ""
+
+#: src/Rules/RulePostType.php:39
+msgid "Complement Rule"
+msgstr ""
+
+#: src/Rules/RulePostType.php:38 src/Rules/RulePostType.php:40 src/Rules/RulePostType.php:41
+msgid "Complement Rules"
+msgstr ""
+
+#: src/Admin/RuleListTable.php:61
+msgid "Count"
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php:136
+msgid "Create at least one WooCommerce product category before saving a rule."
+msgstr ""
+
+#: src/Admin/RuleListTable.php:64
+msgid "Date"
+msgstr ""
+
+#, php-format
+#: src/Admin/RuleListTable.php:174
+msgid "Deleted category #%d"
+msgstr ""
+
+#: src/Admin/RuleListTable.php:140
+msgid "Disable"
+msgstr ""
+
+#: src/Admin/RuleListTable.php:97
+msgid "Disabled"
+msgstr ""
+
+#: hamkharid.php:4
+msgid "Display WooCommerce product complements based on category rules."
+msgstr ""
+
+#: src/Rules/RulePostType.php:44
+msgid "Edit Complement Rule"
+msgstr ""
+
+#: src/Admin/RuleListTable.php:140
+msgid "Enable"
+msgstr ""
+
+#: src/Admin/RuleListTable.php:97 src/Admin/RuleMetaBox.php:92
+msgid "Enabled"
+msgstr ""
+
+#: src/Admin/RuleAdmin.php:230
+msgid "Enter a name for the complement rule."
+msgstr ""
+
+#: src/Rules/RulePostType.php:45
+msgid "New Complement Rule"
+msgstr ""
+
+#: src/Admin/RuleListTable.php:191 src/Admin/RuleMetaBox.php:219
+msgid "Newest"
+msgstr ""
+
+#: src/Rules/RulePostType.php:48
+msgid "No complement rules found in Trash."
+msgstr ""
+
+#: src/Rules/RulePostType.php:47
+msgid "No complement rules found."
+msgstr ""
+
+#: src/Rules/RulePostType.php:137
+msgid "Number of products to recommend."
+msgstr ""
+
+#: src/Admin/RuleAdmin.php:193
+msgid "Permission denied"
+msgstr ""
+
+#: src/Admin/RuleListTable.php:190 src/Admin/RuleMetaBox.php:218
+msgid "Random"
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php:120
+msgid "Recommendation Count"
+msgstr ""
+
+#: src/Rules/RulePostType.php:149
+msgid "Recommendation sort strategy."
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php:116
+msgid "Recommended products will be selected from this category and its descendants."
+msgstr ""
+
+#: src/Admin/RuleListTable.php:58
+msgid "Rule Name"
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php:52
+msgid "Rule Settings"
+msgstr ""
+
+#: src/Rules/RulePostType.php:46
+msgid "Search Complement Rules"
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php:113
+msgid "Select a category"
+msgstr ""
+
+#: src/Admin/RuleAdmin.php:232
+msgid "Select a valid target category. The rule was disabled."
+msgstr ""
+
+#: src/Admin/RuleAdmin.php:231
+msgid "Select at least one valid source category. The rule was disabled."
+msgstr ""
+
+#: hamkharid.php:3
+msgid "Smart Category Complement – Hamkharid"
+msgstr ""
+
+#: hamkharid.php:51
+msgid "Smart Category Complement – Hamkharid could not load because its autoloader is missing. Please reinstall the plugin."
+msgstr ""
+
+#: src/Plugin.php:91
+msgid "Smart Category Complement – Hamkharid requires WooCommerce to be installed and active."
+msgstr ""
+
+#: src/Admin/RuleListTable.php:62
+msgid "Sort"
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php:124
+msgid "Sort Strategy"
+msgstr ""
+
+#: src/Admin/RuleListTable.php:59 src/Admin/RuleMetaBox.php:101
+msgid "Source Categories"
+msgstr ""
+
+#: src/Rules/RulePostType.php:113
+msgid "Source product category ID."
+msgstr ""
+
+#: src/Admin/RuleListTable.php:63
+msgid "Status"
+msgstr ""
+
+#: src/Admin/RuleListTable.php:60 src/Admin/RuleMetaBox.php:110
+msgid "Target Category"
+msgstr ""
+
+#: src/Rules/RulePostType.php:125
+msgid "Target product category ID."
+msgstr ""
+
+#: src/Admin/RuleAdmin.php:233
+msgid "The complement rule could not be found."
+msgstr ""
+
+#: src/Admin/RuleAdmin.php:236
+msgid "The complement rule could not be saved. Please review its settings."
+msgstr ""
+
+#: src/Rules/RuleRepository.php:91
+msgid "The complement rule does not exist."
+msgstr ""
+
+#: src/Admin/RuleAdmin.php:178
+msgid "The complement rule was disabled."
+msgstr ""
+
+#: src/Admin/RuleAdmin.php:177
+msgid "The complement rule was enabled."
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php:106
+msgid "The rule applies when a product belongs to any selected category or its descendants."
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php:96
+msgid "Use this rule on matching product pages."
+msgstr ""
+
+#: src/Admin/RuleAdmin.php:192
+msgid "You are not allowed to manage complement rules."
+msgstr ""
+
+#: src/Frontend/ProductRecommendations.php:163
+msgid "You may also like"
+msgstr ""

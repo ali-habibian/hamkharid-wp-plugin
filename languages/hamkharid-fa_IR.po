@@ -1,0 +1,230 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Smart Category Complement – Hamkharid 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-23 21:20+0330\n"
+"PO-Revision-Date: 2026-08-23 21:20+0330\n"
+"Language-Team: Persian\n"
+"Language: fa_IR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Domain: hamkharid\n"
+
+#: src/Rules/RuleRepository.php:228
+msgid "A rule name is required."
+msgstr "وارد کردن نام قانون الزامی است."
+
+#: src/Rules/RuleRepository.php:238
+msgid "A valid target category is required."
+msgstr "یک دسته‌بندی مقصد معتبر الزامی است."
+
+#: src/Rules/RulePostType.php:42
+msgid "Add New"
+msgstr "افزودن جدید"
+
+#: src/Rules/RulePostType.php:43
+msgid "Add New Complement Rule"
+msgstr "افزودن قانون محصول مکمل"
+
+#: src/Rules/RuleRepository.php:234
+msgid "At least one valid source category is required."
+msgstr "حداقل یک دسته‌بندی مبدأ معتبر الزامی است."
+
+#: src/Admin/RuleListTable.php:192 src/Admin/RuleMetaBox.php:220
+msgid "Best Selling"
+msgstr "پرفروش‌ترین"
+
+#: src/Rules/RulePostType.php:39
+msgid "Complement Rule"
+msgstr "قانون محصول مکمل"
+
+#: src/Rules/RulePostType.php:38 src/Rules/RulePostType.php:40 src/Rules/RulePostType.php:41
+msgid "Complement Rules"
+msgstr "قوانین محصولات مکمل"
+
+#: src/Admin/RuleListTable.php:61
+msgid "Count"
+msgstr "تعداد"
+
+#: src/Admin/RuleMetaBox.php:136
+msgid "Create at least one WooCommerce product category before saving a rule."
+msgstr "پیش از ذخیره قانون، حداقل یک دسته‌بندی محصول ووکامرس ایجاد کنید."
+
+#: src/Admin/RuleListTable.php:64
+msgid "Date"
+msgstr "تاریخ"
+
+#, php-format
+#: src/Admin/RuleListTable.php:174
+msgid "Deleted category #%d"
+msgstr "دسته‌بندی حذف‌شده شماره %d"
+
+#: src/Admin/RuleListTable.php:140
+msgid "Disable"
+msgstr "غیرفعال‌کردن"
+
+#: src/Admin/RuleListTable.php:97
+msgid "Disabled"
+msgstr "غیرفعال"
+
+#: hamkharid.php:4
+msgid "Display WooCommerce product complements based on category rules."
+msgstr "نمایش محصولات مکمل ووکامرس بر اساس قوانین دسته‌بندی."
+
+#: src/Rules/RulePostType.php:44
+msgid "Edit Complement Rule"
+msgstr "ویرایش قانون محصول مکمل"
+
+#: src/Admin/RuleListTable.php:140
+msgid "Enable"
+msgstr "فعال‌کردن"
+
+#: src/Admin/RuleListTable.php:97 src/Admin/RuleMetaBox.php:92
+msgid "Enabled"
+msgstr "فعال"
+
+#: src/Admin/RuleAdmin.php:230
+msgid "Enter a name for the complement rule."
+msgstr "نامی برای قانون محصول مکمل وارد کنید."
+
+#: src/Rules/RulePostType.php:45
+msgid "New Complement Rule"
+msgstr "قانون محصول مکمل جدید"
+
+#: src/Admin/RuleListTable.php:191 src/Admin/RuleMetaBox.php:219
+msgid "Newest"
+msgstr "جدیدترین"
+
+#: src/Rules/RulePostType.php:48
+msgid "No complement rules found in Trash."
+msgstr "هیچ قانون محصول مکملی در زباله‌دان پیدا نشد."
+
+#: src/Rules/RulePostType.php:47
+msgid "No complement rules found."
+msgstr "هیچ قانون محصول مکملی پیدا نشد."
+
+#: src/Rules/RulePostType.php:137
+msgid "Number of products to recommend."
+msgstr "تعداد محصولات پیشنهادی."
+
+#: src/Admin/RuleAdmin.php:193
+msgid "Permission denied"
+msgstr "دسترسی مجاز نیست"
+
+#: src/Admin/RuleListTable.php:190 src/Admin/RuleMetaBox.php:218
+msgid "Random"
+msgstr "تصادفی"
+
+#: src/Admin/RuleMetaBox.php:120
+msgid "Recommendation Count"
+msgstr "تعداد پیشنهادها"
+
+#: src/Rules/RulePostType.php:149
+msgid "Recommendation sort strategy."
+msgstr "روش مرتب‌سازی پیشنهادها."
+
+#: src/Admin/RuleMetaBox.php:116
+msgid "Recommended products will be selected from this category and its descendants."
+msgstr "محصولات پیشنهادی از این دسته‌بندی و زیرمجموعه‌های آن انتخاب می‌شوند."
+
+#: src/Admin/RuleListTable.php:58
+msgid "Rule Name"
+msgstr "نام قانون"
+
+#: src/Admin/RuleMetaBox.php:52
+msgid "Rule Settings"
+msgstr "تنظیمات قانون"
+
+#: src/Rules/RulePostType.php:46
+msgid "Search Complement Rules"
+msgstr "جستجوی قوانین محصولات مکمل"
+
+#: src/Admin/RuleMetaBox.php:113
+msgid "Select a category"
+msgstr "یک دسته‌بندی انتخاب کنید"
+
+#: src/Admin/RuleAdmin.php:232
+msgid "Select a valid target category. The rule was disabled."
+msgstr "یک دسته‌بندی مقصد معتبر انتخاب کنید. قانون غیرفعال شد."
+
+#: src/Admin/RuleAdmin.php:231
+msgid "Select at least one valid source category. The rule was disabled."
+msgstr "حداقل یک دسته‌بندی مبدأ معتبر انتخاب کنید. قانون غیرفعال شد."
+
+#: hamkharid.php:3
+msgid "Smart Category Complement – Hamkharid"
+msgstr "مکمل هوشمند دسته‌بندی – هم‌خرید"
+
+#: hamkharid.php:51
+msgid "Smart Category Complement – Hamkharid could not load because its autoloader is missing. Please reinstall the plugin."
+msgstr "افزونه «مکمل هوشمند دسته‌بندی – هم‌خرید» به‌دلیل نبود بارگذار خودکار اجرا نشد. لطفاً افزونه را دوباره نصب کنید."
+
+#: src/Plugin.php:91
+msgid "Smart Category Complement – Hamkharid requires WooCommerce to be installed and active."
+msgstr "افزونه «مکمل هوشمند دسته‌بندی – هم‌خرید» برای اجرا به نصب و فعال بودن ووکامرس نیاز دارد."
+
+#: src/Admin/RuleListTable.php:62
+msgid "Sort"
+msgstr "مرتب‌سازی"
+
+#: src/Admin/RuleMetaBox.php:124
+msgid "Sort Strategy"
+msgstr "روش مرتب‌سازی"
+
+#: src/Admin/RuleListTable.php:59 src/Admin/RuleMetaBox.php:101
+msgid "Source Categories"
+msgstr "دسته‌بندی‌های مبدأ"
+
+#: src/Rules/RulePostType.php:113
+msgid "Source product category ID."
+msgstr "شناسه دسته‌بندی محصول مبدأ."
+
+#: src/Admin/RuleListTable.php:63
+msgid "Status"
+msgstr "وضعیت"
+
+#: src/Admin/RuleListTable.php:60 src/Admin/RuleMetaBox.php:110
+msgid "Target Category"
+msgstr "دسته‌بندی مقصد"
+
+#: src/Rules/RulePostType.php:125
+msgid "Target product category ID."
+msgstr "شناسه دسته‌بندی محصول مقصد."
+
+#: src/Admin/RuleAdmin.php:233
+msgid "The complement rule could not be found."
+msgstr "قانون محصول مکمل پیدا نشد."
+
+#: src/Admin/RuleAdmin.php:236
+msgid "The complement rule could not be saved. Please review its settings."
+msgstr "قانون محصول مکمل ذخیره نشد. تنظیمات آن را بررسی کنید."
+
+#: src/Rules/RuleRepository.php:91
+msgid "The complement rule does not exist."
+msgstr "قانون محصول مکمل وجود ندارد."
+
+#: src/Admin/RuleAdmin.php:178
+msgid "The complement rule was disabled."
+msgstr "قانون محصول مکمل غیرفعال شد."
+
+#: src/Admin/RuleAdmin.php:177
+msgid "The complement rule was enabled."
+msgstr "قانون محصول مکمل فعال شد."
+
+#: src/Admin/RuleMetaBox.php:106
+msgid "The rule applies when a product belongs to any selected category or its descendants."
+msgstr "این قانون زمانی اعمال می‌شود که محصول در هر یک از دسته‌بندی‌های انتخاب‌شده یا زیرمجموعه‌های آن‌ها قرار داشته باشد."
+
+#: src/Admin/RuleMetaBox.php:96
+msgid "Use this rule on matching product pages."
+msgstr "از این قانون در صفحه محصولات منطبق استفاده شود."
+
+#: src/Admin/RuleAdmin.php:192
+msgid "You are not allowed to manage complement rules."
+msgstr "شما اجازه مدیریت قوانین محصولات مکمل را ندارید."
+
+#: src/Frontend/ProductRecommendations.php:163
+msgid "You may also like"
+msgstr "شاید این محصولات هم برای شما مناسب باشند"

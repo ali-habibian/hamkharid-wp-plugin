@@ -127,8 +127,10 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'Frontend recommendations were missing or rendered more than once.' );
 		}
 
-		if ( false === strpos( $html, 'You may also like' ) ) {
-			throw new RuntimeException( 'The complement section heading was not rendered.' );
+		$expected_heading = esc_html__( 'You may also like', 'hamkharid' );
+
+		if ( false === strpos( $html, $expected_heading ) ) {
+			throw new RuntimeException( 'The complement section heading was not rendered for the active WordPress locale.' );
 		}
 
 		$heading_id = 'hamkharid-complements-title-' . $current_product_id;

@@ -46,6 +46,7 @@
             "@php -l tests/integration-frontend-presentation.php",
             "@php -l tests/integration-compatibility.php",
             "@php -l tests/integration-security.php",
+            "@php -l tests/integration-localization.php",
             "@php -l tests/integration-performance.php"
         ],
         "cs": "phpcs --standard=phpcs.xml.dist",
@@ -63,6 +64,7 @@
         "test:add-to-cart": "@php tests/integration-add-to-cart.php",
         "test:presentation": "@php tests/integration-frontend-presentation.php",
         "test:compatibility": "@php tests/integration-compatibility.php",
+        "test:localization": "@php tests/integration-localization.php",
         "test:security": "@php tests/integration-security.php",
         "test:performance": "@php tests/integration-performance.php",
         "test:integration-all": [
@@ -74,6 +76,7 @@
             "@test:add-to-cart",
             "@test:presentation",
             "@test:compatibility",
+            "@test:localization",
             "@test:security",
             "@test:performance"
         ],
