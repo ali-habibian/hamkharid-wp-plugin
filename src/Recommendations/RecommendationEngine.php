@@ -153,9 +153,7 @@ final class RecommendationEngine {
 	 * @return WC_Product[]
 	 */
 	private function ordered_eligible_products( array $base_args, int $limit, array $ordering ): array {
-		$count = $this->query_total( array_merge( $base_args, $ordering ) );
-
-		return $this->eligible_products_from_pages( $base_args, $ordering, $count, 0, $limit );
+		return $this->eligible_products_from_pages( $base_args, $ordering, self::MAX_CANDIDATE_SCAN, 0, $limit );
 	}
 
 	/**
@@ -348,6 +346,10 @@ final class RecommendationEngine {
 	 * @param int $product_id Variable product ID.
 	 */
 	private function has_eligible_variation( int $product_id ): bool {
+		if ( $this->variation_scan_limit_reached ) {
+			return false;
+		}
+
 		$stock_status = $this->allow_backorders() ? array( 'instock', 'onbackorder' ) : array( 'instock' );
 		$args         = array(
 			'parent'       => $product_id,

@@ -122,6 +122,8 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 				'min-inline-size: 0',
 				'max-inline-size: 100%',
 				'color: #5a430d',
+				'background-color: #5a430d !important',
+				'color: #fff !important',
 			) as $required_css
 		) {
 			if ( false === strpos( $css, $required_css ) ) {
@@ -140,6 +142,10 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			array(
 				'selector'    => '.hamkharid-complements.related.products ul.products li.product',
 				'declaration' => 'margin: 0 !important',
+			),
+			array(
+				'selector'    => '.hamkharid-complements.related.products ul.products li.product .button',
+				'declaration' => 'background-color: #5a430d !important',
 			),
 		);
 

@@ -14,8 +14,7 @@
 
 .hamkharid-complements.related.products ul.products li.product .woocommerce-loop-product__title,
 .hamkharid-complements.related.products ul.products li.product .price,
-.hamkharid-complements.related.products ul.products li.product .price *,
-.hamkharid-complements.related.products ul.products li.product .button {
+.hamkharid-complements.related.products ul.products li.product .price * {
 	color: #5a430d !important;
 }
 
@@ -58,8 +57,11 @@
 	max-inline-size: 100%;
 }
 
-.hamkharid-complements .button {
+.hamkharid-complements.related.products ul.products li.product .button {
+	background-color: #5a430d !important;
+	border-color: #5a430d !important;
 	box-sizing: border-box;
+	color: #fff !important;
 	max-inline-size: 100%;
 	white-space: normal;
 	overflow-wrap: anywhere;

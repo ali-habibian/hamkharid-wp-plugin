@@ -154,6 +154,28 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		$created_products[] = $real_variation_id;
 		\WC_Product_Variable::sync( $variable_parent_id );
 		wc_delete_product_transients( $variable_parent_id );
+		$second_variable_parent = wc_get_product( $variable_parent_id );
+		$second_variable_parent->set_id( 0 );
+		$second_variable_parent->set_name( 'Performance Second Variable ' . wp_generate_uuid4() );
+		$second_variable_parent_id = (int) $second_variable_parent->save();
+
+		if ( $second_variable_parent_id <= 0 ) {
+			throw new RuntimeException( 'A second variable product for the global scan limit fixture could not be created.' );
+		}
+
+		$created_products[]    = $second_variable_parent_id;
+		$second_real_variation = wc_get_product( $real_variation_id );
+		$second_real_variation->set_id( 0 );
+		$second_real_variation->set_parent_id( $second_variable_parent_id );
+		$second_real_variation_id = (int) $second_real_variation->save();
+
+		if ( $second_real_variation_id <= 0 ) {
+			throw new RuntimeException( 'A second purchasable variation for the global scan limit fixture could not be created.' );
+		}
+
+		$created_products[] = $second_real_variation_id;
+		\WC_Product_Variable::sync( $second_variable_parent_id );
+		wc_delete_product_transients( $second_variable_parent_id );
 		$variation_rule_id = $repository->create(
 			'Performance Variation Rule',
 			true,
@@ -169,15 +191,17 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
 		$created_rules[]       = (int) $variation_rule_id;
 		$variation_query_count = 0;
-		$variation_probe       = static function ( $results, array $args ) use ( $variable_parent_id, &$variation_query_count ) {
-			if ( ! isset( $args['parent'] ) || (int) $variable_parent_id !== (int) $args['parent'] ) {
+		$variable_parent_ids   = array( $variable_parent_id, $second_variable_parent_id );
+		$variation_probe       = static function ( $results, array $args ) use ( $variable_parent_ids, &$variation_query_count ) {
+			if ( ! isset( $args['parent'] ) || ! in_array( (int) $args['parent'], $variable_parent_ids, true ) ) {
 				return $results;
 			}
 
 			++$variation_query_count;
-			$offset = isset( $args['offset'] ) ? (int) $args['offset'] : 0;
-			$limit  = isset( $args['limit'] ) ? (int) $args['limit'] : 1;
-			$count  = min( $limit, max( 0, 501 - $offset ) );
+			$parent_id = (int) $args['parent'];
+			$offset    = isset( $args['offset'] ) ? (int) $args['offset'] : 0;
+			$limit     = isset( $args['limit'] ) ? (int) $args['limit'] : 1;
+			$count     = min( $limit, max( 0, 501 - $offset ) );
 
 			if ( 'ids' === ( $args['return'] ?? '' ) ) {
 				return $count > 0 ? range( $offset + 10000, $offset + 9999 + $count ) : array();
@@ -187,7 +211,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			for ( $index = 0; $index < $count; $index++ ) {
 				$synthetic_variation = new \WC_Product_Variation();
 				$synthetic_variation->set_id( 100000 + $offset + $index );
-				$synthetic_variation->set_parent_id( $variable_parent_id );
+				$synthetic_variation->set_parent_id( $parent_id );
 				$synthetic_variation->set_status( 'publish' );
 				$synthetic_variation->set_stock_status( 'instock' );
 				$synthetic_variations[] = $synthetic_variation;
@@ -289,14 +313,14 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
 		$newest = $run_strategy( Rule::SORT_NEWEST );
 
-		if ( 2 !== count( $newest['queries'] ) || 1 !== $newest['queries'][0]['limit'] || ! $newest['queries'][0]['paginate'] || 'ids' !== $newest['queries'][0]['return'] || $newest['queries'][1]['limit'] > 24 || $newest['queries'][1]['paginate'] ) {
-			throw new RuntimeException( 'Newest recommendations did not use one ID-only count query and one bounded candidate page.' );
+		if ( 1 !== count( $newest['queries'] ) || $newest['queries'][0]['limit'] > 24 || $newest['queries'][0]['paginate'] ) {
+			throw new RuntimeException( 'Newest recommendations did not use one bounded candidate page without a full count query.' );
 		}
 
 		$best_selling = $run_strategy( Rule::SORT_BEST_SELLING );
 
-		if ( 2 !== count( $best_selling['queries'] ) || 1 !== $best_selling['queries'][0]['limit'] || ! $best_selling['queries'][0]['paginate'] || 'ids' !== $best_selling['queries'][0]['return'] || $best_selling['queries'][1]['limit'] > 24 || $best_selling['queries'][1]['paginate'] ) {
-			throw new RuntimeException( 'Best-selling recommendations did not use one ID-only count query and one bounded candidate page.' );
+		if ( 1 !== count( $best_selling['queries'] ) || $best_selling['queries'][0]['limit'] > 24 || $best_selling['queries'][0]['paginate'] ) {
+			throw new RuntimeException( 'Best-selling recommendations did not use one bounded candidate page without a full count query.' );
 		}
 
 		$random = $run_strategy( Rule::SORT_RANDOM );
