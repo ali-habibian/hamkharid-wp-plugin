@@ -35,7 +35,7 @@ P0=مانع پایلوت، P1=لازم در دامنه MVP، P2=پس از پای
 
 | مرحله | وضعیت در این run | شاهد/مانع باقی‌مانده |
 |---|---|---|
-| M0 | انجام محلی؛ checkout تازه پس از commit باز است | دستورالعمل‌ها و اسناد خوانده، ignore محلی اصلاح و نسخه‌های محیط ثبت شدند. |
+| M0 | تأیید شد | clone تازه و تمیز در commit `a075c21fb10c359622eb96dc9b36cd7000daa766` ساخته شد؛ اسناد و ابزارهای لازم tracked و قابل‌دسترسی بودند، و `git check-ignore` تأیید کرد که فایل‌های لازم ignore نیستند. تغییر `.gitignore` در `da914d3` ثبت شده است. ماتریس محیط نیز ثبت است. |
 | M1 | gate کد و integration پاس | `composer run test:all` exit 0 پس از regression؛ تمام ۱۲ integration از جمله تست synthetic variation cap پاس شدند. |
 | M2 | مسیرهای اصلی browser QA پاس | E2E `1aa89a2c28a1` با 17/17، شامل QA-097، QA-104، QA-130، shortcode/block، دو locale و دو قالب؛ Elementor مرورگری و screen reader خارج از این pass هستند. |
 | M3 | بخشی پاس؛ باقی موارد pending | PHP/JS suite و E2E پاس؛ NFR-02 در envelope محلی E-15 pass. Elementor، screen reader و matrix گسترده compatibility بازند. |
@@ -47,7 +47,7 @@ P0=مانع پایلوت، P1=لازم در دامنه MVP، P2=پس از پای
 
 | ID | کار، مالک تغییر پیشنهادی و خروجی | نیازمندی/وابستگی | اثبات و rollback |
 |---|---|---|---|
-| B-00 P0 | اصلاح ignore محلی docs/npm/ابزار و بازبینی تغییرات قبلی؛ انجام شده در working tree | NFR-07؛ M0 | فایل‌ها اکنون در status دیده می‌شوند؛ commit برای اثبات checkout تیمی باقی است |
+| B-00 P0 | اصلاح ignore و بازبینی تغییرات قبلی؛ تأیید شد | NFR-07؛ M0 | clone تمیز `a075c21fb10c359622eb96dc9b36cd7000daa766` شامل `docs/README.md`، PRD، معماری، UX، تصمیم‌ها، roadmap، development، manual QA، pilot QA، `scripts/package-pilot.ps1` و `package.json` بود؛ `git check-ignore` برای فایل‌های لازم ignore نشان نداد. اصلاح `.gitignore` در commit `da914d3` است |
 | B-01 P0 | انتخاب و ثبت محیط QA، نسخه‌های واقعی و قالب/builderهای نمونه؛ runbook در development | O-03، NFR-04 | دسترسی واقعی بدون ثبت secret و ماتریس قابل‌اجرا؛ نسخه غایب Skip و gate باز بماند |
 | B-10 P0 | حفظ پیکربندی سالم در خطای ذخیره؛ پیاده‌سازی و integration admin/security پاس | FR-01/02؛ M0 | suite شامل حفظ وضعیت/meta و مقادیر فرم نامعتبر و رد nonce/capability نامعتبر است؛ E2E `1aa89a2c28a1` نقش واقعی Shop Manager و access به rules/settings را نیز آزمود |
 | B-11 P1 | priority در Rule/schema/repository/form/list و default برای داده قدیمی؛ پیاده‌سازی شده | FR-03؛ D-03/E-02 | `test:all` شامل تست matching/storage بود و پاس شد؛ بدون backfill مخرب |
@@ -85,7 +85,7 @@ P0=مانع پایلوت، P1=لازم در دامنه MVP، P2=پس از پای
 | R-05 | count/offset بزرگ و postmeta join هزینه دارند | B-31؛ schema/کش جدید فقط با شاهد |
 | R-06 | CSS قالب و duplicate با چند embed | renderer مشترک، namespace و گرید کانتینری B-22/23 |
 | R-07 | تنظیمات option افزونه با `autoload=false` ذخیره می‌شود؛ benchmark از حدهای محلی E-15 عبور کرد | B-31/E-15؛ نتیجه فقط گیت محلی است و به SLA عمومی/محصولی تعمیم نمی‌یابد |
-| R-08 | اصلاح ignore در working tree انجام شده؛ نسخه‌بندی Git و دسترسی checkout تازه تا commit اثبات نشده | B-00؛ فایل محلی با فایل تحویل‌شده اشتباه نشود |
+| R-08 | بسته شد: دسترسی clone تازه و نسخه‌بندی فایل‌های لازم با clone تمیز `a075c21fb10c359622eb96dc9b36cd7000daa766` و `git check-ignore` تأیید شد؛ اصلاح `.gitignore` در `da914d3` ثبت است | B-00؛ شواهد فقط به فایل‌های فهرست‌شده در clone اشاره دارد |
 | R-09 | نسخه حداقل قدیمی و سربرگ tested-up-to بدون ماتریس کامل | O-03/B-01/30؛ حداقل‌ها بدون تصمیم سازگاری تغییر نکنند |
 | R-10 | محصول متغیر ممکن است در سطح parent موجود ولی فاقد variation واجد شرایط باشد | B-13 و تست ترکیب variation/backorder/price |
 

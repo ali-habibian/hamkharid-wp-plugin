@@ -8,7 +8,7 @@
 - نسخه‌های محیط محلی بررسی‌شده: PHP 8.4.1، WordPress 7.1.3، WooCommerce 11.2.1، Node 26.7.0، npm 11.19.0 و Composer 2.8.3؛ قالب فعال Luxury Shop 1.9.4، locale=`fa_IR`/RTL و HPOS روشن. این ماتریس ادعای پوشش همه نسخه‌های سربرگ نیست.
 - PHP CLI، PHP وب و تنظیمات extension آن‌ها ممکن است متفاوت باشند. مسیر پوشه Laragon اثبات نمی‌کند PHP از Laragon اجرا می‌شود؛ در بررسی قبلی CLI از `C:\xampp\php\php.exe` resolve شد، پیش از اجرا دوباره بررسی شود.
 - WordPress/WooCommerce و DB محلی برای integration لازم‌اند؛ root وردپرس خارج از ریشه افزونه است. نام DB، حساب و رمز در مستندات/مخزن ثبت نشوند.
-- runtime به `vendor/autoload.php` نیاز دارد. ابزارهای dev از `composer.lock` و Playwright از `package-lock.json`/`package.json` می‌آیند. فایل‌های لازم از ignore محلی خارج شده‌اند؛ دسترسی آن‌ها برای checkout تازه پس از commit اثبات می‌شود.
+- runtime به `vendor/autoload.php` نیاز دارد. ابزارهای dev از `composer.lock` و Playwright از `package-lock.json`/`package.json` می‌آیند. دسترسی اسناد و ابزارهای لازم در clone تمیز `a075c21fb10c359622eb96dc9b36cd7000daa766` تأیید شد؛ `git check-ignore` آن‌ها را ignoreشده گزارش نکرد. اصلاح `.gitignore` در `da914d3` ثبت شده است.
 
 ## شروع توسعه در workspace محلی QA
 
