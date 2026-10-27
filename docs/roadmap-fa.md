@@ -4,18 +4,18 @@
 
 ## وضعیت واقعی و حدود شاهد
 
-مبنای Git هنوز `b6bfab6` است؛ کد جاری نسخه `0.1.0` به‌همراه تغییرهای محلی است و commit این مجموعه هنوز انجام نشده. fixtureهای محلی پس از QA پاک‌سازی شدند؛ به هاست/داده واقعی دست زده نشده. `composer run test:all`، `npm run check:js` و E2E run=`2a533f5a6c48` موفق‌اند. M1 و مسیرهای اصلی M2 از این gateها عبور کرده‌اند؛ M3 به‌دلیل موارد دسترس‌پذیری/سازگاری/عملکردی باز است. M4 تا دریافت گزارش نصب/ارتقای ZIP مستقل pending است؛ آمادگی انتشار ادعا نمی‌شود.
+مبنای Git هنوز `b6bfab6` است؛ کد جاری نسخه `0.1.0` به‌همراه تغییرهای محلی است و commit این مجموعه هنوز انجام نشده. fixtureهای محلی پس از QA پاک‌سازی شدند؛ به هاست/داده واقعی دست زده نشده. اجرای تازه `composer run test:all` پس از regression ۵۰۱ variation با exit 0 تمام شد؛ `npm run check:js` نیز exit 0 بود. E2E روی کد به‌روز (`63f291d389df`) با ۱۴/۱۴ Browser QA پاس شد و cleanup exit 0 داشت. M1 و مسیرهای اصلی M2 از gateهای اجراشده عبور کردند؛ M3 به‌دلیل موارد دسترس‌پذیری/سازگاری/benchmark باز است. روی ZIP اولیه شواهد نصب/ارتقا/uninstall وجود دارد، اما آن بسته از revision پیش از اصلاح ممیزی بود؛ M4 تا بازسازی و تکرار QA با کد جاری pending می‌ماند.
 
 | موضوع | شاهد فعلی | فاصله تا هدف |
 |---|---|---|
 | قواعد و مدیریت | اولویت، fallback، validation، حفظ فرم نامعتبر، تنظیمات و preview پیاده شده | integrationهای admin/security و suite کامل پاس شدند؛ تعامل Shop Manager جداگانه آزموده نشده |
 | محصول واجد شرایط | simple/variable، purchasable/visible/stock، backorder تنظیم‌پذیر و refill محدود | integrationها پاس؛ عملکرد فقط با fixture کوچک سنجیده شده و پذیرش benchmark مقیاس نیست |
-| نمایش | shortcode، dynamic block، renderer مشترک، manual/automatic و CSS خارج صفحه محصول | E2E run `2a533f5a6c48` شامل shortcode، block editor/frontend، preview، حالت manual و قالب کلاسیک/بلوک پاس شد؛ widget area و builder مستقل آزموده نشده‌اند |
+| نمایش | shortcode، dynamic block، renderer مشترک، manual/automatic و CSS خارج صفحه محصول | E2E run `63f291d389df` شامل shortcode، block editor/frontend، preview، حالت manual و قالب کلاسیک/بلوک پاس شد؛ widget area و builder مستقل آزموده نشده‌اند |
 | فارسی | ترجمه PHP/JS به‌روز؛ E2E در `en_US`/LTR و `fa_IR`/RTL پاس شد | ۲۰۰٪ zoom، screen reader و ماتریس گسترده زبان/مرورگر آزموده نشده‌اند |
 | سازگاری | WP 7.1.3، WC 11.2.1، PHP 8.4.1؛ Luxury Shop کلاسیک و Twenty Twenty-Five بلوکی در E2E | Elementor/builder، widget area، HPOS خاموش، WC غایب، Shop Manager و نسخه‌های دیگر هنوز آزموده نشده‌اند |
-| کارایی | suite یک fixture performance کوچک دارد؛ query محدود و SQL RAND ندارد | PRD scale (۱k/۱۰k/۵۰k product، ۱۰/۱۰۰/۱۰۰۰ rule و ۳۰ cold/warm sample) اجرا نشده؛ gate کارایی پاس نیست |
-| آزمون | `composer run test:all` exit 0: lint، PHPCS 28/28، PHPUnit 8/8 (13 assertion)، تمام ۱۲ integration؛ `npm run check:js` exit 0؛ E2E 14/14 scenario و cleanup exit 0 | جزئیات، شناسه QA و محدودیت‌های باز در [گزارش QA پایلوت](pilot-qa-fa.md) ثبت شده‌اند |
-| تحویل | docs/tools از ignore محلی خارج؛ اسکریپت package، readme، changelog و license موجود | M4 همچنان pending تا گزارش مستقل ساخت/بازرسی ZIP و آزمون نصب/ارتقا/rollback؛ تغییرات هنوز commit نشده‌اند |
+| کارایی | محصول و variation هر دو سقف اسکن و صفحه‌های محدود دارند؛ preview رسیدن به سقف variation را هشدار می‌دهد. regression مصنوعی ۵۰۱ variation در full suite پاس شد | benchmark PRD (۱k/۱۰k/۵۰k محصول، ۱۰/۱۰۰/۱۰۰۰ rule و ۳۰ نمونه cold/warm) هنوز اجرا نشده؛ fixture کوچک timings را ثبت می‌کند اما NFR-02 را پاس نمی‌کند؛ benchmark agent در حال بررسی است |
+| آزمون | `composer run test:all` پس از regression exit 0: lint، PHPCS 28/28، PHPUnit 8/8 (13 assertion)، تمام ۱۲ integration از جمله `integration-performance`؛ `npm run check:js` exit 0 | E2E روی کد جاری `63f291d389df`، 14/14؛ cleanup exit 0. تاریخچه/موارد باز در [گزارش QA پایلوت](pilot-qa-fa.md) |
+| تحویل | docs/tools از ignore محلی خارج؛ اسکریپت package، readme، changelog و license موجود؛ ZIP اولیه نصب/ارتقا و هر دو حالت uninstall را در clone جداگانه گذراند | ZIP اولیه از revision pre-review-fix است (SHA-256 در گزارش QA)؛ باید از کد جاری rebuild و M4 دوباره اجرا شود. پس از آن نیز تغییرات کد هنوز commit نشده‌اند |
 
 تغییرهای قبلی در `assets/css/frontend.css`، `composer.json`، `docs/manual-qa-fa.md` و `tests/e2e/` حفظ شده و با دامنه فعلی ادغام می‌شوند. نام Phase 15/16 در QA اصطلاح تاریخی است؛ معادل خودکار تکمیل milestoneهای زیر نیست.
 
@@ -36,10 +36,10 @@ P0=مانع پایلوت، P1=لازم در دامنه MVP، P2=پس از پای
 | مرحله | وضعیت در این run | شاهد/مانع باقی‌مانده |
 |---|---|---|
 | M0 | انجام محلی؛ checkout تازه پس از commit باز است | دستورالعمل‌ها و اسناد خوانده، ignore محلی اصلاح و نسخه‌های محیط ثبت شدند. |
-| M1 | gateهای کد و integration پاس | `composer run test:all` exit 0؛ ۱۲ integration شامل uninstall پاس شدند. |
-| M2 | مسیرهای اصلی browser QA پاس | 14/14 scenario؛ QA-205 این بار پاس شد و شامل manual، preview، shortcode، block و دو theme بود. |
-| M3 | بخشی پاس؛ باقی موارد pending | ترجمه/RTL/LTR/responsive/focus smoke پاس؛ builder/widget/zoom/screen reader/HPOS off/WC absent/shop-manager/perf scale هنوز آزموده نشده‌اند. |
-| M4 | pending گزارش بسته | ساخت/بررسی ZIP، نصب تمیز، ارتقا، uninstall/rollback از ZIP و checksum تا گزارش QA مجزای M4 تکمیل نشده‌اند. |
+| M1 | gate کد و integration پاس | `composer run test:all` exit 0 پس از regression؛ تمام ۱۲ integration از جمله تست synthetic variation cap پاس شدند. |
+| M2 | مسیرهای اصلی browser QA پاس | E2E روی کد جاری `63f291d389df` با 14/14 سناریو؛ shortcode و block/editor/frontend، manual mode، preview و دو قالب. |
+| M3 | بخشی پاس؛ باقی موارد pending | suite و regression variation پاس؛ E2E تازه 14/14؛ builder/widget/zoom/screen reader/HPOS off/WC absent/Shop Manager و benchmark PRD بازند. |
+| M4 | شواهد اولیه روی بسته stale؛ قبولی gate جاری pending | ZIP با SHA-256 ثبت‌شده در [گزارش QA پایلوت](pilot-qa-fa.md) از source revision قبلی نصب/به‌روزرسانی و uninstall را در clone گذراند؛ پس از اصلاح ممیزی باید package تازه ساخته و همان چرخه تکرار شود. |
 
 وابستگی اصلی: M0 → M1 → M2 → M3 → M4. نوشتن متن و آماده‌سازی fixture درون مراحل قابل‌پیشبرد مستقل است؛ پذیرش به یکپارچگی نیاز دارد. به‌علت ورود block/shortcode به MVP، برآورد ۵ تا ۸ هفته بررسی قبلی دوباره قابل‌اتکا نیست؛ پس از B-01/B-22 ظرفیت و تخمین بازبینی شود، نه اینکه عدد قدیمی تعهد شود.
 
@@ -52,15 +52,15 @@ P0=مانع پایلوت، P1=لازم در دامنه MVP، P2=پس از پای
 | B-10 P0 | حفظ پیکربندی سالم در خطای ذخیره؛ پیاده‌سازی و integration admin/security پاس | FR-01/02؛ M0 | suite شامل حفظ وضعیت/meta و مقادیر فرم نامعتبر و رد nonce/capability نامعتبر است؛ Shop Manager flow آزموده نشده |
 | B-11 P1 | priority در Rule/schema/repository/form/list و default برای داده قدیمی؛ پیاده‌سازی شده | FR-03؛ D-03/E-02 | `test:all` شامل تست matching/storage بود و پاس شد؛ بدون backfill مخرب |
 | B-12 P0 | fallback از مقصد حذف‌شده با pagination محدود و diagnostics؛ پیاده‌سازی شده | FR-04؛ B-11 | integration matching پاس؛ سقف ۵۰۰ نامزد همچنان محدودیت ایمنی و benchmark scale باز است |
-| B-13 P0 | eligibility مشترک و refill محدود؛ پیاده‌سازی شده | FR-05/06؛ D-05 | integration recommendations پاس؛ داده fixture کوچک است، پس NFR performance باز می‌ماند |
+| B-13 P0 | eligibility مشترک و refill محدود؛ پیاده‌سازی شده | FR-05/06؛ D-05/E-13 | integration و regression ۵۰۱ variation در full suite تازه پاس شدند. fixture محدود، NFR performance را پاس نمی‌کند |
 | B-20 P1 | priority در فرم/جدول و تنظیمات نمایش پیاده شده؛ خطای فرم و حفظ ورودی هنوز گیت کامل ندارد | FR-01/02؛ B-11 | keyboard/اعتبارسنجی و POST نامعتبر باید rule قبلی و ورودی را حفظ کند؛ انتخاب‌گر دسته فعلی native است و جست‌وجوی فارسی پیشرفته ندارد |
 | B-21 P1 | Preview مشترک و settings schema v1 با capability/nonce پیاده شده | FR-07/08؛ B-12/13 | admin preview و read-only behavior در E2E و auth/nonce در integration suite پاس شدند |
-| B-22 P1 | شورت‌کد و بلوک پویا با renderer مشترک، جست‌وجوی محصول، asset/editor/i18n و انتخاب دستی/خودکار؛ پیاده‌سازی و browser smoke پاس | FR-10؛ D-08؛ B-21 | QA-205 در اجرای `2a533f5a6c48` پاس؛ widget area، Elementor/builder و multi-embed duplicate هنوز آزموده نشده‌اند. JS مستقیم runtime است و build step جداگانه لازم ندارد |
+| B-22 P1 | شورت‌کد و بلوک پویا با renderer مشترک، جست‌وجوی محصول، asset/editor/i18n و انتخاب دستی/خودکار؛ پیاده‌سازی و browser smoke پاس | FR-10؛ D-08؛ B-21 | QA-205 در اجرای `63f291d389df` پاس؛ widget area، Elementor/builder و multi-embed duplicate هنوز آزموده نشده‌اند. JS مستقیم runtime است و build step جداگانه لازم ندارد |
 | B-23 P1 | گرید واکنش‌گرا، عنوان locale و accessible section در source/CSS پیاده شده | FR-08، NFR-03/05؛ B-22 | E2E responsive screenshot پاس شده؛ ۲۰۰٪ zoom، متن‌های ترکیبی طولانی، screen reader و ارزیابی بصری کامل بازند |
-| B-30 P0 | runner E2E و fixture محلی موجود؛ 14/14 scenario آخر پاس شد | NFR-01/03/04/05؛ M2 | پوشش و موارد آزموده‌نشده در گزارش QA پایلوت؛ HPOS خاموش، WC غایب، Elementor/builder و Shop Manager همچنان بازند |
-| B-31 P0 | benchmark مقیاس و guard کارایی؛ اجرا نشده | NFR-02؛ B-21/22 | ۱k/۱۰k/۵۰k محصول، ۱۰/۱۰۰/۱۰۰۰ قانون و عمق متنوع، حداقل ۳۰ نمونه warm و cold جدا، p50/p95/query/memory ثبت؛ WC query count با SQL کل تفکیک |
+| B-30 P0 | runner E2E و fixture محلی موجود؛ اجرای کد جاری 14/14 پاس شد | NFR-01/03/04/05؛ M2 | run `63f291d389df` و موارد آزموده‌نشده در گزارش QA پایلوت؛ HPOS خاموش، WC غایب، Elementor/builder و Shop Manager همچنان بازند |
+| B-31 P0 | regression محدود variation (۵۰۱ candidate) در suite پاس شد؛ benchmark مقیاس هنوز در حال انجام توسط agent است | NFR-02؛ B-21/22/E-13 | ۱k/۱۰k/۵۰k محصول، ۱۰/۱۰۰/۱۰۰۰ rule و عمق متنوع، حداقل ۳۰ نمونه warm و cold جدا، p50/p95/query/memory ثبت؛ WC query count با SQL کل تفکیک. regression مصنوعی benchmark نیست؛ fixture کوچک timings: match 3.65ms، newest 8.68ms، best-selling 8.71ms، random 7.15ms |
 | B-32 P0 | `uninstall.php` و option پاک‌سازی opt-in پیاده شده؛ integration پاس | FR-09؛ D-06؛ B-21 | آزمون lifecycle نصب/حذف از ZIP و rollback همچنان به M4 تعلق دارد |
-| B-40 P0 | readme، license، changelog و اسکریپت allowlist برای بسته runtime آماده است | NFR-07؛ M3 | ZIP هنوز ساخته نشده؛ نصب بدون Composer، ارتقای داده قدیمی/manual-auto و checksum واقعی باید اجرا شود |
+| B-40 P0 | اسکریپت/محتوای package آماده؛ ZIP اولیه چرخه نصب/ارتقا/uninstall را در clone گذراند | NFR-07؛ M3 | ZIP QA شده revision پیش از اصلاح ممیزی است؛ با source جاری rebuild/retest شود. M4 تا checksum، نصب و update/uninstall روی package جدید و rollback بسته نمانده |
 | B-50 P2 | ثبت زمان ساخت قانون و مشکلات واقعی پایلوت؛ سپس تصمیم درباره استثنا/انتخاب دستی و آمار | M4 | حداقل سه مشاهده مدیر و دسته‌بندی علت‌ها؛ معیار پیشنهادی ۵ دقیقه PRD با گزارش واقعی سنجیده شود |
 
 فرمان‌های موجود و اثرشان در [راهنمای توسعه](development-fa.md) مرجع‌اند. هر task در اجرا ابتدا diagnostic متناسب، سپس تغییر حداقلی و regression دارد؛ strict TDD الزام نشده است. فایل‌های جدید adapter/build در B-22 پس از بررسی ابزار موجود تعیین شوند؛ امروز ساختار executable حدسی ساخته نمی‌شود.
@@ -93,4 +93,4 @@ P0=مانع پایلوت، P1=لازم در دامنه MVP، P2=پس از پای
 
 ## تغییر دامنه ثبت‌شده
 
-۲۰۲۶-۱۰-۲۷: کاربر تصمیم قبلی محدودیت قالب کلاسیک و تعویق embed را اصلاح کرد. D-08، بلوک پویا و shortcode را در MVP قرار داد و D-09 مسیر ZIP پایلوت را تعیین کرد. E2E run=`2a533f5a6c48` در ۲۰۲۶-۱۰-۲۸، QA-205 را پس از شکست اجرای پیشین پاس کرد؛ قالب‌های builder/widget مستقل همچنان آزموده نشده‌اند. کاربر اجرای کامل محلی و commit/push را مجاز کرد؛ اجرای روی هاست واقعی، انتشار عمومی و ارسال ZIP مجاز نشده است.
+۲۰۲۶-۱۰-۲۷: کاربر تصمیم قبلی محدودیت قالب کلاسیک و تعویق embed را اصلاح کرد. D-08، بلوک پویا و shortcode را در MVP قرار داد و D-09 مسیر ZIP پایلوت را تعیین کرد. E2E run=`63f291d389df` در ۲۰۲۶-۱۰-۲۸، QA-205 را پس از شکست اجرای پیشین پاس کرد؛ قالب‌های builder/widget مستقل همچنان آزموده نشده‌اند. کاربر اجرای کامل محلی و commit/push را مجاز کرد؛ اجرای روی هاست واقعی، انتشار عمومی و ارسال ZIP مجاز نشده است.

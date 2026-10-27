@@ -124,6 +124,12 @@ try {
 		throw "Staging contains excluded development or sensitive files: $($forbiddenFiles.FullName -join ', ')"
 	}
 
+	# Keep ZIP entry timestamps stable so repeated builds from identical source bytes are reproducible.
+	$stableZipTimestamp = [DateTime]::SpecifyKind([DateTime]'1980-01-01T00:00:00', [DateTimeKind]::Local)
+	Get-ChildItem -LiteralPath $packagePath -Recurse -File | ForEach-Object {
+		$_.LastWriteTime = $stableZipTimestamp
+	}
+
 	Add-Type -AssemblyName System.IO.Compression.FileSystem
 	[System.IO.Compression.ZipFile]::CreateFromDirectory($stagePath, $temporaryZipPath, [System.IO.Compression.CompressionLevel]::Optimal, $false)
 	$zipHash = (Get-FileHash -LiteralPath $temporaryZipPath -Algorithm SHA256).Hash.ToLowerInvariant()

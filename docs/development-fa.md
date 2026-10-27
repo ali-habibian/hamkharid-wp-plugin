@@ -48,7 +48,7 @@ npm run e2e:install
 | `npm run test:e2e:headed` | همان تست با مرورگر دیدنی | QA بصری دستی مستقل همچنان لازم است |
 | `npm run e2e:cleanup` | حذف fixtureهای E2E | عملیات حذف DB است؛ تست read-only نیست |
 
-شواهد اجرای ۲۰۲۶-۱۰-۲۸: `composer run test:all` با exit 0 تمام شد؛ lint و PHPCS روی ۲۸ فایل، PHPUnit با ۸ تست/۱۳ assertion و هر ۱۲ integration (شامل uninstall) پاس شدند. `npm run check:js` نیز exit 0 داشت. E2E run=`2a533f5a6c48`، ۱۴/۱۴ سناریو را پاس کرد و `npm run e2e:cleanup` با exit 0 fixtureها را پاک کرد. جزئیات و محدودیت‌ها در [گزارش QA پایلوت](pilot-qa-fa.md) است.
+اجرای ۲۰۲۶-۱۰-۲۸: `composer run test:all` پس از افزودن regression مصنوعی ۵۰۱ variation با exit 0 تمام شد؛ lint، PHPCS روی ۲۸ فایل، PHPUnit با ۸ تست/۱۳ assertion و هر ۱۲ integration (شامل `integration-performance` و uninstall) پاس شدند. `npm run check:js` exit 0 بود. performance fixture کوچک: matching=3.65ms، newest=8.68ms، best-selling=8.71ms، random=7.15ms؛ این داده معیار NFR-02 را پاس نمی‌کند. E2E روی کد به‌روز با run=`63f291d389df`، Browser QA ۱۴/۱۴ را پاس کرد؛ `npm run e2e:cleanup` نیز exit 0 داشت. جزئیات و محدودیت‌ها در [گزارش QA پایلوت](pilot-qa-fa.md) است.
 
 برای unit بدون نوشتن cache نتیجه:
 
@@ -86,13 +86,15 @@ npm run test:e2e
 ## ساخت محلی ZIP پایلوت؛ آزمون بسته هنوز pending است
 
 1. بسته را پس از بازبینی diff و ثبت QA بسازید؛ ZIP فقط در مسیر محلی خروجی قرار می‌گیرد. ساخت/نصب/upgrade مستقل از source QA باقی می‌ماند تا گزارش M4 ثبت شود؛ benchmark PRD نیز gate باز است.
-2. `scripts/package-pilot.ps1` در staging موقت، وابستگی‌ها را با lock و `composer install --no-dev --optimize-autoloader` می‌سازد و runtime allowlist را بسته‌بندی می‌کند. اسکریپت به‌طور پیش‌فرض dirty checkout را رد می‌کند؛ `-AllowDirty` فقط برای artifact محلی علامت‌خورده است.
+2. `scripts/package-pilot.ps1` در staging موقت، وابستگی‌ها را با lock و `composer install --no-dev --optimize-autoloader` می‌سازد و runtime allowlist را بسته‌بندی می‌کند. timestamp فایل‌های ZIP ثابت است تا build با source و lock یکسان hash یکسان داشته باشد؛ زمان ساخت واقعی فقط در manifest می‌آید. اسکریپت به‌طور پیش‌فرض dirty checkout را رد می‌کند؛ `-AllowDirty` فقط برای artifact محلی علامت‌خورده است.
 3. بسته شامل `hamkharid.php`، `src/`، assetهای runtime، ترجمه‌ها، autoloader و وابستگی‌های runtime، `LICENSE`، `readme.txt` و `CHANGELOG.md` است. فایل‌های JS فعلی مستقیم runtime هستند و build step جداگانه ندارند.
 4. `.git`، `.idea`، node_modules، tests، fixture، خروجی حساس، cache و index تولیدشده وارد ZIP نمی‌شوند؛ اسکریپت staging این موارد را رد می‌کند.
 5. ZIP با پوشه بالایی `hamkharid/` روی سایت QA تمیز نصب شود؛ نبود vendor در مقصد، dependency ناقص و نبود WC بدون fatal و با پیام درست بررسی شوند.
 6. ارتقای نسخه موجود به بسته، حفظ قواعد و defaults، جای‌گذاری دستی/خودکار و uninstall با حفظ/پاک‌سازی انتخابی تست شود؛ محصول/دسته/سفارش تغییر نکند.
-7. manifest شامل نسخه، checksum ZIP و فایل‌ها، revision، dirty state، گزارش QA ارسالی و راهنمای rollback ساخته می‌شود. هنوز artifact یا checksum واقعی تولید نشده است.
+7. manifest شامل نسخه، checksum ZIP و فایل‌ها، revision، dirty state، گزارش QA و راهنمای rollback باشد. برای package اولیه manifest و checksum واقعی ثبت شده‌اند؛ آن artifact از revision پیش از اصلاح variation است و مدرک package جاری نیست.
 8. انتشار ZIP به پایلوت طبق D-09؛ ارسال به کاربران یا انتشار بیرونی نیازمند مجوز همان اقدام است. انتخاب مارکت/مدل تجاری بعد از پایلوت باز است.
+
+شواهد اولیه M4: یک ZIP محلی روی clone مجزای QA نصب و فعال شد؛ shortcode و auto placement، update شبیه‌سازی‌شده و uninstall پیش‌فرض/opt-in pass شدند. ZIP با SHA-256 `d026f297d533047b64f00faf884ccc8534b37c62513c0c242cb2051f2a512e4c` از source revision `da914d3257b24564a5aafaeea939d4dd07c05fe2` ساخته شده بود، یعنی پیش از آخرین اصلاح ممیزی variation. update از 0.0.9 نیز فقط با تغییر synthetic header روی همان کپی QA شبیه‌سازی شد، نه با نسخه تاریخی واقعی. پس این شاهد برای ZIP جاری محسوب نمی‌شود؛ با code revision جاری باید بسته دوباره ساخته و چرخه روی آن تکرار شود. گزارش خام در مسیر محلی موجود است.
 
 Rollback هدف: غیرفعال‌سازی افزونه باید افزودن عادی WC را سالم نگه دارد؛ بازگشت بسته قبلی با backup DB و schema سازگار در محیط QA تمرین شود. وجود default برای meta جدید جای آزمون downgrade را نمی‌گیرد. نسخه افزونه و assetها، readme/changelog و ترجمه هنگام release واقعی همسان شوند.
 
@@ -100,4 +102,4 @@ Rollback هدف: غیرفعال‌سازی افزونه باید افزودن ع
 
 برای هر run این اطلاعات را کنار QA نتیجه ثبت کنید: تاریخ، commit و diff محلی، محیط/locale/HPOS، فرمان، تعداد و نتیجه، خطا، screenshot یا log بدون secret، موارد Skip با علت و تصمیم پذیرش.
 
-شواهد ثبت‌شده در این اجرا (۲۰۲۶-۱۰-۲۸) در [گزارش QA پایلوت](pilot-qa-fa.md) آمده است. `composer run test:all`، `npm run check:js` و آخرین E2E سبز هستند. ZIP و install/upgrade از ZIP، Elementor/builder، widget areas، zoom ۲۰۰٪، screen reader، HPOS خاموش، WooCommerce غایب، Shop Manager، multi-embed duplicate و benchmark مقیاس هنوز آزموده نشده‌اند.
+شواهد و موارد آزموده‌نشده در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. `composer run test:all` پس از regression variation، `npm run check:js` و E2E به‌روز سبز هستند؛ E2E با run=`63f291d389df`، ۱۴/۱۴ سناریو را گذراند و cleanup exit 0 داشت. ZIP اولیه install/upgrade/uninstall را روی clone گذراند اما از source پیش از اصلاح اخیر بود و باید rebuild/retest شود. Elementor/builder، widget areas، zoom ۲۰۰٪، screen reader، HPOS خاموش، WooCommerce غایب، Shop Manager، multi-embed duplicate و benchmark مقیاس آزموده نشده‌اند.

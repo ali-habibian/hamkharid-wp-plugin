@@ -108,9 +108,113 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( $rule_id->get_error_message() );
 		}
 
-		$created_rules[] = (int) $rule_id;
-		$matcher         = new RuleMatcher( $repository );
-		$engine          = new RecommendationEngine();
+		$created_rules[]         = (int) $rule_id;
+		$matcher                 = new RuleMatcher( $repository );
+		$engine                  = new RecommendationEngine();
+		$variation_target_result = wp_insert_term( 'Performance Variation Target ' . wp_generate_uuid4(), 'product_cat' );
+
+		if ( is_wp_error( $variation_target_result ) ) {
+			throw new RuntimeException( $variation_target_result->get_error_message() );
+		}
+
+		$variation_target_id = (int) $variation_target_result['term_id'];
+		$created_terms[]     = $variation_target_id;
+		$variation_attribute = new \WC_Product_Attribute();
+		$variation_attribute->set_id( 0 );
+		$variation_attribute->set_name( 'Size' );
+		$variation_attribute->set_options( array( 'Small', 'Large' ) );
+		$variation_attribute->set_visible( true );
+		$variation_attribute->set_variation( true );
+		$variable_parent = new \WC_Product_Variable();
+		$variable_parent->set_name( 'Performance Variable ' . wp_generate_uuid4() );
+		$variable_parent->set_status( 'publish' );
+		$variable_parent->set_attributes( array( $variation_attribute ) );
+		$variable_parent->set_category_ids( array( $variation_target_id ) );
+		$variable_parent->set_stock_status( 'instock' );
+		$variable_parent->set_catalog_visibility( 'visible' );
+		$variable_parent_id = (int) $variable_parent->save();
+
+		if ( $variable_parent_id <= 0 ) {
+			throw new RuntimeException( 'A variable product for the variation scan limit fixture could not be created.' );
+		}
+
+		$created_products[] = $variable_parent_id;
+		$variation          = new \WC_Product_Variation();
+		$variation->set_parent_id( $variable_parent_id );
+		$variation->set_status( 'publish' );
+		$variation->set_regular_price( '10' );
+		$variation->set_stock_status( 'instock' );
+		$variation->set_attributes( array( 'size' => 'Small' ) );
+		$real_variation_id = (int) $variation->save();
+
+		if ( $real_variation_id <= 0 ) {
+			throw new RuntimeException( 'A purchasable variation for the scan limit fixture could not be created.' );
+		}
+
+		$created_products[] = $real_variation_id;
+		\WC_Product_Variable::sync( $variable_parent_id );
+		wc_delete_product_transients( $variable_parent_id );
+		$variation_rule_id = $repository->create(
+			'Performance Variation Rule',
+			true,
+			array( $source_root_id ),
+			$variation_target_id,
+			1,
+			Rule::SORT_NEWEST
+		);
+
+		if ( is_wp_error( $variation_rule_id ) ) {
+			throw new RuntimeException( $variation_rule_id->get_error_message() );
+		}
+
+		$created_rules[]       = (int) $variation_rule_id;
+		$variation_query_count = 0;
+		$variation_probe       = static function ( $results, array $args ) use ( $variable_parent_id, &$variation_query_count ) {
+			if ( ! isset( $args['parent'] ) || (int) $variable_parent_id !== (int) $args['parent'] ) {
+				return $results;
+			}
+
+			++$variation_query_count;
+			$offset = isset( $args['offset'] ) ? (int) $args['offset'] : 0;
+			$limit  = isset( $args['limit'] ) ? (int) $args['limit'] : 1;
+			$count  = min( $limit, max( 0, 501 - $offset ) );
+
+			if ( 'ids' === ( $args['return'] ?? '' ) ) {
+				return $count > 0 ? range( $offset + 10000, $offset + 9999 + $count ) : array();
+			}
+
+			$synthetic_variations = array();
+			for ( $index = 0; $index < $count; $index++ ) {
+				$synthetic_variation = new \WC_Product_Variation();
+				$synthetic_variation->set_id( 100000 + $offset + $index );
+				$synthetic_variation->set_parent_id( $variable_parent_id );
+				$synthetic_variation->set_status( 'publish' );
+				$synthetic_variation->set_stock_status( 'instock' );
+				$synthetic_variations[] = $synthetic_variation;
+			}
+
+			return $synthetic_variations;
+		};
+		add_filter( 'woocommerce_product_object_query', $variation_probe, 999, 2 );
+		$variation_scan_engine          = new RecommendationEngine();
+		$variation_scan_recommendations = $variation_scan_engine->recommend( $current_product_id, $repository->find( (int) $variation_rule_id ) );
+		$variation_diagnostics          = $variation_scan_engine->diagnostics();
+		remove_filter( 'woocommerce_product_object_query', $variation_probe, 999 );
+
+		if ( 500 !== $variation_diagnostics['variation_candidates_scanned'] || empty( $variation_diagnostics['variation_scan_limit_reached'] ) || $variation_query_count > 22 ) {
+			throw new RuntimeException(
+				'Variable product scan limit mismatch: ' . wp_json_encode(
+					array(
+						'diagnostics'          => $variation_diagnostics,
+						'query_count'          => $variation_query_count,
+						'recommendation_count' => count( $variation_scan_recommendations ),
+						'parent_purchasable'   => wc_get_product( $variable_parent_id )->is_purchasable(),
+						'parent_category_ids'  => wc_get_product( $variable_parent_id )->get_category_ids(),
+						'expected_target_id'   => $variation_target_id,
+					)
+				)
+			);
+		}
 
 		$rule_queries = array();
 		$rule_probe   = static function ( $query ) use ( &$rule_queries ): void {

@@ -430,6 +430,10 @@ msgid "The rule search reached its safety limit. Review the matching rules for d
 msgstr "جست‌وجوی قانون به سقف ایمنی رسید. قواعد منطبق را برای مقصدهای حذف‌شده بررسی کنید."
 
 #: src/Admin/DisplaySettings.php
+msgid "The variation search reached its 500-candidate safety limit. Some variable products may be omitted; review the target category or variations."
+msgstr "جست‌وجوی تنوع‌ها به سقف ایمنی ۵۰۰ نامزد رسید. ممکن است بعضی محصولات متغیر در پیشنهادها نیایند؛ دسته یا تنوع‌ها را بازبینی کنید."
+
+#: src/Admin/DisplaySettings.php
 msgid "No rule could be selected."
 msgstr "قانونی انتخاب نشد."
 

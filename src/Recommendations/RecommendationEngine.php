@@ -29,6 +29,23 @@ final class RecommendationEngine {
 	/** Maximum candidates inspected for one recommendation result. */
 	private const MAX_CANDIDATE_SCAN = 500;
 
+	/** Maximum variation candidates inspected across one recommendation result. */
+	private const MAX_VARIATION_SCAN = 500;
+
+	/**
+	 * Number of variations inspected during the current recommendation request.
+	 *
+	 * @var int
+	 */
+	private $variation_candidates_scanned = 0;
+
+	/**
+	 * Whether the variation safety limit excluded further candidates this request.
+	 *
+	 * @var bool
+	 */
+	private $variation_scan_limit_reached = false;
+
 	/**
 	 * Returns products recommended for the current product and matched rule.
 	 *
@@ -37,6 +54,9 @@ final class RecommendationEngine {
 	 * @return WC_Product[]
 	 */
 	public function recommend( int $current_product_id, Rule $rule ): array {
+		$this->variation_candidates_scanned = 0;
+		$this->variation_scan_limit_reached = false;
+
 		if ( 'product' !== get_post_type( $current_product_id ) || ! $rule->is_enabled() ) {
 			return array();
 		}
@@ -72,6 +92,18 @@ final class RecommendationEngine {
 		}
 
 		return array_slice( $products, 0, $rule->recommendation_count() );
+	}
+
+	/**
+	 * Returns diagnostics from the most recent recommendation request.
+	 *
+	 * @return array<string, bool|int>
+	 */
+	public function diagnostics(): array {
+		return array(
+			'variation_candidates_scanned' => $this->variation_candidates_scanned,
+			'variation_scan_limit_reached' => $this->variation_scan_limit_reached,
+		);
 	}
 
 	/**
@@ -311,7 +343,7 @@ final class RecommendationEngine {
 	}
 
 	/**
-	 * Checks variation candidates in bounded pages until one can be purchased.
+	 * Checks variation candidates in pages within the request-wide scan budget.
 	 *
 	 * @param int $product_id Variable product ID.
 	 */
@@ -327,25 +359,52 @@ final class RecommendationEngine {
 			'order'        => 'ASC',
 			'return'       => 'objects',
 		);
-		$total        = $this->query_total( $args );
+		$offset       = 0;
 
-		for ( $offset = 0; $offset < $total; $offset += self::CANDIDATE_PAGE_SIZE ) {
+		while ( $this->variation_candidates_scanned < self::MAX_VARIATION_SCAN ) {
+			$remaining  = self::MAX_VARIATION_SCAN - $this->variation_candidates_scanned;
+			$page_size  = min( self::CANDIDATE_PAGE_SIZE, $remaining );
 			$variations = $this->query_products(
 				array_merge(
 					$args,
 					array(
 						'offset' => $offset,
-						'limit'  => self::CANDIDATE_PAGE_SIZE,
+						'limit'  => $page_size,
 					)
 				)
 			);
+
+			if ( array() === $variations ) {
+				return false;
+			}
+
+			$scanned                             = count( $variations );
+			$this->variation_candidates_scanned += $scanned;
+			$offset                             += $scanned;
 
 			foreach ( $variations as $variation ) {
 				if ( 'variation' === $variation->get_type() && $variation->is_purchasable() && $this->stock_is_allowed( $variation ) ) {
 					return true;
 				}
 			}
+
+			if ( $scanned < $page_size ) {
+				return false;
+			}
 		}
+
+		$remaining_variations = $this->query(
+			array_merge(
+				$args,
+				array(
+					'offset' => $offset,
+					'limit'  => 1,
+					'return' => 'ids',
+				)
+			)
+		);
+
+		$this->variation_scan_limit_reached = $this->variation_scan_limit_reached || ( is_array( $remaining_variations ) && array() !== $remaining_variations );
 
 		return false;
 	}

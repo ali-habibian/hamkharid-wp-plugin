@@ -52,7 +52,7 @@ Repository نام خالی و نبود مبدأ/مقصد معتبر را با WP
 REST عمومی برای قواعد یا سرویس خارجی وجود ندارد. route محدود `hamkharid/v1/products` برای انتخاب محصول در editor/admin فقط به کاربر دارای `manage_woocommerce` یا `edit_products` پاسخ می‌دهد. مدیریت قانون بر hookهای WP، متدهای PHP و فرم بومی admin است.
 
 - `RuleMatcher::match(int $product_id): ?Rule` و `match_with_diagnostics(int $product_id): array`؛ در هر specificity، اولویت DESC و ID ASC؛ مقصد حذف‌شده رد می‌شود تا قانون بعدی بررسی شود. پس از سقف ۵۰۰ نامزد reason=`candidate_limit_reached` گزارش می‌شود.
-- `RecommendationEngine::recommend(int $current_product_id, Rule $rule): array`؛ خروجی محصولات منتشرشده، قابل‌نمایش و قابل‌خرید از نوع simple یا variable است. variation واجد شرایط و تنظیم backorder بررسی می‌شود؛ query محدود refill می‌کند و SQL RAND ندارد.
+- `RecommendationEngine::recommend(int $current_product_id, Rule $rule): array`؛ خروجی محصولات منتشرشده، قابل‌نمایش و قابل‌خرید از نوع simple یا variable است. variation واجد شرایط و تنظیم backorder بررسی می‌شود؛ query محدود refill می‌کند و SQL RAND ندارد. علاوه بر بودجه ۵۰۰ محصول E-12، هر فراخوانی حداکثر ۵۰۰ variation را در صفحه‌های حداکثر ۲۴تایی بررسی می‌کند.
 - `RuleRepository::create/update` خروجی `int|WP_Error` و `find` خروجی `?Rule` دارند. repository مجوز endpoint نیست؛ ورودی خارجی باید در controller احراز مجوز شود.
 - `save_post_hamkharid_rule` به `RuleAdmin::save` متصل است؛ nonce فعلی `hamkharid_rule_nonce` برای action=`hamkharid_save_rule` و capability=`manage_woocommerce` است.
 - toggle از `admin-post.php?action=hamkharid_toggle_rule&rule_id=...`، nonce متناسب با ID و redirect امن استفاده می‌کند. endpoint عمومی بدون احراز مجوز ندارد.
@@ -60,7 +60,7 @@ REST عمومی برای قواعد یا سرویس خارجی وجود ندار
 - `do_action('hamkharid_loaded', $plugin)` بعد از boot وابستگی‌ها اجرا می‌شود؛ hook توسعه موجود است، تضمین نسخه‌بندی‌شده برای extensionها ارائه نشده.
 - نمایش: `[hamkharid_complements]` و block=`hamkharid/complements` از renderer مشترک استفاده می‌کنند؛ `product_id` صریح و context محصول برای block پشتیبانی می‌شود. نصب تازه manual است؛ activation با rule موجود، نصب ارتقایافته را automatic نگه می‌دارد. حالت automatic دو placement دارد.
 - renderer از `wc_get_template_part('content', 'product')` استفاده و globals/loop props را در finally بازیابی می‌کند؛ اولین خروجی موفق برای هر product ID در request نگه داشته می‌شود. CSS برای صفحه محصول و محتوای embed شناسایی‌شده enqueue می‌شود؛ این اسکن، اثبات سازگاری هر builder نیست.
-- Preview مدیریت، نتیجه matcher و engine واقعی را بدون تغییر cart یا rule نشان می‌دهد؛ reasonهای فعلی شامل invalid product، no match، invalid target، سقف جست‌وجو و no eligible products است.
+- Preview مدیریت، نتیجه matcher و engine واقعی را بدون تغییر cart یا rule نشان می‌دهد؛ reasonهای matcher شامل invalid product، no match، invalid target و سقف rule scan است. diagnostics موتور پیشنهاد تعداد variationهای بررسی‌شده و رسیدن به سقف را ثبت می‌کند؛ preview وقتی به سقف می‌رسد هشدار می‌دهد که برخی variable productها ممکن است حذف شده باشند.
 - عنوان فروشگاه از locale جاری و overrideهای `title_fa`/`title_en` می‌آید؛ متن پیش‌فرض انگلیسی `Complete your purchase` و فایل ترجمه فارسی منبع متن fa_IR است.
 
 ## قراردادهای هدف و محدودیت‌های تأیید
@@ -69,7 +69,7 @@ REST عمومی برای قواعد یا سرویس خارجی وجود ندار
 
 1. FR-02: POST نامعتبر در مسیر admin رد می‌شود؛ snapshot پیش از native post update، عنوان/status و meta معتبر قبلی را حفظ می‌کند و مقدارهای ارسال‌شده را برای همان مدیر بازمی‌گرداند. آزمون integration مسیر update و E2E CRUD/حفظ فرم اجرا می‌شود؛ خطای نوشتن چند meta همچنان تراکنش اتمیک ندارد.
 2. ذخیره عنوان/status و چند meta یک تراکنش واحد نیست؛ همه خطاهای meta-write به‌طور کامل مدیریت نمی‌شوند. atomic بودن ذخیره ادعا نشود.
-3. Matcher سقف ۵۰۰ نامزد دارد. رسیدن به سقف با `candidate_limit_reached` در preview آشکار می‌شود، اما benchmark ruleهای بسیار زیاد در B-31 باز است.
+3. Matcher سقف ۵۰۰ rule candidate دارد؛ `candidate_limit_reached` در preview آشکار می‌شود. این سقف با سقف جداگانه ۵۰۰ variation در هر `recommend()` اشتباه نشود. benchmark تعداد ruleهای زیاد و variationهای زیاد در B-31 باز است.
 4. تنظیمات فعلی در option نسخه‌دار `hamkharid_display_settings_v1` است؛ نصب تازه manual، و activation با rule موجود automatic را انتخاب می‌کند. این مسیر باید در نصب/ارتقای ZIP آزموده شود.
 5. بلوک `hamkharid/complements` در editor از REST محدود محصول استفاده می‌کند و در frontend از callback سمت سرور. اجرای مرورگری نهایی، درج و نمایش بلوک پویا را در editor و frontend بررسی می‌کند؛ مرز سازگاری Themeها مطابق ماتریس QA است.
 6. enqueue پیش از head، محتوای پست، metaهای با کلید شناخته‌شده builder و widgetهای فعال text/custom HTML/block را بررسی می‌کند. Builderهای خاص و Elementor در این محیط آزموده نشده‌اند.
@@ -86,7 +86,7 @@ REST عمومی برای قواعد یا سرویس خارجی وجود ندار
 
 - قیمت، مالیات، variation، cart و سفارش مالک WooCommerce هستند؛ SQL مستقیم سفارش، تغییر قیمت یا ثبت سفارش وارد این دامنه نمی‌شود.
 - حفظ CPT/APIهای WP/WC طبق E-01. interface یا لایه جدید فقط برای مصرف واقعی مشترک preview/storefront ایجاد شود؛ framework موازی لازم نیست.
-- engine در صفحه‌های حداکثر ۲۴ محصول می‌خواند و برای یک نتیجه حداکثر ۵۰۰ نامزد را بررسی می‌کند (E-12). random از صفحه‌های منتخب نمونه‌گیری می‌کند و ORDER BY RAND ندارد؛ count/offset بزرگ همچنان هزینه دارند. شمار queryهای WC_Product_Query با کل SQLها برابر نیست و کیفیت پرشدن در حجم بالا تا benchmark B-31 اثبات نشده است.
+- engine در صفحه‌های حداکثر ۲۴ محصول می‌خواند و برای یک نتیجه حداکثر ۵۰۰ محصول را بررسی می‌کند (E-12). جداگانه، مجموع variation candidateهای بررسی‌شده در هر فراخوانی `recommend()` نیز حداکثر ۵۰۰ است (E-13)؛ diagnostics این سقف را اعلام می‌کند و preview برای نتیجهٔ احتمالی ناقص هشدار می‌دهد. regression مصنوعی ۵۰۱ variation در `integration-performance` با `composer run test:all` در ۲۰۲۶-۱۰-۲۸ پاس شد. این test رفتار سقف و query bound را اثبات می‌کند؛ کارایی در مقیاس محصول/rule/variation تا benchmark B-31 اثبات نشده است. random از صفحه‌های منتخب نمونه‌گیری می‌کند و ORDER BY RAND ندارد؛ count/offset بزرگ همچنان هزینه دارند و شمار queryهای WC_Product_Query با کل SQLها برابر نیست.
 - کش دائمی و schema اختصاصی تا اثبات نیاز به تعویق می‌افتند. کش request-level می‌تواند نتیجه تکراری را حذف کند. کش آینده ترجیحاً IDها را نگه دارد، نه HTML قیمت؛ locale، تنظیمات، قواعد، تغییر محصول/term/موجودی و contextهای قیمت باید لحاظ شوند.
 - option تنظیمات با `autoload=false` ذخیره می‌شود؛ آزمون benchmark مقیاس هنوز انجام نشده است.
 - `uninstall.php` با `clear_data_on_uninstall` انتخابی، ruleها و option هم‌خرید را پاک می‌کند؛ نصب/حذف بسته و lifecycle واقعی هنوز gate دارد. cleanup مجاز به حذف product، product_cat، user یا order نیست.

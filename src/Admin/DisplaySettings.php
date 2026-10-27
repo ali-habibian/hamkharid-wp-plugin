@@ -241,10 +241,13 @@ final class DisplaySettings {
 			return;
 		}
 
-		$recommendations = ( new RecommendationEngine() )->recommend( $product_id, $rule );
+		$engine          = new RecommendationEngine();
+		$recommendations = $engine->recommend( $product_id, $rule );
+		$diagnostics     = $engine->diagnostics();
 
 		if ( array() === $recommendations ) {
 			printf( '<div class="notice notice-info inline" role="status"><p>%s</p></div>', esc_html__( 'A rule matched, but no eligible products were found in its target category.', 'hamkharid' ) );
+			$this->render_variation_scan_notice( $diagnostics );
 			return;
 		}
 
@@ -268,6 +271,23 @@ final class DisplaySettings {
 		}
 
 		echo '</ul>';
+		$this->render_variation_scan_notice( $diagnostics );
+	}
+
+	/**
+	 * Explains when bounded variation checking may have omitted variable products.
+	 *
+	 * @param array<string, bool|int> $diagnostics Recommendation engine diagnostics.
+	 */
+	private function render_variation_scan_notice( array $diagnostics ): void {
+		if ( empty( $diagnostics['variation_scan_limit_reached'] ) ) {
+			return;
+		}
+
+		printf(
+			'<div class="notice notice-warning inline" role="status"><p>%s</p></div>',
+			esc_html__( 'The variation search reached its 500-candidate safety limit. Some variable products may be omitted; review the target category or variations.', 'hamkharid' )
+		);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 msgid ""
 msgstr ""
+
 "Project-Id-Version: Smart Category Complement – Hamkharid 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-08-23 21:20+0330\n"
@@ -455,4 +456,8 @@ msgstr ""
 
 #: assets/js/admin-preview.js
 msgid "Product search failed."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "The variation search reached its 500-candidate safety limit. Some variable products may be omitted; review the target category or variations."
 msgstr ""

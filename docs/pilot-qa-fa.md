@@ -1,10 +1,10 @@
 # گزارش QA محلی هم‌خرید
 
-تاریخ اجرا: ۲۰۲۶-۱۰-۲۸. نسخه کد: `0.1.0` به‌همراه تغییرهای محلی روی مبنای Git `b6bfab6`؛ شناسه E2E: `2a533f5a6c48`.
+تاریخ اجرا: ۲۰۲۶-۱۰-۲۸. نسخه کد: `0.1.0` به‌همراه تغییرهای محلی روی مبنای Git `b6bfab6`؛ شناسه E2E: `63f291d389df`.
 
 ## نتیجه
 
-آزمون‌های واحد، یکپارچگی و E2E ثبت‌شده در این گزارش موفق‌اند. این گزارش آمادگی انتشار را اعلام نمی‌کند: M4 تا تکمیل گزارش مستقل بسته، نصب/ارتقا و rollback باز می‌ماند؛ چند حوزه M3 هم آزموده نشده‌اند.
+اجرای تازه `composer run test:all` پس از افزودن regression variation با exit 0 تمام شد. E2E روی کد به‌روز با run=`63f291d389df`، Browser QA ۱۴/۱۴ را پاس کرد و cleanup exit 0 داشت. این گزارش آمادگی انتشار را اعلام نمی‌کند: M4 تا بازسازی و آزمون package روی کد جاری و تکمیل rollback باز است؛ چند حوزه M3 نیز آزموده نشده‌اند.
 
 ## محیط
 
@@ -25,12 +25,12 @@
 
 | فرمان | نتیجه |
 |---|---|
-| `composer run test:all` | exit 0؛ lint موفق، PHPCS برای ۲۸ فایل، PHPUnit با ۸/۸ تست و ۱۳ assertion، و هر ۱۲ integration از جمله uninstall موفق |
+| `composer run test:all` (۲۰۲۶-۱۰-۲۸) | exit 0 پس از regression variation؛ lint، PHPCS برای ۲۸ فایل، PHPUnit با ۸/۸ تست و ۱۳ assertion، هر ۱۲ integration از جمله `integration-performance` و uninstall موفق |
 | `npm run check:js` | exit 0 |
-| `npm run test:e2e` | run `2a533f5a6c48`؛ ۱۴/۱۴ سناریوی مرورگر موفق |
-| `npm run e2e:cleanup` | exit 0؛ fixtureهای E2E پاک شدند |
+| `npm run test:e2e` (کد جاری) | run `63f291d389df`؛ Browser QA ۱۴/۱۴ سناریوی مرورگر موفق |
+| `npm run e2e:cleanup` پس از run جاری | exit 0؛ fixtureهای E2E پاک شدند |
 
-E2E شناسه‌های زیر را پوشش داد:
+در E2E کد جاری با شناسه `63f291d389df` موارد زیر پوشش داده شدند:
 
 - Admin: QA-005/006 و QA-010 تا QA-019.
 - Matching/rendering: QA-032/033، QA-050 تا QA-057، QA-070/071/076.
@@ -57,8 +57,20 @@ E2E شناسه‌های زیر را پوشش داد:
 - سناریوی چند embed برای یک محصول و رفتار duplicate در همه placementها.
 - ماتریس گسترده نسخه‌های WordPress/WooCommerce/PHP و مرورگرها.
 - benchmark پذیرش PRD: مقیاس ۱k/۱۰k/۵۰k محصول، ۱۰/۱۰۰/۱۰۰۰ rule و نمونه‌های cold/warm. fixture کوچک performance در integrationها اجرا شده، اما برای عبور NFR-02 کافی نیست.
-- M4: ساخت و بررسی ZIP، manifest/checksum واقعی، نصب تمیز، ارتقا از قواعد قدیمی، uninstall/rollback از بسته و بررسی نبود Composer در مقصد. نتیجه این موارد باید در همین سند بعداً تکمیل شود.
+- M4 روی کد جاری: rebuild و بررسی ZIP، manifest/checksum، نصب تمیز، update/uninstall/rollback از همان artifact و بررسی نبود Composer در مقصد. package قبلی شواهد اولیه دارد، اما از revision قبل از آخرین اصلاح variation است.
+
+### شواهد اولیه M4 روی package قبلی
+
+یک ZIP با SHA-256 `d026f297d533047b64f00faf884ccc8534b37c62513c0c242cb2051f2a512e4c` و source revision `da914d3257b24564a5aafaeea939d4dd07c05fe2` در clone مستقل QA بررسی شد. WordPress uploader، نصب تمیز/فعال‌سازی، تنظیم manual نصب تازه، shortcode، auto placement در upgrade، حفظ داده‌ها، uninstall پیش‌فرض و opt-in، و پاک‌سازی fixtureها پاس شدند؛ manifest با ZIP hash منطبق بود. محیط clone: WordPress 7.1.3، WooCommerce 11.2.1، PHP 8.4، Twenty Twenty-Five و `en_US`. گزارش خام در `C:\Users\HP\.codex\visualizations\2026\10\27\01a17ea3-2fb8-7403-b60e-3f15d61b0241\qa\zip-install\zip-qa-evidence.txt` و تصاویر در همان پوشه هستند.
+
+این ZIP از revision پیش از اصلاح variation ساخته شده؛ پس شاهد چرخه‌عمر اولیه است، نه قبولی package کد جاری. به‌روزرسانی با تغییر header همان کپی QA از 0.1.0 به 0.0.9 شبیه‌سازی شد، نه با نسخه تاریخی واقعی. package فعلی باید دوباره ساخته شود و install/update/uninstall/rollback روی همان SHA تکرار شود. هنگام اجرا، PHP برای curl هشدار extension گم‌شده داد؛ WordPress UI و چرخه‌های ZIP با وجود هشدار کامل شدند.
+
+## یافته تازه ممیزی کد و وضعیت بازآزمایی
+
+بازبینی تازه نشان داد variable productها می‌توانند تعداد variation زیادی داشته باشند. برای هر فراخوانی `RecommendationEngine::recommend()` اکنون سقف سراسری ۵۰۰ variation candidate در صفحه‌های حداکثر ۲۴تایی اعمال می‌شود؛ این سقف مستقل از بودجه ۵۰۰ محصول است. engine تعداد variationهای بررسی‌شده و رسیدن به سقف را در diagnostics می‌دهد، و preview مدیریت هشدار می‌دهد که برخی variable productها ممکن است از خروجی جا افتاده باشند.
+
+برای regression یک fixture مصنوعی ۵۰۱ variation به `integration-performance` اضافه شد. کل `composer run test:all` با این regression exit 0 شد و تمام ۱۲ integration پاس شدند. performance fixture کوچک این زمان‌ها را ثبت کرد: match=3.65ms، newest=8.68ms، best-selling=8.71ms، random=7.15ms. این fixture هدفمند فقط سقف و query bound را می‌آزماید؛ benchmark مقیاس PRD نیست. benchmark agent جداگانه در حال کار است و NFR-02 همچنان پاس‌نشده است.
 
 ## جمع‌بندی gate
 
-M1 و مسیرهای اصلی M2 در suiteهای گزارش‌شده پاس شدند. M3 ناقص است تا موارد دسترس‌پذیری، چندبستری و benchmark بالا بررسی شوند. تا تکمیل آزمون‌های M4 و ثبت شواهد بسته، این نتیجه فقط گزارش QA محلی است و مجوز انتشار یا ارسال ZIP نیست.
+M1 و integrationهای مربوط به M2، از جمله regression variation، در suite تازه پاس شدند؛ E2E روی کد به‌روز نیز با run=`63f291d389df`، ۱۴/۱۴ را پاس کرد و cleanup exit 0 داشت. M3 ناقص است تا موارد دسترس‌پذیری، چندبستری و benchmark بالا بررسی شوند. M4 تا تکرار QA روی ZIP ساخته‌شده از code revision جاری باز می‌ماند؛ این گزارش مجوز انتشار یا ارسال ZIP نیست.
