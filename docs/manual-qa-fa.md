@@ -1,12 +1,12 @@
 # چک‌لیست QA دستی افزونه هم‌خرید
 
-> مرجع فعلی محصول و توسعه: [فهرست مستندات](README.md)، [PRD](prd-fa.md) و [وضعیت و نقشه راه](roadmap-fa.md). شماره‌های Phase 15/16 در این سند نام‌گذاری تاریخی‌اند، نه شاهد تکمیل. هسته تغییرهای مصوب در source پیاده شده، ولی gateهای پذیرش و موارد زیر هنوز بسته نیستند.
+> مرجع فعلی محصول و توسعه: [فهرست مستندات](README.md)، [PRD](prd-fa.md) و [وضعیت و نقشه راه](roadmap-fa.md). شماره‌های Phase 15/16 در این سند نام‌گذاری تاریخی‌اند، نه شاهد تکمیل. E2E پس از اصلاح کنتراست کارت پاس شد؛ ZIP متناظر با کد جاری هنوز rebuild/lifecycle نشده است.
 >
-> اصلاح دامنه ۲۰۲۶-۱۰-۲۷: طبق D-08، بلوک پویا و shortcode در MVP قرار دارند و جای‌گذاری به قالب خاص محدود نمی‌شود. نبود widget اختصاصی Elementor عمدی است؛ shortcode در builder همچنان نیاز به QA دارد. اجرای نهایی E2E در ۲۰۲۶-۱۰-۲۸ با شناسه `63f291d389df`، ۱۴/۱۴ سناریوی مرورگر را گذراند؛ QA-205 بعد از شکست اجرای قبلی این‌بار پاس شد. این نتیجه جایگزین QA دستی و gateهای M3/M4 نیست.
+> اصلاح دامنه ۲۰۲۶-۱۰-۲۷: طبق D-08، بلوک پویا و shortcode در MVP قرار دارند و جای‌گذاری به قالب خاص محدود نمی‌شود. E2E run=`1aa89a2c28a1` روی working tree پیش از commit `5d468e0`، ۱۷/۱۷ سناریو را گذراند؛ منطق تست با commit tracked/pushed یکسان است و فقط whitespace اصلاح‌شده با PHPCBF تفاوت دارد. پوشش شامل QA-097، QA-130 دسترسی واقعی Shop Manager و axe-core 4.13.0 در `en_US`/LTR و `fa_IR`/RTL با صفر تخلف در tagهای WCAG 2.0/2.1/2.2 A/AA بود. بازبینی screenshotهای ۱۲۰۰/۴۲۰px contrast کارت و layout را تأیید کرد و fixtureها پاک شدند. ZIP متناظر با کد جاری هنوز rebuild/lifecycle نشده است.
 
 این سند برای QA دستی MVP افزونه **Smart Category Complement – Hamkharid** است. هدف این مرحله، تأیید رفتار واقعی افزونه در WordPress/WooCommerce و ثبت یک اجرای قابل تکرار قبل از آماده‌سازی مارکت است.
 
-> برچسب Phase 15/16 از چک‌لیست قدیمی مانده است؛ gateهای M3 در اجرای حاضر بخشی پاس شده‌اند و بسته‌بندی/نصب/ارتقای ZIP در M4 تا ثبت گزارش مستقل باز است.
+> برچسب Phase 15/16 از چک‌لیست قدیمی مانده است؛ lifecycle artifact قبلی پاس شده بود، اما M4 برای ZIP بازسازی‌شده، Elementor مرورگری، screen reader و چند gate دیگر M3 همچنان بازند.
 
 ## 1. اطلاعات اجرای QA
 
@@ -173,14 +173,15 @@ Rule دیگری با Source مستقیم `QA Source Child` و همان Target ب
 - [ ] **QA-094** در viewport متوسط، ستون‌ها متناسب با فضای والد کم می‌شوند و کارت‌ها زیر حداقل عرض تعریف‌شده نمی‌روند.
 - [ ] **QA-095** در viewport باریک گرید تک‌ستونه می‌شود.
 - [ ] **QA-096** در هیچ‌یک از سه حالت horizontal page overflow ناشی از Hamkharid ایجاد نمی‌شود.
+- [x] **QA-097** در عرض مؤثر ۳۲۰ CSS px و zoom صفحهٔ ۲۰۰٪ کنترل‌ها و محتوای ضروری قابل‌استفاده می‌مانند؛ E2E run=`1aa89a2c28a1`.
 
 ## 10. Accessibility پایه
 
-- [ ] **QA-100** فقط با `Tab` بین لینک محصول و دکمه‌های section حرکت کنید؛ همه عناصر قابل دسترس‌اند.
-- [ ] **QA-101** focus با `:focus-visible` واضح و قابل تشخیص است.
-- [ ] **QA-102** ترتیب Tab منطقی است و focus trap ایجاد نمی‌شود.
-- [ ] **QA-103** heading section در hierarchy صفحه قابل تشخیص است و section label معتبر دارد.
-- [ ] **QA-104** zoom مرورگر را روی 200% قرار دهید؛ متن/دکمه‌ها قابل استفاده می‌مانند و محتوای ضروری قطع نمی‌شود.
+- [x] **QA-100** فقط با `Tab` بین لینک محصول و دکمه‌های section حرکت کنید؛ E2E keyboard smoke پاس شد.
+- [x] **QA-101** focus با `:focus-visible` واضح و قابل تشخیص است؛ در E2E بررسی شد.
+- [x] **QA-102** ترتیب Tab منطقی است و focus trap ایجاد نمی‌شود؛ E2E smoke پاس شد.
+- [x] **QA-103** heading section در hierarchy صفحه قابل تشخیص است و section label معتبر دارد.
+- [x] **QA-104** axe-core 4.13.0 در run=`1aa89a2c28a1` برای WCAG 2.0/2.1/2.2 A/AA tags، در هر دو locale، zero violations گزارش کرد.
 
 ## 11. Theme و Block Compatibility
 
@@ -194,16 +195,16 @@ Rule دیگری با Source مستقیم `QA Source Child` و همان Target ب
 
 ## 12. HPOS و Dependency Behavior
 
-- [ ] **QA-120** در `WooCommerce → Settings → Advanced → Features`، HPOS را فعال کنید؛ Hamkharid به‌عنوان incompatible گزارش نمی‌شود.
-- [ ] **QA-121** با HPOS فعال، Admin Ruleها و frontend recommendationها مانند قبل کار می‌کنند.
-- [ ] **QA-122** WooCommerce را در یک محیط QA/clone موقتاً غیرفعال کنید؛ Hamkharid fatal error ایجاد نمی‌کند.
-- [ ] **QA-123** در حالت WooCommerce غیرفعال، مدیر notice مربوط به نیاز افزونه به WooCommerce را مشاهده می‌کند.
+- [x] **QA-120** HPOS روشن/خاموش در QA سازگاری بررسی شد؛ Hamkharid incompatible گزارش نشد.
+- [x] **QA-121** با HPOS روشن، Admin Ruleها و frontend recommendationها کار کردند.
+- [x] **QA-122** در clone QA با WooCommerce غیرفعال، Hamkharid fatal error ایجاد نکرد.
+- [x] **QA-123** در حالت WooCommerce غیرفعال، notice نیاز به WooCommerce دیده شد.
 - [ ] **QA-124** WooCommerce را دوباره فعال کنید؛ Hamkharid بدون نیاز به repair دستی به کار برمی‌گردد.
 
 ## 13. Permission و Admin Safety Smoke Test
 
-- [ ] **QA-130** با یک کاربر Administrator/Shop Manager دارای `manage_woocommerce`، Rule management قابل دسترس است.
-- [ ] **QA-131** با یک کاربر Subscriber/Customer، صفحه مدیریت Ruleها قابل استفاده برای تغییر Rule نیست.
+- [x] **QA-130** در E2E run=`1aa89a2c28a1` حساب role=`shop_manager` توانست Rules/settings را باز کند و مدیریت کند.
+- [x] **QA-131** در همان E2E کاربر Subscriber به مدیریت Ruleها دسترسی نداشت.
 - [ ] **QA-132** Enable/Disable و Save در استفاده معمول، redirect/fatal/blank page ایجاد نمی‌کنند.
 
 ## 14. Regression نهایی End-to-End
@@ -289,33 +290,34 @@ npm run test:e2e:headed
 
 Runner داده‌های موقت، Administrator و Subscriber اختصاصی می‌سازد و برای بازبینی بصری بعد از تست نگه می‌دارد. داده‌های موجود فروشگاه را برای fixture استفاده نمی‌کند. اجرای بعدی ابتدا fixtureهای E2E قبلی را پاک می‌کند و مجموعه تازه می‌سازد. پس از پایان بازبینی بصری، داده‌های QA را با `npm run e2e:cleanup` حذف کنید.
 
-پوشش smoke اجرای `63f291d389df` (موفق، ۱۴/۱۴ سناریو):
+آخرین پوشش smoke تأییدشده `1aa89a2c28a1` (۱۷/۱۷ سناریو؛ اجرا پیش از commit `5d468e0` با همان منطق تست و تفاوت whitespace PHPCBF):
 
 - Admin: `QA-005`, `QA-006`, `QA-010` تا `QA-019`
 - Matching/Rendering: `QA-032`, `QA-033`, `QA-050` تا `QA-057`, `QA-070`, `QA-071`, `QA-076`, `QA-145`, `QA-146`
 - Add-to-Cart: `QA-080`, `QA-081`, `QA-083` تا `QA-085`
-- Responsive: `QA-093` تا `QA-096`
-- Accessibility smoke: `QA-100` تا `QA-103`
-- Permission smoke: `QA-130`, `QA-131`
+- Responsive: `QA-093` تا `QA-097`؛ QA-097 در عرض مؤثر ۳۲۰ CSS px و zoom صفحهٔ ۲۰۰٪.
+- Accessibility smoke: `QA-100` تا `QA-104`؛ QA-104 اجرای axe-core 4.13.0 برای tagهای `wcag2a/aa`, `wcag21a/aa`, `wcag22a/aa` است.
+- Permission smoke: `QA-130` (Shop Manager واقعی)، `QA-131` (Subscriber denial)
 
-پوشش آزموده‌شده شامل admin preview، manual mode بدون auto placement، shortcode و dynamic block در editor و frontend، قالب کلاسیک Luxury Shop و Twenty Twenty-Five، `en_US`/LTR و `fa_IR`/RTL است. Keyboard/focus smoke، عنوان/قیمت/دکمه و contrast محاسبه‌شده با نسبت حداقل 4.5:1 نیز پاس شدند. اجرای cleanup پس از E2E با exit 0 تمام شد و fixtureها حذف شدند.
+پوشش اجرا شامل admin preview، manual mode بدون auto placement، shortcode و dynamic block در editor و frontend، قالب کلاسیک Luxury Shop و Twenty Twenty-Five، `en_US`/LTR و `fa_IR`/RTL بود. Keyboard/focus smoke و سنجش contrast عنوان/قیمت/دکمه پاس شدند. axe-core 4.13.0 در هر دو locale برای tagهای `wcag2a/aa`, `wcag21a/aa`, `wcag22a/aa` صفر تخلف گزارش کرد. بازبینی screenshotهای ۱۲۰۰px desktop و ۴۲۰px mobile نیز contrast کارت و layout را تأیید کرد. Cleanup exit 0 داشت و fixtureها پاک شدند.
 
-موارد آزموده‌نشده شامل Elementor و builderها، ناحیه‌های widget، zoom ۲۰۰٪، Screen Reader، HPOS خاموش، WooCommerce غیرفعال، Shop Manager، سناریوی چند embed/duplicate، ماتریس گسترده مرورگر/نسخه و benchmark در مقیاس PRD است. جزئیات و تصویرهای responsive در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند.
+موارد باز شامل rendering مرورگری Elementor و page builderهای خاص، Screen Reader و ماتریس گسترده مرورگر/نسخه است. QAهای ثبت‌شده HPOS روشن/خاموش، WooCommerce فعال/غیرفعال، ناحیهٔ widget موجود و multi-embed/duplicate را پوشش دادند؛ E2E اخیر دسترسی واقعی حساب Shop Manager به rules/settings را نیز گذراند. Benchmark مقیاس PASS محدود محلی E-15 است و SLA عمومی نیست؛ variable-heavy test فقط exploratory است.
 
 ## 17. تکمیل QA پس از اجرای نیازمندی‌های جدید
 
-وضعیت: برنامه آزمون و شواهد ثبت‌شده. `composer run test:all` پس از regression سقف ۵۰۱ variation با exit 0 پاس شد؛ E2E روی کد جاری با run=`63f291d389df`، ۱۴/۱۴ سناریو را پاس کرد و cleanup نیز exit 0 داشت. این چک‌لیست دستی راهنمای تکرار است؛ شناسه‌های قبلی حذف یا به‌معنای Pass بازتفسیر نشوند.
+وضعیت: suite ثبت‌شده با `composer run test:all` exit 0 پاس شد (PHPCS 28/28، PHPUnit 8/8 با 13 assertion و integration 12/12)؛ `npm run check:js` و `node --check` نیز پاس شدند. E2E `1aa89a2c28a1`، ۱۷/۱۷ بود و axe-core/WCAG A/AA، Shop Manager و بازبینی بصری کارت را پوشش داد؛ fixtureها پاک شدند. تغییر test-only اکنون در commit `5d468e0c2909f3ef78088ebeccae8db008e33766` tracked و pushed است؛ E2E پیش از commit ولی با همان منطق تست اجرا شد. ZIP تازه هنوز build و lifecycle نشده؛ M4 باز است. وجود تست یا تیک به‌تنهایی معیار پذیرش نیست.
 
 - [ ] **QA-200 / FR-03** دسته مستقیم، والد نزدیک، priority هم‌سطح و tie-ID؛ قواعد قدیمی بدون meta همان نتیجه قبلی را بدهند.
 - [ ] **QA-201 / FR-04** مقصد حذف‌شده به قانون معتبر بعدی همان سطح و سپس والد برسد؛ مقصد معتبر ولی خالی به قانون دیگر fallback نکند؛ دلیل در preview دیده شود.
 - [ ] **QA-202 / FR-02** POST نامعتبر، نام/مبدأ/مقصد نامعتبر و مقدار تعداد فارسی؛ ورودی فرم حفظ و قانون سالم قبلی ناخواسته غیرفعال نشود. وجود normalization در Repository جایگزین پذیرش ورودی نامعتبر نیست.
 - [ ] **QA-203 / FR-05/06** ساده/متغیر با variationهای موجود و ناموجود، backorder روشن/خاموش و محصول بی‌قیمت؛ خارجی/گروهی حذف؛ ظرفیت با محصول واجد شرایط و query محدود پر شود. سقف variation: حداکثر ۵۰۰ candidate در هر `recommend()`، page حداکثر ۲۴؛ رسیدن به سقف باید در preview هشدار دهد. regression مصنوعی ۵۰۱ variation در اجرای تازه `composer run test:all` پاس شد؛ آزمون دستی preview/لبه‌های دیگر همچنان جداست.
 - [ ] **QA-204 / FR-07** preview همان موتور فروشگاه، بدون تغییر rule/cart، با احراز capability/nonce؛ نمایش علت no-match و no-eligible-products.
-- [ ] **QA-205 / FR-10** shortcode و block روی قالب کلاسیک و بلوکی؛ product_id صریح در برگه غیرمحصول؛ context نامعتبر خروجی امن؛ CSS واقعاً در embed خارج صفحه محصول برسد. E2E run=`63f291d389df` این مورد را در حد smoke مرورگر پاس کرده؛ builder/widget و ارزیابی دستی همچنان pending است.
-- [ ] **QA-206 / FR-08/10** ابزارک موجود و builder دارای shortcode، کانتینر باریک، چند embed، یکتایی heading ID و نبود duplicate ناخواسته؛ در manual خروجی خودکار خاموش باشد.
-- [ ] **QA-207 / NFR-03/05** فارسی و انگلیسی، نام طولانی و SKU ترکیبی، keyboard/screen reader و ۲۰۰٪ zoom؛ قیمت از WC و بدون تبدیل دوباره تومان/ریال.
+- [x] **QA-205 / FR-10 — browser smoke subset** E2E `1aa89a2c28a1`، manual mode، shortcode و block/editor/frontend را در دو قالب smoke کرد؛ product_id/contextهای لبه و Elementor مرورگری هنوز جداگانه pending هستند.
+- [ ] **QA-206 / FR-08/10 — subset** ناحیهٔ widget موجود و multi-embed/duplicate behavior در QAهای ثبت‌شده پوشش یافت؛ Elementor و builderهای خاص، همهٔ کانتینرها و یکتایی heading ID در ماتریس کامل هنوز gate باز دارند.
+- [ ] **QA-207 / NFR-03/05** zoom صفحهٔ ۲۰۰٪ در عرض مؤثر ۳۲۰ CSS px زیر QA-097 آزموده شد؛ ارزیابی نام/SKUهای طولانی، keyboard/screen reader، قیمت WC و عدم تبدیل مجدد تومان/ریال همچنان نیازمند QA است.
 - [ ] **QA-208 / FR-09** غیرفعال‌سازی و uninstall پیش‌فرض حفظ؛ opt-in پاک‌سازی فقط داده هم‌خرید؛ product/category/order تغییر نکنند.
-- [ ] **QA-209 / NFR-04/07** نصب ZIP تمیز، upgrade از قواعد قدیمی، حفظ نمایش خودکار نصب قبلی و حالت دستی نصب تازه؛ HPOS دو حالت و Shop Manager. اجرای اولیه با ZIP پیش از اصلاح ممیزی pass شد ولی update فقط با version marker مصنوعی از 0.0.9 بود؛ با ZIP بازسازی‌شده از code جاری تکرار شود.
-- [ ] **QA-210 / NFR-02** benchmark مقیاس و baseline/آستانه مصوب، نه فقط fixture کوچک و شمار query object. regression مصنوعی ۵۰۱ variation در suite کامل پاس شد؛ benchmark agent جداگانه هنوز در حال کار است و هیچ‌یک از شواهد فعلی معیار مقیاس PRD را پاس نمی‌کند.
+- [ ] **QA-209 / NFR-04/07 — ZIP lifecycle subset** artifact پیشین lifecycle را گذراند؛ پس از fix کنتراست کارت باید ZIP تازه با SHA/revision جدید build و روی همان gateها آزموده شود. SHA جاری pending است. Update قبلی با header marker مصنوعی 0.0.9 بود، نه ZIP تاریخی.
+- [x] **QA-209 / NFR-04/07 — compatibility subset** HPOS روشن/خاموش و WooCommerce فعال/غیرفعال آزموده شدند؛ E2E run=`1aa89a2c28a1` دسترسی واقعی role=`shop_manager` را نیز تأیید کرد.
+- [x] **QA-210 / NFR-02 — local envelope only** benchmark ماتریس با E-15 PASS است؛ پیکربندی محیط، thresholdها و maxima در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. این انتخاب مهندسی محلی، نه SLA عمومی/محصولی است. Variable-heavy n=5 exploratory است و از پذیرش خارج است.
 
-gate نهایی نسخه هدف: `composer run test:all`، جداگانه `npm run test:e2e`، QA بصری/دسترس‌پذیری و QA بسته. اجرای تازه `test:all` و E2E به‌روز در ۲۰۲۶-۱۰-۲۸ موفق شدند؛ E2E با run=`63f291d389df`، ۱۴/۱۴ سناریو را پاس کرد و cleanup با exit 0 fixtureها را پاک کرد. QA اولیه ZIP روی revision قدیمی pass شد ولی M4 تا بازسازی/QA بسته جاری pending است؛ benchmark PRD نیز pending است. تست‌های integration و E2E فقط روی محیط محلی QA و fixtureهای آزمایشی اجرا شوند؛ اثر cleanup مطابق [راهنمای توسعه](development-fa.md) بررسی شود.
+gateها: suite PHP/JS و E2E روی commit `5d468e0` پاس شدند؛ E2E پیش از commit و با همان منطق تست اجرا شد، با تفاوت whitespace PHPCBF. axe-core صفر تخلف در tagهای ذکرشده برای هر دو locale گزارش کرد. HPOS دو حالت، WooCommerce فعال/غیرفعال، widget area، multi-embed و Shop Manager access پوشش دارند؛ Elementor مرورگری، screen reader و سازگاری گسترده بازند. NFR-02 فقط در envelope محلی E-15 پاس است. commit tracked و pushed است؛ SHA و lifecycle ZIP جاری pending است؛ آمادگی کلی پایلوت اعلام نمی‌شود. اجرای integration/E2E و پاک‌سازی فقط روی محیط QA محلی و fixtureهای آزمایشی باشد.

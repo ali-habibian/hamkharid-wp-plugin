@@ -77,3 +77,9 @@ gettext با domain=`hamkharid` حفظ شود؛ POT از source و PO/MO هم‌
 واژه‌نامه: Rule=قانون، Source=مبدأ، Target=دسته مکمل، Preview=آزمایش پیشنهاد، Backorder=پیش‌سفارش/سفارش با تأمین بعدی با توضیح واقعی WC، Enabled=فعال. متن‌های کاربرمحور انگلیسی ترجمه معنایی داشته باشند، نه ترتیب کلمه‌به‌کلمه فارسی.
 
 پذیرش با محتوای واقعی فارسی بلند، نام انگلیسی، SKU ترکیبی، ارقام سه‌گانه، ابزارک باریک، ۳۲۰/۴۲۰/۷۰۰/۱۲۰۰ پیکسل، zoom ۲۰۰٪، keyboard و screen reader انجام شود. ابزار خودکار جای قضاوت بصری و دسترس‌پذیری دستی را نمی‌گیرد.
+
+## وضعیت اجرا و شواهد (۲۰۲۶-۱۰-۲۸)
+
+بخش‌های بالا همچنان هدف تجربه‌اند و با این یادداشت تغییر نمی‌کنند؛ مواردی که آزموده نشده‌اند، الزاماً در runtime پیاده‌شده یا پذیرفته‌شده نیستند. E2E run=`1aa89a2c28a1` پیش از commit `5d468e0c2909f3ef78088ebeccae8db008e33766` روی working tree اجرا شد و Browser QA ۱۷/۱۷ را گذراند؛ منطق تست با نسخهٔ tracked/pushed یکسان است و commit فقط whitespace را با PHPCBF مرتب کرد. QA-097 در عرض مؤثر ۳۲۰ CSS px/zoom صفحهٔ ۲۰۰٪، دسترسی Shop Manager و axe-core 4.13.0 در `en_US`/LTR و `fa_IR`/RTL اجرا شدند. axe در برچسب‌های `wcag2a/aa`, `wcag21a/aa`, `wcag22a/aa` تخلفی گزارش نکرد. بازبینی screenshot در ۱۲۰۰px و ۴۲۰px نیز contrast کارت و layout را تأیید کرد؛ fixtureها پاک شدند. این نتیجه screen reader یا سازگاری گسترده را پوشش نمی‌دهد.
+
+Elementor و rendering مرورگری page builderهای خاص، screen reader و ماتریس گسترده مرورگر/قالب هنوز آزموده نشده‌اند. smoke ناحیهٔ widget موجود و multi-embed اجرا شده‌اند؛ E2E دسترسی rules/settings را با حساب واقعی role=`shop_manager` تأیید کرد. تغییر test-only در commit tracked/pushed `5d468e0c2909f3ef78088ebeccae8db008e33766` ثبت شده است؛ SHA ZIP تازه پس از build و lifecycle QA ثبت می‌شود. جزئیات و تصاویر بیرونی در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند.

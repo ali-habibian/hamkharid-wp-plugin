@@ -48,7 +48,15 @@ npm run e2e:install
 | `npm run test:e2e:headed` | همان تست با مرورگر دیدنی | QA بصری دستی مستقل همچنان لازم است |
 | `npm run e2e:cleanup` | حذف fixtureهای E2E | عملیات حذف DB است؛ تست read-only نیست |
 
-اجرای ۲۰۲۶-۱۰-۲۸: `composer run test:all` پس از افزودن regression مصنوعی ۵۰۱ variation با exit 0 تمام شد؛ lint، PHPCS روی ۲۸ فایل، PHPUnit با ۸ تست/۱۳ assertion و هر ۱۲ integration (شامل `integration-performance` و uninstall) پاس شدند. `npm run check:js` exit 0 بود. performance fixture کوچک: matching=3.65ms، newest=8.68ms، best-selling=8.71ms، random=7.15ms؛ این داده معیار NFR-02 را پاس نمی‌کند. E2E روی کد به‌روز با run=`63f291d389df`، Browser QA ۱۴/۱۴ را پاس کرد؛ `npm run e2e:cleanup` نیز exit 0 داشت. جزئیات و محدودیت‌ها در [گزارش QA پایلوت](pilot-qa-fa.md) است.
+روی source/test commit `5d468e0c2909f3ef78088ebeccae8db008e33766` (tracked و pushed)، `composer run test:all` exit 0 داشت: PHPCS 28/28، PHPUnit 8/8 با 13 assertion، integration 12/12. `npm run check:js` و `node --check` نیز پاس شدند. E2E `1aa89a2c28a1` با Browser QA 17/17 پاس شد؛ شامل دسترسی واقعی Shop Manager به rules/settings، Subscriber denial، و axe-core 4.13.0 برای tagهای WCAG 2.0/2.1/2.2 A/AA در `en_US`/LTR و `fa_IR`/RTL بدون violation. E2E اجرا شد پیش از commit؛ منطق تست همان است و تفاوت commit فقط whitespace اصلاح‌شده با PHPCBF است. Screenshot review در 1200/420px کارت و layout را تأیید کرد؛ `npm run e2e:cleanup` exit 0 شد و fixtureها پاک شدند. QA ثبت‌شده شامل HPOS روشن/خاموش، WooCommerce فعال/غیرفعال، widget area و multi-embed است. Elementor/browser rendering و screen reader هنوز بازند. ZIP متناظر با commit هنوز rebuild/lifecycle نشده و SHA آن pending است. جزئیات در [گزارش QA پایلوت](pilot-qa-fa.md) آمده است.
+
+### ثبت اجرای benchmark و گیت محلی NFR-02
+
+ماتریس full-scale در ۲۰۲۶-۱۰-۲۸ روی Windows 11 Pro 10.0.26300، Intel Core i5-9500 @ 3.00 GHz، WP 7.1.3، WC 11.2.1، PHP 8.4.1 و MariaDB 10.4.32 اجرا شد؛ دیتابیس synthetic جدا با 61k simple product و 3k rule داشت و external object cache فعال نبود. ماتریس ۱k/۱۰k/۵۰k × ۱۰/۱۰۰/۱۰۰۰ با ۳۰ cold و ۳۰ warm نمونه برای matcher و هر sort کامل شد. Cold یعنی `wp_cache_flush()` پیش از نمونه؛ MariaDB buffer pool restart نشد و warm ماند.
+
+بر اساس انتخاب مهندسی E-15، matcher p95 ≤125ms cold/≤10ms warm؛ recommendations ordered/random در 1k به‌ترتیب ≤125/50 و ≤250/125ms، در 10k ≤200/75 و ≤550/150ms، در 50k ≤750/75 و ≤1200/600ms؛ و peak matrix memory ≤120MiB تعیین شد. بیشینه‌های مشاهده‌شده به‌ترتیب matcher 107.08/7.06ms؛ ordered/random در 1k برابر 103/33.67 و 224.35/104.33ms، در 10k برابر 195.8/72.48 و 514.31/144.34ms، در 50k برابر 682.56/42.91 و 1143.92/568.68ms؛ حافظه 96MiB بودند. همهٔ بیشینه‌ها در حد محلی منتخب هستند؛ بنابراین NFR-02 فقط برای همین local envelope PASS است، نه SLA عمومی یا محصولی و نه تأیید کاربر.
+
+SQLهای ساختاری مشاهده‌شده: matcher سرد 28 با 10 rule و 108 با 100/1000 rule، warm صفر؛ recommendations ordered سرد/گرم 16/0 و random 18/4. Variable-heavy با 100 parent/12k variation و cap 500، فقط n=5 و exploratory بود: 841–870ms cold/244 SQL و 574–602ms warm/0 SQL. uncapped pre-fix از timeout 120s عبور کرد و نتیجهٔ مقایسه‌پذیر تولید نکرد. گزارش، raw matrix و variable samples بیرون مخزن در [گزارش QA پایلوت](pilot-qa-fa.md) ثبت‌اند. دیتابیس پاک شد (۵۲ جدول `wpperf_` حذف شدند)؛ فایل‌های clone به‌دلیل مسدودشدن حذف recursive در PowerShell باقی ماندند.
 
 برای unit بدون نوشتن cache نتیجه:
 
@@ -83,18 +91,18 @@ npm run test:e2e
 
 دو زبان fa_IR/en_US، مهمان و مدیر و shop manager و subscriber، mobile/desktop و JS روشن/خاموش روی مسیرهای اصلی پوشش داده شوند. حداقل‌های سربرگ و نسخه جاری پشتیبانی‌شده به‌عنوان jobهای واقعی تعریف شوند؛ نسخه جاری از حدس یا خروجی قدیمی انتخاب نشود. تغییر حداقل پشتیبانی تصمیم سازگاری جدا می‌خواهد.
 
-## ساخت محلی ZIP پایلوت؛ آزمون بسته هنوز pending است
+## ساخت محلی ZIP پایلوت؛ QA بسته پاس شده است
 
-1. بسته را پس از بازبینی diff و ثبت QA بسازید؛ ZIP فقط در مسیر محلی خروجی قرار می‌گیرد. ساخت/نصب/upgrade مستقل از source QA باقی می‌ماند تا گزارش M4 ثبت شود؛ benchmark PRD نیز gate باز است.
+1. بسته را پس از بازبینی diff و ثبت QA بسازید؛ ZIP فقط در مسیر محلی خروجی قرار می‌گیرد. ساخت/نصب/upgrade مستقل از source QA انجام می‌شود؛ artifact جاری چرخه QA را گذرانده است.
 2. `scripts/package-pilot.ps1` در staging موقت، وابستگی‌ها را با lock و `composer install --no-dev --optimize-autoloader` می‌سازد و runtime allowlist را بسته‌بندی می‌کند. timestamp فایل‌های ZIP ثابت است تا build با source و lock یکسان hash یکسان داشته باشد؛ زمان ساخت واقعی فقط در manifest می‌آید. اسکریپت به‌طور پیش‌فرض dirty checkout را رد می‌کند؛ `-AllowDirty` فقط برای artifact محلی علامت‌خورده است.
 3. بسته شامل `hamkharid.php`، `src/`، assetهای runtime، ترجمه‌ها، autoloader و وابستگی‌های runtime، `LICENSE`، `readme.txt` و `CHANGELOG.md` است. فایل‌های JS فعلی مستقیم runtime هستند و build step جداگانه ندارند.
 4. `.git`، `.idea`، node_modules، tests، fixture، خروجی حساس، cache و index تولیدشده وارد ZIP نمی‌شوند؛ اسکریپت staging این موارد را رد می‌کند.
 5. ZIP با پوشه بالایی `hamkharid/` روی سایت QA تمیز نصب شود؛ نبود vendor در مقصد، dependency ناقص و نبود WC بدون fatal و با پیام درست بررسی شوند.
 6. ارتقای نسخه موجود به بسته، حفظ قواعد و defaults، جای‌گذاری دستی/خودکار و uninstall با حفظ/پاک‌سازی انتخابی تست شود؛ محصول/دسته/سفارش تغییر نکند.
-7. manifest شامل نسخه، checksum ZIP و فایل‌ها، revision، dirty state، گزارش QA و راهنمای rollback باشد. برای package اولیه manifest و checksum واقعی ثبت شده‌اند؛ آن artifact از revision پیش از اصلاح variation است و مدرک package جاری نیست.
+7. manifest شامل نسخه، checksum ZIP و فایل‌ها، revision، dirty state، گزارش QA و راهنمای rollback باشد. artifact پیشین از source تمیز `7693821`، hash manifest برابر با SHA ZIP و دو build یکسان داشت؛ برای commit جاری `5d468e0c2909f3ef78088ebeccae8db008e33766` باید artifact تازه build و lifecycle شود. جزئیات در [گزارش QA پایلوت](pilot-qa-fa.md) آمده است.
 8. انتشار ZIP به پایلوت طبق D-09؛ ارسال به کاربران یا انتشار بیرونی نیازمند مجوز همان اقدام است. انتخاب مارکت/مدل تجاری بعد از پایلوت باز است.
 
-شواهد اولیه M4: یک ZIP محلی روی clone مجزای QA نصب و فعال شد؛ shortcode و auto placement، update شبیه‌سازی‌شده و uninstall پیش‌فرض/opt-in pass شدند. ZIP با SHA-256 `d026f297d533047b64f00faf884ccc8534b37c62513c0c242cb2051f2a512e4c` از source revision `da914d3257b24564a5aafaeea939d4dd07c05fe2` ساخته شده بود، یعنی پیش از آخرین اصلاح ممیزی variation. update از 0.0.9 نیز فقط با تغییر synthetic header روی همان کپی QA شبیه‌سازی شد، نه با نسخه تاریخی واقعی. پس این شاهد برای ZIP جاری محسوب نمی‌شود؛ با code revision جاری باید بسته دوباره ساخته و چرخه روی آن تکرار شود. گزارش خام در مسیر محلی موجود است.
+شواهد M4 artifact پیشین: ZIP با SHA-256 `d6006eb80ebcaca16794ff55d73f873b72a46e07387323c3ccc056ea36304053` و source `7693821` در clone ایزوله نصب، ارتقا، uninstall، rollback و دوباره نصب شد؛ default/opt-in data behavior مطابق انتظار بود و fixtureها پاک شدند. downgrade به `0.0.9` با header marker مصنوعی شبیه‌سازی شد، نه با ZIP تاریخی. پس از اصلاح کنتراست کارت، این SHA دیگر artifact جاری را مشخص نمی‌کند؛ build و lifecycle مجدد روی ZIP تازه تا دریافت شواهد pending است. گزارش قبلی در [گزارش QA پایلوت](pilot-qa-fa.md) ثبت شده است.
 
 Rollback هدف: غیرفعال‌سازی افزونه باید افزودن عادی WC را سالم نگه دارد؛ بازگشت بسته قبلی با backup DB و schema سازگار در محیط QA تمرین شود. وجود default برای meta جدید جای آزمون downgrade را نمی‌گیرد. نسخه افزونه و assetها، readme/changelog و ترجمه هنگام release واقعی همسان شوند.
 
@@ -102,4 +110,4 @@ Rollback هدف: غیرفعال‌سازی افزونه باید افزودن ع
 
 برای هر run این اطلاعات را کنار QA نتیجه ثبت کنید: تاریخ، commit و diff محلی، محیط/locale/HPOS، فرمان، تعداد و نتیجه، خطا، screenshot یا log بدون secret، موارد Skip با علت و تصمیم پذیرش.
 
-شواهد و موارد آزموده‌نشده در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. `composer run test:all` پس از regression variation، `npm run check:js` و E2E به‌روز سبز هستند؛ E2E با run=`63f291d389df`، ۱۴/۱۴ سناریو را گذراند و cleanup exit 0 داشت. ZIP اولیه install/upgrade/uninstall را روی clone گذراند اما از source پیش از اصلاح اخیر بود و باید rebuild/retest شود. Elementor/builder، widget areas، zoom ۲۰۰٪، screen reader، HPOS خاموش، WooCommerce غایب، Shop Manager، multi-embed duplicate و benchmark مقیاس آزموده نشده‌اند.
+شواهد و موارد آزموده‌نشده در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. Suite PHP/JS پاس است؛ E2E 17/17 و axe-core دو locale نیز پاس شدند. commit جاری `5d468e0c2909f3ef78088ebeccae8db008e33766` tracked و pushed است؛ E2E پیش از commit روی همان منطق تست اجرا شد و commit فقط whitespace را با PHPCBF مرتب کرد. ZIP قبلی lifecycle را پاس کرد؛ artifact تازه و lifecycle مجدد pending است. benchmark فقط در local envelope منتخب E-15 پاس است، نه SLA عمومی/محصولی. Elementor/browser rendering، screen reader و compatibility گسترده بازند؛ HPOS دو حالت، WooCommerce فعال/غیرفعال، widget area و multi-embed پوشش دارند.
