@@ -139,8 +139,8 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		}
 
 		foreach ( $rule_queries as $query_args ) {
-			if ( 1 !== $query_args['posts_per_page'] || 'ids' !== $query_args['fields'] ) {
-				throw new RuntimeException( 'A rule matching query was not bounded to one rule ID.' );
+			if ( $query_args['posts_per_page'] < 1 || $query_args['posts_per_page'] > 50 || 'ids' !== $query_args['fields'] ) {
+				throw new RuntimeException( 'A rule matching query exceeded the bounded page-size budget or loaded full post objects.' );
 			}
 		}
 
@@ -185,14 +185,14 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
 		$newest = $run_strategy( Rule::SORT_NEWEST );
 
-		if ( 1 !== count( $newest['queries'] ) || 6 !== $newest['queries'][0]['limit'] || $newest['queries'][0]['paginate'] ) {
-			throw new RuntimeException( 'Newest recommendations did not stay within a single bounded product query.' );
+		if ( 2 !== count( $newest['queries'] ) || 1 !== $newest['queries'][0]['limit'] || ! $newest['queries'][0]['paginate'] || 'ids' !== $newest['queries'][0]['return'] || $newest['queries'][1]['limit'] > 24 || $newest['queries'][1]['paginate'] ) {
+			throw new RuntimeException( 'Newest recommendations did not use one ID-only count query and one bounded candidate page.' );
 		}
 
 		$best_selling = $run_strategy( Rule::SORT_BEST_SELLING );
 
-		if ( 1 !== count( $best_selling['queries'] ) || 6 !== $best_selling['queries'][0]['limit'] || $best_selling['queries'][0]['paginate'] ) {
-			throw new RuntimeException( 'Best-selling recommendations did not stay within a single bounded product query.' );
+		if ( 2 !== count( $best_selling['queries'] ) || 1 !== $best_selling['queries'][0]['limit'] || ! $best_selling['queries'][0]['paginate'] || 'ids' !== $best_selling['queries'][0]['return'] || $best_selling['queries'][1]['limit'] > 24 || $best_selling['queries'][1]['paginate'] ) {
+			throw new RuntimeException( 'Best-selling recommendations did not use one ID-only count query and one bounded candidate page.' );
 		}
 
 		$random = $run_strategy( Rule::SORT_RANDOM );
@@ -217,8 +217,8 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			$candidate_limit_total += $candidate_query['limit'];
 		}
 
-		if ( $candidate_limit_total > 24 ) {
-			throw new RuntimeException( 'Random candidate hydration exceeded the bounded 24-product pool.' );
+		if ( $candidate_limit_total > 500 ) {
+			throw new RuntimeException( 'Random candidate hydration exceeded the bounded 500-product inspection budget.' );
 		}
 
 		$root_production_files   = glob( dirname( __DIR__ ) . '/src/*.php' );
@@ -236,8 +236,14 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 				throw new RuntimeException( 'A production source file could not be read during the performance audit.' );
 			}
 
-			if ( preg_match( '/\b(?:add|update)_option\s*\(/i', $contents ) ) {
-				throw new RuntimeException( 'The plugin introduced an autoloadable option write without performance evidence.' );
+			$option_write_count   = preg_match_all( '/\b(?:add|update)_option\s*\(/i', $contents );
+			$safe_settings_writes = preg_match_all(
+				'/\b(?:add_option\s*\(\s*self::OPTION_NAME\s*,\s*self::defaults\(\s*\$mode\s*\)\s*,\s*\'\'\s*,\s*false\s*\)|update_option\s*\(\s*self::OPTION_NAME\s*,\s*\$settings\s*,\s*false\s*\))/i',
+				$contents
+			);
+
+			if ( $option_write_count !== $safe_settings_writes ) {
+				throw new RuntimeException( 'A plugin option write is not explicitly non-autoloaded or is outside the versioned display settings contract.' );
 			}
 		}
 

@@ -54,14 +54,15 @@ final class RuleListTable {
 	 */
 	public function columns( array $columns ): array {
 		return array(
-			'cb'                => $columns['cb'] ?? '<input type="checkbox" />',
-			'title'             => __( 'Rule Name', 'hamkharid' ),
-			'hamkharid_source'  => __( 'Source Categories', 'hamkharid' ),
-			'hamkharid_target'  => __( 'Target Category', 'hamkharid' ),
-			'hamkharid_count'   => __( 'Count', 'hamkharid' ),
-			'hamkharid_sort'    => __( 'Sort', 'hamkharid' ),
-			'hamkharid_enabled' => __( 'Status', 'hamkharid' ),
-			'date'              => $columns['date'] ?? __( 'Date', 'hamkharid' ),
+			'cb'                 => $columns['cb'] ?? '<input type="checkbox" />',
+			'title'              => __( 'Rule Name', 'hamkharid' ),
+			'hamkharid_source'   => __( 'Source Categories', 'hamkharid' ),
+			'hamkharid_target'   => __( 'Target Category', 'hamkharid' ),
+			'hamkharid_count'    => __( 'Count', 'hamkharid' ),
+			'hamkharid_sort'     => __( 'Sort', 'hamkharid' ),
+			'hamkharid_priority' => __( 'Priority', 'hamkharid' ),
+			'hamkharid_enabled'  => __( 'Status', 'hamkharid' ),
+			'date'               => $columns['date'] ?? __( 'Date', 'hamkharid' ),
 		);
 	}
 
@@ -92,6 +93,9 @@ final class RuleListTable {
 			case 'hamkharid_sort':
 				$labels = $this->sort_labels();
 				echo esc_html( $labels[ $rule->sort_strategy() ] ?? $rule->sort_strategy() );
+				break;
+			case 'hamkharid_priority':
+				echo esc_html( (string) $rule->priority() );
 				break;
 			case 'hamkharid_enabled':
 				echo esc_html( $rule->is_enabled() ? __( 'Enabled', 'hamkharid' ) : __( 'Disabled', 'hamkharid' ) );

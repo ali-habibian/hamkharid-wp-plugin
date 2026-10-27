@@ -141,12 +141,52 @@ msgstr ""
 msgid "Select a category"
 msgstr ""
 
-#: src/Admin/RuleAdmin.php:232
-msgid "Select a valid target category. The rule was disabled."
+#: src/Admin/RuleAdmin.php
+msgid "Select a valid target category. The saved rule was preserved."
 msgstr ""
 
-#: src/Admin/RuleAdmin.php:231
-msgid "Select at least one valid source category. The rule was disabled."
+#: src/Admin/RuleAdmin.php
+msgid "Select at least one valid source category. The saved rule was preserved."
+msgstr ""
+
+#: src/Admin/RuleAdmin.php src/Rules/RuleRepository.php
+msgid "Choose between one and six recommended products."
+msgstr ""
+
+#: src/Admin/RuleAdmin.php src/Rules/RuleRepository.php
+msgid "Priority must be between zero and one hundred."
+msgstr ""
+
+#: src/Admin/RuleAdmin.php src/Rules/RuleRepository.php
+msgid "Choose a supported sorting method."
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php
+msgid "Select at least one existing source category."
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php
+msgid "Select an existing target category."
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php
+msgid "Enter a whole number from one to six."
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php
+msgid "Choose one of the available sorting methods."
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php
+msgid "Enter a whole number from zero to one hundred."
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php
+msgid "Invalid submitted value: %s"
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php
+msgid "Unavailable category (#%d)"
 msgstr ""
 
 #: hamkharid.php:3
@@ -223,4 +263,196 @@ msgstr ""
 
 #: src/Frontend/ProductRecommendations.php:163
 msgid "You may also like"
+msgstr ""
+
+#: src/Frontend/ProductRecommendations.php
+msgid "Complete your purchase"
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php src/Admin/RuleListTable.php
+msgid "Priority"
+msgstr ""
+
+#: src/Admin/RuleMetaBox.php
+msgid "A higher number wins among rules at the same category distance. A direct category match still wins over a parent category."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Hamkharid Display Settings"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Complement Display"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "You are not allowed to manage complement display settings."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Complement Display Settings"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Place recommendations manually with the dynamic block or shortcode, or choose one automatic product-page location."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Display Mode"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Manual: use a block or shortcode"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Automatic: use one product-page location"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Manual mode disables automatic placement. Enabling a rule does not insert a block into a page."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Automatic Location"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "After product summary"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "After Add to Cart form"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Persian Heading"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "English Heading"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Leave blank to use the translated default heading."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Backorders"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Include products that WooCommerce allows customers to backorder."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Uninstall"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Delete Hamkharid rules and settings when the plugin is deleted."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "By default, your rules and settings are kept when the plugin is deleted. Orders and products are never removed."
+msgstr ""
+
+#: assets/js/complements-block.js
+msgid "Hamkharid complements"
+msgstr ""
+
+#: assets/js/complements-block.js
+msgid "Show category-based complementary products for a selected product."
+msgstr ""
+
+#: assets/js/complements-block.js
+msgid "Products could not be loaded. Check your permissions and try again."
+msgstr ""
+
+#: assets/js/complements-block.js
+msgid "Product"
+msgstr ""
+
+#: assets/js/complements-block.js
+msgid "Product for recommendations"
+msgstr ""
+
+#: assets/js/complements-block.js
+msgid "Leave empty to use the product context in a single-product template."
+msgstr ""
+
+#: assets/js/complements-block.js
+msgid "Choose a product or place this block in a single-product template."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Preview recommendations"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Choose a product to see the winning rule and the products the storefront engine would return. This preview does not change a rule or the cart."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Search products"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Preview"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "The preview request expired. Search for the product again."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Choose a published WooCommerce product."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "The selected product is invalid."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "No enabled rule matches this product."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Matching rules point to deleted categories. Repair a rule target."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "The rule search reached its safety limit. Review the matching rules for deleted targets."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "No rule could be selected."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "A rule matched, but no eligible products were found in its target category."
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Matched rule:"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Category distance:"
+msgstr ""
+
+#: src/Admin/DisplaySettings.php
+msgid "Recommended products:"
+msgstr ""
+
+#: assets/js/admin-preview.js
+msgid "No products found."
+msgstr ""
+
+#: assets/js/admin-preview.js
+msgid "Searching…"
+msgstr ""
+
+#: assets/js/admin-preview.js
+msgid "Product search failed."
 msgstr ""

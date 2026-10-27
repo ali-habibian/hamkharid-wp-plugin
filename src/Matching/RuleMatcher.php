@@ -18,6 +18,11 @@ defined( 'ABSPATH' ) || exit;
 final class RuleMatcher {
 
 	/**
+	 * Maximum candidates inspected within one specificity tier.
+	 */
+	private const MAX_CANDIDATES_PER_TIER = 500;
+
+	/**
 	 * Rule persistence gateway.
 	 *
 	 * @var RuleRepository
@@ -43,31 +48,92 @@ final class RuleMatcher {
 	 * @param int $product_id WooCommerce product post ID.
 	 */
 	public function match( int $product_id ): ?Rule {
+		$result = $this->match_with_diagnostics( $product_id );
+
+		return $result['rule'];
+	}
+
+	/**
+	 * Resolves a rule and describes why no rule could be selected.
+	 *
+	 * @param int $product_id WooCommerce product post ID.
+	 * @return array{rule:?Rule,reason:string,distance:?int}
+	 */
+	public function match_with_diagnostics( int $product_id ): array {
 		if ( 'product' !== get_post_type( $product_id ) ) {
-			return null;
+			return array(
+				'rule'     => null,
+				'reason'   => 'invalid_product',
+				'distance' => null,
+			);
 		}
 
 		$category_ids = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'ids' ) );
 
 		if ( is_wp_error( $category_ids ) || array() === $category_ids ) {
-			return null;
+			return array(
+				'rule'     => null,
+				'reason'   => 'no_match',
+				'distance' => null,
+			);
 		}
 
-		foreach ( $this->category_ids_by_specificity( $category_ids ) as $priority_category_ids ) {
-			$rule = $this->repository->find_first_enabled_matching_source_categories( $priority_category_ids );
+		$invalid_target_seen = false;
+		$distance            = 0;
 
-			if ( null === $rule ) {
-				continue;
+		foreach ( $this->category_ids_by_specificity( $category_ids ) as $specificity_category_ids ) {
+			$page = 1;
+			$seen = 0;
+
+			while ( $seen < self::MAX_CANDIDATES_PER_TIER ) {
+				$page_size = min( 50, self::MAX_CANDIDATES_PER_TIER - $seen );
+				$rules     = $this->repository->find_enabled_matching_source_categories( $specificity_category_ids, $page, $page_size );
+
+				if ( array() === $rules ) {
+					break;
+				}
+
+				foreach ( $rules as $rule ) {
+					if ( term_exists( $rule->target_category_id(), 'product_cat' ) ) {
+						return array(
+							'rule'     => $rule,
+							'reason'   => 'matched',
+							'distance' => $distance,
+						);
+					}
+
+					$invalid_target_seen = true;
+				}
+
+				$seen += count( $rules );
+
+				if ( count( $rules ) < $page_size ) {
+					break;
+				}
+
+				++$page;
 			}
 
-			if ( ! term_exists( $rule->target_category_id(), 'product_cat' ) ) {
-				return null;
+			if ( $seen >= self::MAX_CANDIDATES_PER_TIER && count( $rules ) === $page_size ) {
+				$remaining = $this->repository->find_enabled_matching_source_categories( $specificity_category_ids, $page, 1 );
+
+				if ( array() !== $remaining ) {
+					return array(
+						'rule'     => null,
+						'reason'   => 'candidate_limit_reached',
+						'distance' => $distance,
+					);
+				}
 			}
 
-			return $rule;
+			++$distance;
 		}
 
-		return null;
+		return array(
+			'rule'     => null,
+			'reason'   => $invalid_target_seen ? 'invalid_target' : 'no_match',
+			'distance' => null,
+		);
 	}
 
 	/**

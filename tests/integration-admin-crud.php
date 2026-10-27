@@ -77,6 +77,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		);
 
 		$admin = new RuleAdmin( $repository );
+		$admin->register_hooks();
 		$admin->save( $rule_id, get_post( $rule_id ), true );
 		$rule = $repository->find( $rule_id );
 
@@ -120,6 +121,66 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		$test_user->set_role( 'administrator' );
 		wp_set_current_user( 0 );
 		wp_set_current_user( $user_id );
+		$_POST           = array(
+			RuleAdmin::NONCE_NAME            => wp_create_nonce( RuleAdmin::NONCE_ACTION ),
+			'hamkharid_enabled'              => '1',
+			'hamkharid_source_category_ids'  => array( (string) $created_terms[1] ),
+			'hamkharid_target_category_id'   => (string) $created_terms[2],
+			'hamkharid_recommendation_count' => '7',
+			'hamkharid_sort_strategy'        => 'unsupported',
+			'hamkharid_priority'             => '101',
+		);
+		$submitted_title = 'Invalid Submitted Rule Title';
+		wp_update_post(
+			array(
+				'ID'          => $rule_id,
+				'post_title'  => $submitted_title,
+				'post_status' => 'publish',
+			)
+		);
+		$invalid_count_redirect = $admin->add_save_error_to_redirect( admin_url( 'post.php?post=' . $rule_id . '&action=edit' ) );
+
+		if ( false === strpos( $invalid_count_redirect, 'hamkharid_rule_error=hamkharid_recommendation_count_invalid' ) ) {
+			throw new RuntimeException( 'The admin form did not reject an out-of-range recommendation count.' );
+		}
+
+		$preserved_rule = $repository->find( $rule_id );
+		$submitted      = get_user_meta( $user_id, RuleAdmin::form_values_meta_key( $rule_id ), true );
+
+		if (
+			'publish' !== get_post_status( $rule_id )
+			|| 'Admin Integration Rule' !== get_the_title( $rule_id )
+			|| null === $preserved_rule
+			|| ! $preserved_rule->is_enabled()
+			|| array( $created_terms[0], $created_terms[1] ) !== $preserved_rule->source_category_ids()
+			|| $created_terms[2] !== $preserved_rule->target_category_id()
+			|| 5 !== $preserved_rule->recommendation_count()
+			|| Rule::SORT_BEST_SELLING !== $preserved_rule->sort_strategy()
+			|| 0 !== $preserved_rule->priority()
+		) {
+			throw new RuntimeException( 'An invalid update changed the active rule title, status, or stored metadata.' );
+		}
+
+		if ( ! is_array( $submitted ) || $submitted_title !== $submitted['name'] || '7' !== $submitted['recommendation_count'] || '101' !== $submitted['priority'] || 'unsupported' !== $submitted['sort_strategy'] ) {
+			throw new RuntimeException( 'Invalid submitted form values were not preserved for the submitting administrator.' );
+		}
+
+		ob_start();
+		$meta_box = new \Hamkharid\SmartCategoryComplement\Admin\RuleMetaBox( $repository );
+		$meta_box->render( get_post( $rule_id ) );
+		$rendered_form = (string) ob_get_clean();
+
+		// translators: %s is the unsupported sorting strategy submitted by the test.
+		$invalid_sort_label = sprintf( __( 'Invalid submitted value: %s', 'hamkharid' ), 'unsupported' );
+
+		if ( false === strpos( $rendered_form, 'value="7"' ) || false === strpos( $rendered_form, 'value="101"' ) || false === strpos( $rendered_form, $invalid_sort_label ) || false === strpos( $rendered_form, $submitted_title ) ) {
+			throw new RuntimeException( 'The admin edit form did not repopulate invalid submitted values.' );
+		}
+
+		if ( metadata_exists( 'user', $user_id, RuleAdmin::form_values_meta_key( $rule_id ) ) ) {
+			throw new RuntimeException( 'Consumed invalid form data was not cleared after rendering the edit form.' );
+		}
+
 		$_POST = array(
 			RuleAdmin::NONCE_NAME            => wp_create_nonce( RuleAdmin::NONCE_ACTION ),
 			'hamkharid_enabled'              => '1',
@@ -130,8 +191,8 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		);
 		$admin->save( $rule_id, get_post( $rule_id ), true );
 
-		if ( 'draft' !== get_post_status( $rule_id ) || 5 !== $repository->find( $rule_id )->recommendation_count() ) {
-			throw new RuntimeException( 'An invalid rule was not safely drafted without overwriting its stored settings.' );
+		if ( 'publish' !== get_post_status( $rule_id ) || 5 !== $repository->find( $rule_id )->recommendation_count() ) {
+			throw new RuntimeException( 'An invalid update did not preserve the existing rule status and settings.' );
 		}
 
 		$redirect = $admin->add_save_error_to_redirect( admin_url( 'post.php?post=' . $rule_id . '&action=edit' ) );
@@ -161,6 +222,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'Rule row actions did not replace Quick Edit with the secure status action.' );
 		}
 
+		$_POST = array();
 		wp_trash_post( $rule_id );
 
 		if ( isset( $list_table->row_actions( array(), get_post( $rule_id ) )['hamkharid_toggle'] ) ) {

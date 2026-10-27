@@ -58,5 +58,10 @@ if ( ! is_readable( $hamkharid_autoloader ) ) {
 
 require_once $hamkharid_autoloader;
 
+register_activation_hook(
+	HAMKHARID_FILE,
+	array( Hamkharid\SmartCategoryComplement\Admin\DisplaySettings::class, 'initialize_on_activation' )
+);
+
 $hamkharid_plugin = new Hamkharid\SmartCategoryComplement\Plugin();
 $hamkharid_plugin->register();

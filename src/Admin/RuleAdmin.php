@@ -23,8 +23,9 @@ final class RuleAdmin {
 	public const NONCE_NAME    = 'hamkharid_rule_nonce';
 	public const TOGGLE_ACTION = 'hamkharid_toggle_rule';
 
-	private const ERROR_QUERY_ARG   = 'hamkharid_rule_error';
-	private const TOGGLED_QUERY_ARG = 'hamkharid_rule_toggled';
+	private const ERROR_QUERY_ARG         = 'hamkharid_rule_error';
+	private const TOGGLED_QUERY_ARG       = 'hamkharid_rule_toggled';
+	private const FORM_VALUES_META_PREFIX = '_hamkharid_invalid_rule_form_';
 
 	/**
 	 * Rule persistence gateway.
@@ -48,6 +49,13 @@ final class RuleAdmin {
 	private $is_saving = false;
 
 	/**
+	 * Original post snapshots captured before WordPress saves the native edit form.
+	 *
+	 * @var array<int, WP_Post>
+	 */
+	private $pre_update_posts = array();
+
+	/**
 	 * Creates the rule administration controller.
 	 *
 	 * @param RuleRepository $repository Rule persistence gateway.
@@ -60,6 +68,7 @@ final class RuleAdmin {
 	 * Registers admin hooks and native UI components.
 	 */
 	public function register_hooks(): void {
+		add_action( 'pre_post_update', array( $this, 'capture_pre_update' ), 10, 2 );
 		add_action( 'save_post_' . RulePostType::POST_TYPE, array( $this, 'save' ), 10, 3 );
 		add_action( 'admin_notices', array( $this, 'render_admin_notice' ) );
 		add_action( 'admin_post_' . self::TOGGLE_ACTION, array( $this, 'toggle_rule' ) );
@@ -73,6 +82,26 @@ final class RuleAdmin {
 	}
 
 	/**
+	 * Captures existing post data before the native editor writes its submitted title/status.
+	 *
+	 * @param int                  $post_id Post being updated.
+	 * @param array<string, mixed> $data    Fields about to be written.
+	 */
+	public function capture_pre_update( int $post_id, array $data = array() ): void {
+		unset( $data );
+
+		if ( $this->is_saving || RulePostType::POST_TYPE !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$post = get_post( $post_id );
+
+		if ( $post instanceof WP_Post ) {
+			$this->pre_update_posts[ $post_id ] = clone $post;
+		}
+	}
+
+	/**
 	 * Persists validated rule fields after a native post save.
 	 *
 	 * @param int     $post_id Rule post ID.
@@ -80,8 +109,6 @@ final class RuleAdmin {
 	 * @param bool    $update  Whether this is an update.
 	 */
 	public function save( int $post_id, WP_Post $post, bool $update ): void {
-		unset( $update );
-
 		if ( $this->is_saving || wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
 			return;
 		}
@@ -92,19 +119,40 @@ final class RuleAdmin {
 			return;
 		}
 
-		$source_category_ids  = isset( $_POST['hamkharid_source_category_ids'] ) && is_array( $_POST['hamkharid_source_category_ids'] )
-			? array_map( 'absint', wp_unslash( $_POST['hamkharid_source_category_ids'] ) )
-			: array();
-		$target_category_id   = isset( $_POST['hamkharid_target_category_id'] )
-			? absint( wp_unslash( $_POST['hamkharid_target_category_id'] ) )
+		$source_category_values = array();
+		if ( isset( $_POST['hamkharid_source_category_ids'] ) && is_array( $_POST['hamkharid_source_category_ids'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Every scalar value is sanitized before it is used below.
+			$submitted_source_values = wp_unslash( $_POST['hamkharid_source_category_ids'] );
+
+			foreach ( $submitted_source_values as $submitted_source_value ) {
+				if ( is_scalar( $submitted_source_value ) ) {
+					$source_category_values[] = sanitize_text_field( (string) $submitted_source_value );
+				}
+			}
+		}
+		$source_category_ids        = array_map( 'absint', $source_category_values );
+		$target_category_value      = isset( $_POST['hamkharid_target_category_id'] ) && is_scalar( $_POST['hamkharid_target_category_id'] )
+			? sanitize_text_field( wp_unslash( $_POST['hamkharid_target_category_id'] ) )
+			: '';
+		$target_category_id         = '' !== $target_category_value
+			? absint( $target_category_value )
 			: 0;
-		$recommendation_count = isset( $_POST['hamkharid_recommendation_count'] )
-			? absint( wp_unslash( $_POST['hamkharid_recommendation_count'] ) )
+		$recommendation_count_value = isset( $_POST['hamkharid_recommendation_count'] ) && is_scalar( $_POST['hamkharid_recommendation_count'] )
+			? sanitize_text_field( wp_unslash( $_POST['hamkharid_recommendation_count'] ) )
+			: null;
+		$recommendation_count       = null !== $recommendation_count_value
+			? $this->parse_integer_input( $recommendation_count_value )
 			: Rule::DEFAULT_RECOMMENDATION_COUNT;
-		$sort_strategy        = isset( $_POST['hamkharid_sort_strategy'] )
+		$sort_strategy              = isset( $_POST['hamkharid_sort_strategy'] ) && is_scalar( $_POST['hamkharid_sort_strategy'] )
 			? sanitize_key( wp_unslash( $_POST['hamkharid_sort_strategy'] ) )
 			: Rule::SORT_RANDOM;
-		$enabled              = isset( $_POST['hamkharid_enabled'] );
+		$priority_value             = isset( $_POST['hamkharid_priority'] ) && is_scalar( $_POST['hamkharid_priority'] )
+			? sanitize_text_field( wp_unslash( $_POST['hamkharid_priority'] ) )
+			: null;
+		$priority                   = null !== $priority_value
+			? $this->parse_integer_input( $priority_value )
+			: Rule::DEFAULT_PRIORITY;
+		$enabled                    = isset( $_POST['hamkharid_enabled'] );
 
 		$this->is_saving = true;
 
@@ -116,21 +164,91 @@ final class RuleAdmin {
 				$source_category_ids,
 				$target_category_id,
 				$recommendation_count,
-				$sort_strategy
+				$sort_strategy,
+				$priority
 			);
 
 			if ( is_wp_error( $result ) ) {
 				$this->save_error_code = $result->get_error_code();
-				wp_update_post(
-					array(
-						'ID'          => $post_id,
-						'post_status' => 'draft',
-					)
+				update_user_meta(
+					get_current_user_id(),
+					self::form_values_meta_key( $post_id ),
+					$this->submitted_form_values( $post, $source_category_values, $target_category_value, $recommendation_count_value, $sort_strategy, $priority_value, $enabled )
 				);
+
+				if ( isset( $this->pre_update_posts[ $post_id ] ) ) {
+					$original = $this->pre_update_posts[ $post_id ];
+					wp_update_post(
+						array(
+							'ID'          => $post_id,
+							'post_title'  => $original->post_title,
+							'post_name'   => $original->post_name,
+							'post_status' => $original->post_status,
+						)
+					);
+				} elseif ( ! $update ) {
+					wp_update_post(
+						array(
+							'ID'          => $post_id,
+							'post_status' => 'draft',
+						)
+					);
+				}
+			} else {
+				delete_user_meta( get_current_user_id(), self::form_values_meta_key( $post_id ) );
 			}
 		} finally {
 			$this->is_saving = false;
+			unset( $this->pre_update_posts[ $post_id ] );
 		}
+	}
+
+	/**
+	 * Returns the per-user key used to preserve invalid form values for one rule.
+	 *
+	 * @param int $post_id Rule post ID.
+	 */
+	public static function form_values_meta_key( int $post_id ): string {
+		return self::FORM_VALUES_META_PREFIX . max( 0, $post_id );
+	}
+
+	/**
+	 * Parses a submitted integer without silently clamping invalid values.
+	 *
+	 * @param mixed $value Submitted value.
+	 */
+	private function parse_integer_input( $value ): int {
+		if ( ! is_scalar( $value ) ) {
+			return PHP_INT_MIN;
+		}
+
+		$value = trim( sanitize_text_field( (string) $value ) );
+
+		return 1 === preg_match( '/^-?\d+$/', $value ) ? (int) $value : PHP_INT_MIN;
+	}
+
+	/**
+	 * Captures safe form values so the editor can repopulate them after validation fails.
+	 *
+	 * @param WP_Post     $post         Rule post with the submitted native title.
+	 * @param string[]    $source_ids  Sanitized source category IDs submitted by the user.
+	 * @param string      $target_id   Sanitized target category ID submitted by the user.
+	 * @param string|null $count    Sanitized recommendation count, if submitted.
+	 * @param string      $sort_strategy Sanitized sorting strategy submitted by the user.
+	 * @param string|null $priority Sanitized priority, if submitted.
+	 * @param bool        $enabled     Whether the submitted rule is enabled.
+	 * @return array<string, mixed>
+	 */
+	private function submitted_form_values( WP_Post $post, array $source_ids, string $target_id, ?string $count, string $sort_strategy, ?string $priority, bool $enabled ): array {
+		return array(
+			'name'                 => sanitize_text_field( $post->post_title ),
+			'enabled'              => $enabled,
+			'source_category_ids'  => $source_ids,
+			'target_category_id'   => $target_id,
+			'recommendation_count' => $count ?? '',
+			'sort_strategy'        => $sort_strategy,
+			'priority'             => $priority ?? '',
+		);
 	}
 
 	/**
@@ -210,7 +328,8 @@ final class RuleAdmin {
 			$rule->source_category_ids(),
 			$rule->target_category_id(),
 			$rule->recommendation_count(),
-			$rule->sort_strategy()
+			$rule->sort_strategy(),
+			$rule->priority()
 		);
 
 		if ( is_wp_error( $result ) ) {
@@ -227,10 +346,13 @@ final class RuleAdmin {
 	 */
 	private function error_message( string $error_code ): string {
 		$messages = array(
-			'hamkharid_rule_name_required'       => __( 'Enter a name for the complement rule.', 'hamkharid' ),
-			'hamkharid_source_category_required' => __( 'Select at least one valid source category. The rule was disabled.', 'hamkharid' ),
-			'hamkharid_target_category_required' => __( 'Select a valid target category. The rule was disabled.', 'hamkharid' ),
-			'hamkharid_rule_not_found'           => __( 'The complement rule could not be found.', 'hamkharid' ),
+			'hamkharid_rule_name_required'           => __( 'Enter a name for the complement rule.', 'hamkharid' ),
+			'hamkharid_source_category_required'     => __( 'Select at least one valid source category. The saved rule was preserved.', 'hamkharid' ),
+			'hamkharid_target_category_required'     => __( 'Select a valid target category. The saved rule was preserved.', 'hamkharid' ),
+			'hamkharid_recommendation_count_invalid' => __( 'Choose between one and six recommended products.', 'hamkharid' ),
+			'hamkharid_priority_invalid'             => __( 'Priority must be between zero and one hundred.', 'hamkharid' ),
+			'hamkharid_sort_strategy_invalid'        => __( 'Choose a supported sorting method.', 'hamkharid' ),
+			'hamkharid_rule_not_found'               => __( 'The complement rule could not be found.', 'hamkharid' ),
 		);
 
 		return $messages[ $error_code ] ?? __( 'The complement rule could not be saved. Please review its settings.', 'hamkharid' );

@@ -63,8 +63,12 @@ final class RuleMetaBox {
 	 * @param WP_Post $post Rule post being edited.
 	 */
 	public function render( WP_Post $post ): void {
-		$rule       = $this->repository->find( $post->ID );
-		$categories = get_terms(
+		$rule = $this->repository->find( $post->ID );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- This query string selects a read-only validation message.
+		$error_code  = isset( $_GET['hamkharid_rule_error'] ) && is_scalar( $_GET['hamkharid_rule_error'] ) ? sanitize_key( wp_unslash( $_GET['hamkharid_rule_error'] ) ) : '';
+		$form_values = get_user_meta( get_current_user_id(), RuleAdmin::form_values_meta_key( $post->ID ), true );
+		$form_values = is_array( $form_values ) ? $form_values : array();
+		$categories  = get_terms(
 			array(
 				'taxonomy'   => 'product_cat',
 				'hide_empty' => false,
@@ -83,6 +87,23 @@ final class RuleMetaBox {
 		$target_category_id   = null !== $rule ? $rule->target_category_id() : 0;
 		$recommendation_count = null !== $rule ? $rule->recommendation_count() : Rule::DEFAULT_RECOMMENDATION_COUNT;
 		$sort_strategy        = null !== $rule ? $rule->sort_strategy() : Rule::SORT_RANDOM;
+		$priority             = null !== $rule ? $rule->priority() : Rule::DEFAULT_PRIORITY;
+		$is_enabled           = isset( $form_values['enabled'] ) ? (bool) $form_values['enabled'] : $is_enabled;
+		$source_category_ids  = isset( $form_values['source_category_ids'] ) && is_array( $form_values['source_category_ids'] )
+			? array_map( 'absint', $form_values['source_category_ids'] )
+			: $source_category_ids;
+		$target_category_id   = isset( $form_values['target_category_id'] ) && is_numeric( $form_values['target_category_id'] )
+			? absint( $form_values['target_category_id'] )
+			: $target_category_id;
+		$recommendation_count = isset( $form_values['recommendation_count'] )
+			? sanitize_text_field( (string) $form_values['recommendation_count'] )
+			: $recommendation_count;
+		$sort_strategy        = isset( $form_values['sort_strategy'] )
+			? sanitize_key( (string) $form_values['sort_strategy'] )
+			: $sort_strategy;
+		$priority             = isset( $form_values['priority'] )
+			? sanitize_text_field( (string) $form_values['priority'] )
+			: $priority;
 
 		wp_nonce_field( RuleAdmin::NONCE_ACTION, RuleAdmin::NONCE_NAME );
 		?>
@@ -101,8 +122,10 @@ final class RuleMetaBox {
 					<th scope="row"><label for="hamkharid-source-categories"><?php esc_html_e( 'Source Categories', 'hamkharid' ); ?></label></th>
 					<td>
 						<select id="hamkharid-source-categories" name="hamkharid_source_category_ids[]" class="widefat" multiple size="8" required>
+							<?php $this->render_missing_category_options( $source_category_ids, $categories ); ?>
 							<?php $this->render_category_options( $categories, $source_category_ids ); ?>
 						</select>
+						<?php $this->render_field_error( $error_code, 'hamkharid_source_category_required' ); ?>
 						<p class="description"><?php esc_html_e( 'The rule applies when a product belongs to any selected category or its descendants.', 'hamkharid' ); ?></p>
 					</td>
 				</tr>
@@ -111,23 +134,38 @@ final class RuleMetaBox {
 					<td>
 						<select id="hamkharid-target-category" name="hamkharid_target_category_id" class="widefat" required>
 							<option value=""><?php esc_html_e( 'Select a category', 'hamkharid' ); ?></option>
+							<?php $this->render_missing_category_options( array( $target_category_id ), $categories ); ?>
 							<?php $this->render_category_options( $categories, array( $target_category_id ) ); ?>
 						</select>
+						<?php $this->render_field_error( $error_code, 'hamkharid_target_category_required' ); ?>
 						<p class="description"><?php esc_html_e( 'Recommended products will be selected from this category and its descendants.', 'hamkharid' ); ?></p>
 					</td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="hamkharid-recommendation-count"><?php esc_html_e( 'Recommendation Count', 'hamkharid' ); ?></label></th>
-					<td><input type="number" id="hamkharid-recommendation-count" name="hamkharid_recommendation_count" value="<?php echo esc_attr( (string) $recommendation_count ); ?>" min="<?php echo esc_attr( (string) Rule::MIN_RECOMMENDATION_COUNT ); ?>" max="<?php echo esc_attr( (string) Rule::MAX_RECOMMENDATION_COUNT ); ?>" step="1" class="small-text" required /></td>
+					<td><input type="number" id="hamkharid-recommendation-count" name="hamkharid_recommendation_count" value="<?php echo esc_attr( (string) $recommendation_count ); ?>" min="<?php echo esc_attr( (string) Rule::MIN_RECOMMENDATION_COUNT ); ?>" max="<?php echo esc_attr( (string) Rule::MAX_RECOMMENDATION_COUNT ); ?>" step="1" class="small-text" required /><?php $this->render_field_error( $error_code, 'hamkharid_recommendation_count_invalid' ); ?></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="hamkharid-sort-strategy"><?php esc_html_e( 'Sort Strategy', 'hamkharid' ); ?></label></th>
 					<td>
 						<select id="hamkharid-sort-strategy" name="hamkharid_sort_strategy">
+							<?php if ( ! in_array( $sort_strategy, Rule::sort_strategies(), true ) ) : ?>
+								<?php // translators: %s is the unsupported value submitted for the sorting strategy. ?>
+								<option value="<?php echo esc_attr( $sort_strategy ); ?>" selected><?php printf( esc_html__( 'Invalid submitted value: %s', 'hamkharid' ), esc_html( $sort_strategy ) ); ?></option>
+							<?php endif; ?>
 							<?php foreach ( $this->sort_labels() as $value => $label ) : ?>
 								<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $sort_strategy, $value ); ?>><?php echo esc_html( $label ); ?></option>
 							<?php endforeach; ?>
 						</select>
+						<?php $this->render_field_error( $error_code, 'hamkharid_sort_strategy_invalid' ); ?>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="hamkharid-priority"><?php esc_html_e( 'Priority', 'hamkharid' ); ?></label></th>
+					<td>
+						<input type="number" id="hamkharid-priority" name="hamkharid_priority" value="<?php echo esc_attr( (string) $priority ); ?>" min="<?php echo esc_attr( (string) Rule::MIN_PRIORITY ); ?>" max="<?php echo esc_attr( (string) Rule::MAX_PRIORITY ); ?>" step="1" class="small-text" />
+						<?php $this->render_field_error( $error_code, 'hamkharid_priority_invalid' ); ?>
+						<p class="description"><?php esc_html_e( 'A higher number wins among rules at the same category distance. A direct category match still wins over a parent category.', 'hamkharid' ); ?></p>
 					</td>
 				</tr>
 			</tbody>
@@ -135,7 +173,72 @@ final class RuleMetaBox {
 		<?php if ( array() === $categories ) : ?>
 			<p class="notice notice-warning inline"><?php esc_html_e( 'Create at least one WooCommerce product category before saving a rule.', 'hamkharid' ); ?></p>
 		<?php endif; ?>
+		<?php if ( isset( $form_values['name'] ) ) : ?>
+			<script>
+			(function (title) {
+				var input = document.getElementById('title');
+				if (input) { input.value = title; }
+			})(<?php echo wp_json_encode( sanitize_text_field( (string) $form_values['name'] ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON_HEX_* safely encodes a JS string literal. ?>);
+			</script>
+			<?php delete_user_meta( get_current_user_id(), RuleAdmin::form_values_meta_key( $post->ID ) ); ?>
+		<?php endif; ?>
 		<?php
+	}
+
+	/**
+	 * Renders an inline message beside a field when its submitted value failed validation.
+	 *
+	 * @param string $error_code       Validation error from the redirect query.
+	 * @param string $field_error_code Validation error represented by the field.
+	 */
+	private function render_field_error( string $error_code, string $field_error_code ): void {
+		if ( $error_code !== $field_error_code ) {
+			return;
+		}
+
+		$messages = array(
+			'hamkharid_source_category_required'     => __( 'Select at least one existing source category.', 'hamkharid' ),
+			'hamkharid_target_category_required'     => __( 'Select an existing target category.', 'hamkharid' ),
+			'hamkharid_recommendation_count_invalid' => __( 'Enter a whole number from one to six.', 'hamkharid' ),
+			'hamkharid_sort_strategy_invalid'        => __( 'Choose one of the available sorting methods.', 'hamkharid' ),
+			'hamkharid_priority_invalid'             => __( 'Enter a whole number from zero to one hundred.', 'hamkharid' ),
+		);
+
+		if ( isset( $messages[ $field_error_code ] ) ) {
+			printf( '<p class="description" role="alert">%s</p>', esc_html( $messages[ $field_error_code ] ) );
+		}
+	}
+
+	/**
+	 * Renders a selected category ID that no longer exists so invalid input remains visible.
+	 *
+	 * @param int[]     $selected_categories Submitted category IDs.
+	 * @param WP_Term[] $categories          Existing categories.
+	 */
+	private function render_missing_category_options( array $selected_categories, array $categories ): void {
+		$existing_ids = array_map(
+			static function ( WP_Term $category ): int {
+				return (int) $category->term_id;
+			},
+			$categories
+		);
+
+		foreach ( array_unique( array_map( 'absint', $selected_categories ) ) as $category_id ) {
+			if ( 0 === $category_id || in_array( $category_id, $existing_ids, true ) ) {
+				continue;
+			}
+
+			$label = sprintf(
+				// translators: %d is the ID of a category that no longer exists.
+				__( 'Unavailable category (#%d)', 'hamkharid' ),
+				$category_id
+			);
+			printf(
+				'<option value="%1$s" selected>%2$s</option>',
+				esc_attr( (string) $category_id ),
+				esc_html( $label )
+			);
+		}
 	}
 
 	/**

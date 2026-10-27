@@ -7,6 +7,7 @@
 
 namespace Hamkharid\SmartCategoryComplement\Recommendations;
 
+use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 use Hamkharid\SmartCategoryComplement\Rules\Rule;
 use WC_Product;
 use WC_Product_Query;
@@ -21,14 +22,12 @@ defined( 'ABSPATH' ) || exit;
 final class RecommendationEngine {
 
 	/**
-	 * Minimum number of products considered by the random strategy.
+	 * Maximum number of products loaded for one candidate page.
 	 */
-	private const RANDOM_MINIMUM_CANDIDATE_POOL = 24;
+	private const CANDIDATE_PAGE_SIZE = 24;
 
-	/**
-	 * Candidate pool multiplier for the random strategy.
-	 */
-	private const RANDOM_CANDIDATE_MULTIPLIER = 4;
+	/** Maximum candidates inspected for one recommendation result. */
+	private const MAX_CANDIDATE_SCAN = 500;
 
 	/**
 	 * Returns products recommended for the current product and matched rule.
@@ -52,14 +51,12 @@ final class RecommendationEngine {
 
 		switch ( $rule->sort_strategy() ) {
 			case Rule::SORT_NEWEST:
-				$products = $this->query_products(
-					array_merge(
-						$base_args,
-						array(
-							'limit'   => $rule->recommendation_count(),
-							'orderby' => 'date',
-							'order'   => 'DESC',
-						)
+				$products = $this->ordered_eligible_products(
+					$base_args,
+					$rule->recommendation_count(),
+					array(
+						'orderby' => 'date',
+						'order'   => 'DESC',
 					)
 				);
 				break;
@@ -74,14 +71,7 @@ final class RecommendationEngine {
 				break;
 		}
 
-		return array_values(
-			array_filter(
-				$products,
-				static function ( $product ): bool {
-					return $product instanceof WC_Product && $product->is_in_stock();
-				}
-			)
-		);
+		return array_slice( $products, 0, $rule->recommendation_count() );
 	}
 
 	/**
@@ -95,14 +85,45 @@ final class RecommendationEngine {
 	 * @return array<string, mixed>
 	 */
 	private function base_query_args( int $current_product_id, string $target_category_slug ): array {
+		$allow_backorders = $this->allow_backorders();
+
 		return array(
 			'status'       => 'publish',
+			'type'         => array( 'simple', 'variable' ),
 			'category'     => array( $target_category_slug ),
 			'exclude'      => array( $current_product_id ),
 			'visibility'   => 'catalog',
-			'stock_status' => array( 'instock', 'onbackorder' ),
+			'stock_status' => $allow_backorders ? array( 'instock', 'onbackorder' ) : array( 'instock' ),
 			'return'       => 'objects',
 		);
+	}
+
+	/**
+	 * Reads the versioned site option used by the settings screen.
+	 *
+	 * Until that screen exists, missing or malformed settings keep the safe default.
+	 */
+	private function allow_backorders(): bool {
+		$settings = DisplaySettings::get();
+
+		return ! empty( $settings['allow_backorders'] );
+	}
+
+	/**
+	 * Finds up to the requested number of eligible products in the requested order.
+	 *
+	 * Each query is capped at one page. Pages are fetched only until the requested
+	 * number is reached or WooCommerce reports that the candidate set is exhausted.
+	 *
+	 * @param array<string, mixed> $base_args Shared product query arguments.
+	 * @param int                  $limit     Maximum number of products.
+	 * @param array<string, mixed> $ordering  WooCommerce query ordering arguments.
+	 * @return WC_Product[]
+	 */
+	private function ordered_eligible_products( array $base_args, int $limit, array $ordering ): array {
+		$count = $this->query_total( array_merge( $base_args, $ordering ) );
+
+		return $this->eligible_products_from_pages( $base_args, $ordering, $count, 0, $limit );
 	}
 
 	/**
@@ -124,13 +145,9 @@ final class RecommendationEngine {
 		}
 
 		$ordering = $woocommerce->query->get_catalog_ordering_args( 'popularity', 'DESC' );
-		$args     = array_merge(
-			$base_args,
-			array(
-				'limit'   => $limit,
-				'orderby' => $ordering['orderby'],
-				'order'   => $ordering['order'],
-			)
+		$args     = array(
+			'orderby' => $ordering['orderby'],
+			'order'   => $ordering['order'],
 		);
 
 		if ( ! empty( $ordering['meta_key'] ) ) {
@@ -139,7 +156,7 @@ final class RecommendationEngine {
 		}
 
 		try {
-			return $this->query_products( $args );
+			return $this->ordered_eligible_products( $base_args, $limit, $args );
 		} finally {
 			remove_filter( 'posts_clauses', array( $woocommerce->query, 'order_by_popularity_post_clauses' ) );
 		}
@@ -158,70 +175,179 @@ final class RecommendationEngine {
 	 * @return WC_Product[]
 	 */
 	private function random_products( array $base_args, int $limit ): array {
-		$count_result = $this->query(
-			array_merge(
-				$base_args,
-				array(
-					'limit'    => 1,
-					'paginate' => true,
-					'return'   => 'ids',
-					'orderby'  => 'ID',
-					'order'    => 'ASC',
-				)
-			)
+		$ordering = array(
+			'orderby' => 'ID',
+			'order'   => 'ASC',
 		);
-
-		if ( ! is_object( $count_result ) || ! isset( $count_result->total ) ) {
-			return array();
-		}
-
-		$total = max( 0, (int) $count_result->total );
+		$total    = $this->query_total( array_merge( $base_args, $ordering ) );
 
 		if ( 0 === $total ) {
 			return array();
 		}
 
-		$pool_size  = min(
-			$total,
-			max( self::RANDOM_MINIMUM_CANDIDATE_POOL, $limit * self::RANDOM_CANDIDATE_MULTIPLIER )
-		);
-		$start      = wp_rand( 0, $total - 1 );
-		$first_size = min( $pool_size, $total - $start );
+		$start           = wp_rand( 0, $total - 1 );
+		$scanned_forward = 0;
+		$candidates      = $this->eligible_products_from_pages( $base_args, $ordering, $total, $start, $limit, self::MAX_CANDIDATE_SCAN, $scanned_forward );
 
-		$candidates = $this->query_products(
-			array_merge(
-				$base_args,
-				array(
-					'limit'   => $first_size,
-					'offset'  => $start,
-					'orderby' => 'ID',
-					'order'   => 'ASC',
-				)
-			)
-		);
-
-		$remaining = $pool_size - count( $candidates );
-
-		if ( $remaining > 0 ) {
-			$candidates = array_merge(
+		if ( count( $candidates ) < $limit && $start > 0 ) {
+			$scanned_wrap = 0;
+			$candidates   = array_merge(
 				$candidates,
-				$this->query_products(
-					array_merge(
-						$base_args,
-						array(
-							'limit'   => $remaining,
-							'offset'  => 0,
-							'orderby' => 'ID',
-							'order'   => 'ASC',
-						)
-					)
-				)
+				$this->eligible_products_from_pages( $base_args, $ordering, $start, 0, $limit - count( $candidates ), self::MAX_CANDIDATE_SCAN - $scanned_forward, $scanned_wrap )
 			);
 		}
 
 		shuffle( $candidates );
 
 		return array_slice( $candidates, 0, $limit );
+	}
+
+	/**
+	 * Returns eligible products from a bounded page sequence.
+	 *
+	 * @param array<string, mixed> $base_args Shared query arguments.
+	 * @param array<string, mixed> $ordering  Query ordering arguments.
+	 * @param int                  $total     Number of matching candidates.
+	 * @param int                  $offset    First candidate offset.
+	 * @param int                  $limit     Number of eligible products wanted.
+	 * @param int                  $candidate_budget Maximum candidates to inspect in this segment.
+	 * @param int                  $scanned   Number of candidates inspected in this segment.
+	 * @return WC_Product[]
+	 */
+	private function eligible_products_from_pages( array $base_args, array $ordering, int $total, int $offset, int $limit, int $candidate_budget = self::MAX_CANDIDATE_SCAN, ?int &$scanned = null ): array {
+		$products = array();
+		$end      = min( $total, $offset + max( 0, $candidate_budget ) );
+		$count    = 0;
+		$scanned  = 0;
+
+		while ( $offset < $end && $count < $limit ) {
+			$page_size = min( self::CANDIDATE_PAGE_SIZE, $end - $offset );
+			$page      = $this->query_products(
+				array_merge(
+					$base_args,
+					$ordering,
+					array(
+						'limit'  => $page_size,
+						'offset' => $offset,
+					)
+				)
+			);
+
+			if ( array() === $page ) {
+				break;
+			}
+			$scanned += count( $page );
+
+			foreach ( $page as $product ) {
+				if ( $this->is_eligible_product( $product ) ) {
+					$products[] = $product;
+					++$count;
+				}
+			}
+
+			$offset += $page_size;
+		}
+
+		return $products;
+	}
+
+	/**
+	 * Counts matching products without loading the entire candidate set.
+	 *
+	 * @param array<string, mixed> $args Query arguments.
+	 */
+	private function query_total( array $args ): int {
+		$count = $this->query(
+			array_merge(
+				$args,
+				array(
+					'limit'    => 1,
+					'paginate' => true,
+					'return'   => 'ids',
+				)
+			)
+		);
+
+		return is_object( $count ) && isset( $count->total ) ? max( 0, (int) $count->total ) : 0;
+	}
+
+	/**
+	 * Checks product and, for variable products, variation eligibility.
+	 *
+	 * @param mixed $product Candidate product.
+	 * @return bool
+	 */
+	private function is_eligible_product( $product ): bool {
+		if ( ! $product instanceof WC_Product || ! in_array( $product->get_type(), array( 'simple', 'variable' ), true ) ) {
+			return false;
+		}
+
+		if ( ! $product->is_purchasable() || ! $this->stock_is_allowed( $product ) ) {
+			return false;
+		}
+
+		if ( 'variable' !== $product->get_type() ) {
+			return true;
+		}
+
+		return $this->has_eligible_variation( $product->get_id() );
+	}
+
+	/**
+	 * Reports whether a product is in stock under the site backorder setting.
+	 *
+	 * @param WC_Product $product Product or variation to check.
+	 */
+	private function stock_is_allowed( WC_Product $product ): bool {
+		if ( ! $product->is_in_stock() ) {
+			return false;
+		}
+
+		if ( 'onbackorder' === $product->get_stock_status() ) {
+			return $this->allow_backorders() && $product->backorders_allowed();
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks variation candidates in bounded pages until one can be purchased.
+	 *
+	 * @param int $product_id Variable product ID.
+	 */
+	private function has_eligible_variation( int $product_id ): bool {
+		$stock_status = $this->allow_backorders() ? array( 'instock', 'onbackorder' ) : array( 'instock' );
+		$args         = array(
+			'parent'       => $product_id,
+			'type'         => 'variation',
+			'status'       => 'publish',
+			'stock_status' => $stock_status,
+			'limit'        => self::CANDIDATE_PAGE_SIZE,
+			'orderby'      => 'ID',
+			'order'        => 'ASC',
+			'return'       => 'objects',
+		);
+		$total        = $this->query_total( $args );
+
+		for ( $offset = 0; $offset < $total; $offset += self::CANDIDATE_PAGE_SIZE ) {
+			$variations = $this->query_products(
+				array_merge(
+					$args,
+					array(
+						'offset' => $offset,
+						'limit'  => self::CANDIDATE_PAGE_SIZE,
+					)
+				)
+			);
+
+			foreach ( $variations as $variation ) {
+				if ( 'variation' === $variation->get_type() && $variation->is_purchasable() && $this->stock_is_allowed( $variation ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**

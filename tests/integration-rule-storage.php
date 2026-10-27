@@ -58,7 +58,8 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			array( $created_terms[0], $created_terms[1], $created_terms[0] ),
 			$created_terms[2],
 			4,
-			Rule::SORT_NEWEST
+			Rule::SORT_NEWEST,
+			73
 		);
 
 		if ( is_wp_error( $result ) ) {
@@ -78,7 +79,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'Source categories were not stored as independent, unique values.' );
 		}
 
-		if ( ! $rule->is_enabled() || 4 !== $rule->recommendation_count() || Rule::SORT_NEWEST !== $rule->sort_strategy() ) {
+		if ( ! $rule->is_enabled() || 4 !== $rule->recommendation_count() || Rule::SORT_NEWEST !== $rule->sort_strategy() || 73 !== $rule->priority() ) {
 			throw new RuntimeException( 'Stored rule values did not survive a round trip.' );
 		}
 
@@ -87,6 +88,15 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		if ( array( (string) $created_terms[0], (string) $created_terms[1] ) !== $stored_source_rows ) {
 			throw new RuntimeException( 'Source categories were not persisted as separate metadata rows.' );
 		}
+
+		delete_post_meta( $rule_id, RulePostType::META_PRIORITY );
+		$legacy_rule = $repository->find( $rule_id );
+
+		if ( null === $legacy_rule || Rule::DEFAULT_PRIORITY !== $legacy_rule->priority() ) {
+			throw new RuntimeException( 'A rule without priority metadata did not default to zero.' );
+		}
+
+		update_post_meta( $rule_id, RulePostType::META_PRIORITY, 73 );
 
 		$matched_rule_ids = get_posts(
 			array(
@@ -105,14 +115,45 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'A rule could not be queried by an exact source category metadata value.' );
 		}
 
+		$invalid_updates = array(
+			array( 0, Rule::SORT_RANDOM, 0, 'hamkharid_recommendation_count_invalid' ),
+			array( 7, Rule::SORT_RANDOM, 0, 'hamkharid_recommendation_count_invalid' ),
+			array( 3, Rule::SORT_RANDOM, 101, 'hamkharid_priority_invalid' ),
+			array( 3, 'invalid-sort', 0, 'hamkharid_sort_strategy_invalid' ),
+		);
+
+		foreach ( $invalid_updates as $invalid_update ) {
+			$rejected = $repository->update(
+				$rule_id,
+				'Invalid Updated Rule',
+				false,
+				array( $created_terms[1] ),
+				$created_terms[2],
+				$invalid_update[0],
+				$invalid_update[1],
+				$invalid_update[2]
+			);
+
+			if ( ! is_wp_error( $rejected ) || $invalid_update[3] !== $rejected->get_error_code() ) {
+				throw new RuntimeException( 'Invalid count, priority, or sort strategy was not rejected with its validation error.' );
+			}
+
+			$unchanged = $repository->find( $rule_id );
+
+			if ( null === $unchanged || 'Integration Rule' !== $unchanged->name() || ! $unchanged->is_enabled() || 4 !== $unchanged->recommendation_count() || Rule::SORT_NEWEST !== $unchanged->sort_strategy() || 73 !== $unchanged->priority() ) {
+				throw new RuntimeException( 'A rejected update changed the previously valid rule.' );
+			}
+		}
+
 		$updated = $repository->update(
 			$rule_id,
 			'Updated Integration Rule',
 			false,
 			array( $created_terms[1] ),
 			$created_terms[2],
-			99,
-			'invalid-sort'
+			6,
+			Rule::SORT_RANDOM,
+			100
 		);
 
 		if ( is_wp_error( $updated ) ) {
@@ -125,10 +166,11 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			null === $rule
 			|| $rule->is_enabled()
 			|| array( $created_terms[1] ) !== $rule->source_category_ids()
-			|| Rule::MAX_RECOMMENDATION_COUNT !== $rule->recommendation_count()
+			|| 6 !== $rule->recommendation_count()
 			|| Rule::SORT_RANDOM !== $rule->sort_strategy()
+			|| 100 !== $rule->priority()
 		) {
-			throw new RuntimeException( 'Updated values were not normalized and persisted correctly.' );
+			throw new RuntimeException( 'Valid updated values were not persisted correctly.' );
 		}
 
 		if ( false === $repository->delete( $rule_id, true ) || null !== $repository->find( $rule_id ) ) {

@@ -34,6 +34,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		RulePostType::META_TARGET_CATEGORY,
 		RulePostType::META_RECOMMENDATION_COUNT,
 		RulePostType::META_SORT_STRATEGY,
+		RulePostType::META_PRIORITY,
 	);
 
 	try {
@@ -49,13 +50,12 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			'/\\$_REQUEST/',
 			'/\\$_COOKIE/',
 			'/\\$_FILES/',
-			'/\\bregister_rest_route\\s*\\(/',
 			'/\\badmin_post_nopriv_/',
 			'/\\bwp_ajax_/',
 			'/\\beval\\s*\\(/',
 			'/\\bunserialize\\s*\\(/',
 			'/\\bmaybe_unserialize\\s*\\(/',
-			'/\\$wpdb\\b/',
+			'/\\$wpdb->(?:query|insert|update|delete|get_var|get_row|get_col|get_results)\\s*\\(/',
 		);
 
 		foreach ( $production_files as $production_file ) {
@@ -157,7 +157,26 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'Rule names are not sanitized before persistence.' );
 		}
 
-		$admin = new RuleAdmin( $repository );
+		$admin       = new RuleAdmin( $repository );
+		$rest_server = rest_get_server();
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Integration test initializes the WordPress REST API.
+		do_action( 'rest_api_init', $rest_server );
+		$request = new WP_REST_Request( 'GET', '/hamkharid/v1/products' );
+
+		wp_set_current_user( $subscriber_id );
+		$subscriber_response = rest_do_request( $request );
+		$subscriber_status   = $subscriber_response instanceof WP_REST_Response ? $subscriber_response->get_status() : ( $subscriber_response instanceof WP_Error ? (int) $subscriber_response->get_error_data()['status'] : 0 );
+
+		if ( ! in_array( $subscriber_status, array( 401, 403 ), true ) ) {
+			throw new RuntimeException( 'A Subscriber unexpectedly accessed the product search REST endpoint.' );
+		}
+
+		wp_set_current_user( $administrator_id );
+		$admin_response = rest_do_request( $request );
+
+		if ( ! $admin_response instanceof WP_REST_Response || 200 !== $admin_response->get_status() ) {
+			throw new RuntimeException( 'An authorized administrator could not access the product search REST endpoint.' );
+		}
 
 		wp_set_current_user( $subscriber_id );
 		$_POST = array(
@@ -187,24 +206,57 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'Rule settings changed with an invalid nonce.' );
 		}
 
+		$invalid_submissions = array(
+			array( '999', Rule::SORT_RANDOM, '0', 'hamkharid_recommendation_count_invalid' ),
+			array( '3', '"><script>alert(1)</script>', '0', 'hamkharid_sort_strategy_invalid' ),
+			array( '3', Rule::SORT_RANDOM, '101', 'hamkharid_priority_invalid' ),
+		);
+
+		foreach ( $invalid_submissions as $invalid_submission ) {
+			$_POST = array(
+				RuleAdmin::NONCE_NAME            => wp_create_nonce( RuleAdmin::NONCE_ACTION ),
+				'hamkharid_enabled'              => '1',
+				'hamkharid_source_category_ids'  => array( (string) $created_terms[0], 'not-an-id' ),
+				'hamkharid_target_category_id'   => (string) $created_terms[1],
+				'hamkharid_recommendation_count' => $invalid_submission[0],
+				'hamkharid_sort_strategy'        => $invalid_submission[1],
+				'hamkharid_priority'             => $invalid_submission[2],
+			);
+			$admin->save( $rule_id, get_post( $rule_id ), true );
+			$redirect    = $admin->add_save_error_to_redirect( admin_url( 'post.php?post=' . $rule_id . '&action=edit' ) );
+			$stored_rule = $repository->find( $rule_id );
+
+			if ( false === strpos( $redirect, 'hamkharid_rule_error=' . $invalid_submission[3] ) ) {
+				throw new RuntimeException( 'The admin form did not reject an invalid count, priority, or sort strategy.' );
+			}
+
+			if (
+				null === $stored_rule
+				|| ! $stored_rule->is_enabled()
+				|| array( $created_terms[0] ) !== $stored_rule->source_category_ids()
+				|| $created_terms[1] !== $stored_rule->target_category_id()
+				|| 3 !== $stored_rule->recommendation_count()
+				|| Rule::SORT_NEWEST !== $stored_rule->sort_strategy()
+				|| 0 !== $stored_rule->priority()
+			) {
+				throw new RuntimeException( 'Admin input validation changed a previously valid rule.' );
+			}
+		}
+
 		$_POST = array(
 			RuleAdmin::NONCE_NAME            => wp_create_nonce( RuleAdmin::NONCE_ACTION ),
 			'hamkharid_enabled'              => '1',
-			'hamkharid_source_category_ids'  => array( (string) $created_terms[0], 'not-an-id' ),
+			'hamkharid_source_category_ids'  => array( (string) $created_terms[0], array( 'nested' ) ),
 			'hamkharid_target_category_id'   => (string) $created_terms[1],
-			'hamkharid_recommendation_count' => '999',
-			'hamkharid_sort_strategy'        => '"><script>alert(1)</script>',
+			'hamkharid_recommendation_count' => '3',
+			'hamkharid_sort_strategy'        => Rule::SORT_RANDOM,
+			'hamkharid_priority'             => '0',
 		);
 		$admin->save( $rule_id, get_post( $rule_id ), true );
-		$stored_rule = $repository->find( $rule_id );
+		$malformed_rule = $repository->find( $rule_id );
 
-		if (
-			null === $stored_rule
-			|| array( $created_terms[0] ) !== $stored_rule->source_category_ids()
-			|| Rule::MAX_RECOMMENDATION_COUNT !== $stored_rule->recommendation_count()
-			|| Rule::SORT_RANDOM !== $stored_rule->sort_strategy()
-		) {
-			throw new RuntimeException( 'Admin input validation did not normalize hostile or out-of-range values.' );
+		if ( null === $malformed_rule || array( $created_terms[0] ) !== $malformed_rule->source_category_ids() ) {
+			throw new RuntimeException( 'A nested source-category value was not safely ignored.' );
 		}
 
 		echo "Security integration test passed.\n";

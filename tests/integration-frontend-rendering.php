@@ -6,6 +6,7 @@
  */
 
 use Hamkharid\SmartCategoryComplement\Frontend\ProductRecommendations;
+use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 use Hamkharid\SmartCategoryComplement\Matching\RuleMatcher;
 use Hamkharid\SmartCategoryComplement\Recommendations\RecommendationEngine;
 use Hamkharid\SmartCategoryComplement\Rules\Rule;
@@ -29,12 +30,13 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		exit( 1 );
 	}
 
-	$created_terms    = array();
-	$created_products = array();
-	$created_rule_id  = 0;
-	$previous_post    = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
-	$previous_product = isset( $GLOBALS['product'] ) ? $GLOBALS['product'] : null;
-	$previous_query   = isset( $GLOBALS['wp_query'] ) ? clone $GLOBALS['wp_query'] : null;
+	$created_terms     = array();
+	$created_products  = array();
+	$created_rule_id   = 0;
+	$previous_post     = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+	$previous_product  = isset( $GLOBALS['product'] ) ? $GLOBALS['product'] : null;
+	$previous_query    = isset( $GLOBALS['wp_query'] ) ? clone $GLOBALS['wp_query'] : null;
+	$previous_settings = get_option( DisplaySettings::OPTION_NAME, false );
 
 	try {
 		$source_result = wp_insert_term( 'Frontend Source ' . wp_generate_uuid4(), 'product_cat' );
@@ -127,7 +129,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'Frontend recommendations were missing or rendered more than once.' );
 		}
 
-		$expected_heading = esc_html__( 'You may also like', 'hamkharid' );
+		$expected_heading = esc_html__( 'Complete your purchase', 'hamkharid' );
 
 		if ( false === strpos( $html, $expected_heading ) ) {
 			throw new RuntimeException( 'The complement section heading was not rendered for the active WordPress locale.' );
@@ -158,6 +160,55 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'The native WooCommerce Add-to-Cart loop callback is unavailable.' );
 		}
 
+		if ( ! shortcode_exists( 'hamkharid_complements' ) ) {
+			throw new RuntimeException( 'The manual placement shortcode was not registered.' );
+		}
+
+		$manual_settings = array(
+			'schema_version'          => DisplaySettings::SCHEMA_VERSION,
+			'mode'                    => 'manual',
+			'placement'               => 'after_summary',
+			'title_fa'                => '',
+			'title_en'                => '',
+			'allow_backorders'        => false,
+			'clear_data_on_uninstall' => false,
+		);
+		update_option( DisplaySettings::OPTION_NAME, $manual_settings, false );
+
+		$manual_renderer = new ProductRecommendations(
+			new RuleMatcher( $repository ),
+			new RecommendationEngine()
+		);
+		$manual_renderer->register_hooks();
+
+		if ( false !== has_action( 'woocommerce_after_single_product_summary', array( $manual_renderer, 'render' ) ) ) {
+			throw new RuntimeException( 'Manual mode did not disable automatic placement.' );
+		}
+
+		$GLOBALS['product']                     = $current_product;
+		$GLOBALS['wp_query']->is_single         = false;
+		$GLOBALS['wp_query']->queried_object_id = 0;
+		$shortcode_html                         = $manual_renderer->render_shortcode( array( 'product_id' => (string) $current_product_id ) );
+		$duplicate_shortcode_html               = $manual_renderer->render_shortcode( array( 'product_id' => (string) $current_product_id ) );
+
+		if ( 1 !== substr_count( $shortcode_html, '<section class="hamkharid-complements' ) || '' !== $duplicate_shortcode_html ) {
+			throw new RuntimeException( 'Explicit product shortcode did not render once on a non-product page.' );
+		}
+
+		$block_renderer = new ProductRecommendations(
+			new RuleMatcher( $repository ),
+			new RecommendationEngine()
+		);
+		$block_html     = $block_renderer->render_block( array( 'productId' => $current_product_id ) );
+
+		if ( 1 !== substr_count( $block_html, '<section class="hamkharid-complements' ) ) {
+			throw new RuntimeException( 'The dynamic block render adapter did not accept an explicit product ID.' );
+		}
+
+		if ( '' !== $block_renderer->render_block( array() ) ) {
+			throw new RuntimeException( 'The dynamic block rendered without a valid product context.' );
+		}
+
 		if ( ! isset( $GLOBALS['post'] ) || (int) $GLOBALS['post']->ID !== $current_product_id ) {
 			throw new RuntimeException( 'The global post was not restored after complement rendering.' );
 		}
@@ -170,9 +221,17 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
 		remove_action( 'woocommerce_after_single_product_summary', array( $renderer, 'render' ), 18 );
 		remove_action( 'woocommerce_after_main_content', array( $renderer, 'render' ), 5 );
+		remove_action( 'woocommerce_after_single_product_summary', array( $manual_renderer, 'render' ), 18 );
+		remove_action( 'woocommerce_after_main_content', array( $manual_renderer, 'render' ), 5 );
 
 		echo "Frontend rendering integration test passed.\n";
 	} finally {
+		if ( false === $previous_settings ) {
+			delete_option( DisplaySettings::OPTION_NAME );
+		} else {
+			update_option( DisplaySettings::OPTION_NAME, $previous_settings, false );
+		}
+
 		if ( $created_rule_id > 0 ) {
 			wp_delete_post( $created_rule_id, true );
 		}

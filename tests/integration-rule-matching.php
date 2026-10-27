@@ -117,41 +117,94 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		$matcher    = new RuleMatcher( $repository );
 
 		// Create less-specific rules first so their IDs are lower. Specificity must still win.
-		$grandparent_rule_id = $repository->create(
+		$grandparent_rule_id         = $repository->create(
 			'Grandparent Match Rule',
 			true,
 			array( $created_terms[0] ),
-			$created_terms[3]
+			$created_terms[3],
+			3,
+			'newest',
+			100
 		);
-		$parent_rule_id      = $repository->create(
+		$parent_rule_id              = $repository->create(
 			'Parent Match Rule',
 			true,
 			array( $created_terms[1] ),
-			$created_terms[3]
+			$created_terms[3],
+			3,
+			'newest',
+			90
 		);
-		$direct_rule_id      = $repository->create(
+		$direct_rule_id              = $repository->create(
 			'Direct Match Rule',
 			true,
 			array( $created_terms[2] ),
-			$created_terms[3]
+			$created_terms[3],
+			3,
+			'newest',
+			10
 		);
-		$direct_tie_rule_id  = $repository->create(
+		$direct_tie_rule_id          = $repository->create(
 			'Direct Tie Match Rule',
+			true,
+			array( $created_terms[2] ),
+			$created_terms[3],
+			3,
+			'newest',
+			20
+		);
+		$direct_priority_tie_rule_id = $repository->create(
+			'Direct Priority Tie Match Rule',
+			true,
+			array( $created_terms[2] ),
+			$created_terms[3],
+			3,
+			'newest',
+			20
+		);
+		$legacy_zero_priority_id     = $repository->create(
+			'Legacy Zero Priority Match Rule',
 			true,
 			array( $created_terms[2] ),
 			$created_terms[3]
 		);
-		$disabled_rule_id    = $repository->create(
+		$explicit_zero_priority_id   = $repository->create(
+			'Explicit Zero Priority Match Rule',
+			true,
+			array( $created_terms[2] ),
+			$created_terms[3],
+			3,
+			'newest',
+			0
+		);
+
+		if ( is_wp_error( $legacy_zero_priority_id ) || is_wp_error( $explicit_zero_priority_id ) ) {
+			if ( ! is_wp_error( $legacy_zero_priority_id ) ) {
+				wp_delete_post( (int) $legacy_zero_priority_id, true );
+			}
+
+			if ( ! is_wp_error( $explicit_zero_priority_id ) ) {
+				wp_delete_post( (int) $explicit_zero_priority_id, true );
+			}
+
+			throw new RuntimeException( 'The zero-priority matching fixtures could not be created.' );
+		}
+
+		delete_post_meta( (int) $legacy_zero_priority_id, RulePostType::META_PRIORITY );
+		$disabled_rule_id = $repository->create(
 			'Disabled Match Rule',
 			false,
 			array( $created_terms[2] ),
 			$created_terms[3]
 		);
-		$rule_ids            = array(
+		$rule_ids         = array(
 			$grandparent_rule_id,
 			$parent_rule_id,
 			$direct_rule_id,
 			$direct_tie_rule_id,
+			$direct_priority_tie_rule_id,
+			$legacy_zero_priority_id,
+			$explicit_zero_priority_id,
 			$disabled_rule_id,
 		);
 
@@ -165,25 +218,96 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
 		$matched_rule = $matcher->match( $product_id );
 
-		if ( null === $matched_rule || (int) $direct_rule_id !== $matched_rule->id() ) {
-			throw new RuntimeException( 'A direct-category rule did not outrank older ancestor rules.' );
-		}
-
-		wp_delete_post( $direct_rule_id, true );
-		$created_rules = array_values( array_diff( $created_rules, array( (int) $direct_rule_id ) ) );
-		$matched_rule  = $matcher->match( $product_id );
-
 		if ( null === $matched_rule || (int) $direct_tie_rule_id !== $matched_rule->id() ) {
-			throw new RuntimeException( 'The next direct-category rule was not selected before ancestor rules.' );
+			throw new RuntimeException( 'Specificity and priority did not select the highest-priority direct-category rule.' );
 		}
 
 		wp_delete_post( $direct_tie_rule_id, true );
 		$created_rules = array_values( array_diff( $created_rules, array( (int) $direct_tie_rule_id ) ) );
 		$matched_rule  = $matcher->match( $product_id );
 
+		if ( null === $matched_rule || (int) $direct_priority_tie_rule_id !== $matched_rule->id() ) {
+			throw new RuntimeException( 'Equal priorities did not use ascending rule ID.' );
+		}
+
+		wp_delete_post( $direct_priority_tie_rule_id, true );
+		$created_rules = array_values( array_diff( $created_rules, array( (int) $direct_priority_tie_rule_id ) ) );
+		$matched_rule  = $matcher->match( $product_id );
+
+		if ( null === $matched_rule || (int) $direct_rule_id !== $matched_rule->id() ) {
+			throw new RuntimeException( 'A lower-priority direct rule did not remain ahead of ancestors.' );
+		}
+
+		wp_delete_post( $direct_rule_id, true );
+		$created_rules = array_values( array_diff( $created_rules, array( (int) $direct_rule_id ) ) );
+		$matched_rule  = $matcher->match( $product_id );
+
+		if ( null === $matched_rule || (int) $legacy_zero_priority_id !== $matched_rule->id() ) {
+			throw new RuntimeException( 'A missing legacy priority was not treated as zero ahead of a later zero-priority rule.' );
+		}
+
+		wp_delete_post( $legacy_zero_priority_id, true );
+		$created_rules = array_values( array_diff( $created_rules, array( (int) $legacy_zero_priority_id ) ) );
+		$matched_rule  = $matcher->match( $product_id );
+
+		if ( null === $matched_rule || (int) $explicit_zero_priority_id !== $matched_rule->id() ) {
+			throw new RuntimeException( 'An explicit zero-priority rule did not remain eligible.' );
+		}
+
+		wp_delete_post( $explicit_zero_priority_id, true );
+		$created_rules = array_values( array_diff( $created_rules, array( (int) $explicit_zero_priority_id ) ) );
+		$matched_rule  = $matcher->match( $product_id );
+
 		if ( null === $matched_rule || (int) $parent_rule_id !== $matched_rule->id() ) {
 			throw new RuntimeException( 'The nearest ancestor rule did not outrank a farther ancestor rule.' );
 		}
+
+		$broken_target_result = wp_insert_term( 'Broken Direct Target ' . wp_generate_uuid4(), 'product_cat' );
+
+		if ( is_wp_error( $broken_target_result ) ) {
+			throw new RuntimeException( $broken_target_result->get_error_message() );
+		}
+
+		$broken_target_id = (int) $broken_target_result['term_id'];
+		$created_terms[]  = $broken_target_id;
+		$broken_direct_id = $repository->create(
+			'Broken High Priority Direct Rule',
+			true,
+			array( $created_terms[2] ),
+			$broken_target_id,
+			3,
+			'newest',
+			100
+		);
+		$valid_direct_id  = $repository->create(
+			'Valid Lower Priority Direct Rule',
+			true,
+			array( $created_terms[2] ),
+			$created_terms[3],
+			3,
+			'newest',
+			5
+		);
+
+		foreach ( array( $broken_direct_id, $valid_direct_id ) as $fallback_rule_id ) {
+			if ( is_wp_error( $fallback_rule_id ) ) {
+				throw new RuntimeException( $fallback_rule_id->get_error_message() );
+			}
+
+			$created_rules[] = (int) $fallback_rule_id;
+		}
+
+		wp_delete_term( $broken_target_id, 'product_cat' );
+		$created_terms = array_values( array_diff( $created_terms, array( $broken_target_id ) ) );
+		$matched_rule  = $matcher->match( $product_id );
+
+		if ( null === $matched_rule || (int) $valid_direct_id !== $matched_rule->id() ) {
+			throw new RuntimeException( 'A deleted target did not fall through to the next valid rule in its specificity tier.' );
+		}
+
+		wp_delete_post( $broken_direct_id, true );
+		wp_delete_post( $valid_direct_id, true );
+		$created_rules = array_values( array_diff( $created_rules, array( (int) $broken_direct_id, (int) $valid_direct_id ) ) );
 
 		wp_delete_post( $parent_rule_id, true );
 		$created_rules = array_values( array_diff( $created_rules, array( (int) $parent_rule_id ) ) );

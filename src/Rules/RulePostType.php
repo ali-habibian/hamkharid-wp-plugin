@@ -19,6 +19,7 @@ final class RulePostType {
 	public const META_TARGET_CATEGORY      = '_hamkharid_target_category';
 	public const META_RECOMMENDATION_COUNT = '_hamkharid_recommendation_count';
 	public const META_SORT_STRATEGY        = '_hamkharid_sort_strategy';
+	public const META_PRIORITY             = '_hamkharid_priority';
 
 	/**
 	 * Registers WordPress hooks for the rule schema.
@@ -150,6 +151,21 @@ final class RulePostType {
 				'single'            => true,
 				'default'           => Rule::SORT_RANDOM,
 				'sanitize_callback' => array( Rule::class, 'sanitize_sort_strategy' ),
+				'auth_callback'     => array( $this, 'can_manage_rules' ),
+				'show_in_rest'      => false,
+			)
+		);
+
+		register_post_meta(
+			self::POST_TYPE,
+			self::META_PRIORITY,
+			array(
+				'object_subtype'    => self::POST_TYPE,
+				'type'              => 'integer',
+				'description'       => __( 'Priority within matching category specificity.', 'hamkharid' ),
+				'single'            => true,
+				'default'           => Rule::DEFAULT_PRIORITY,
+				'sanitize_callback' => array( Rule::class, 'sanitize_priority' ),
 				'auth_callback'     => array( $this, 'can_manage_rules' ),
 				'show_in_rest'      => false,
 			)

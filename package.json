@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  },
+  "private": true,
+  "scripts": {
+    "check:js": "node --check assets/js/complements-block.js && node --check assets/js/admin-preview.js",
+    "e2e:install": "playwright install chromium",
+    "e2e:cleanup": "php tests/e2e/fixture.php cleanup",
+    "test:e2e": "node tests/e2e/run.mjs",
+    "test:e2e:headed": "node tests/e2e/run.mjs --headed"
+  }
+}

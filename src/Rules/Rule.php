@@ -17,6 +17,9 @@ final class Rule {
 	public const DEFAULT_RECOMMENDATION_COUNT = 3;
 	public const MIN_RECOMMENDATION_COUNT     = 1;
 	public const MAX_RECOMMENDATION_COUNT     = 6;
+	public const DEFAULT_PRIORITY             = 0;
+	public const MIN_PRIORITY                 = 0;
+	public const MAX_PRIORITY                 = 100;
 
 	public const SORT_RANDOM       = 'random';
 	public const SORT_NEWEST       = 'newest';
@@ -72,6 +75,13 @@ final class Rule {
 	private $sort_strategy;
 
 	/**
+	 * Rule priority within a specificity tier.
+	 *
+	 * @var int
+	 */
+	private $priority;
+
+	/**
 	 * Creates a normalized rule value.
 	 *
 	 * @param int    $id                    Rule post ID.
@@ -81,6 +91,7 @@ final class Rule {
 	 * @param int    $target_category_id    Target product category ID.
 	 * @param int    $recommendation_count  Number of recommendations.
 	 * @param string $sort_strategy         Recommendation sort strategy.
+	 * @param int    $priority              Rule priority within its specificity tier.
 	 */
 	public function __construct(
 		int $id,
@@ -89,7 +100,8 @@ final class Rule {
 		array $source_category_ids,
 		int $target_category_id,
 		int $recommendation_count,
-		string $sort_strategy
+		string $sort_strategy,
+		int $priority = self::DEFAULT_PRIORITY
 	) {
 		$source_category_ids = array_map( 'intval', $source_category_ids );
 		$source_category_ids = array_filter(
@@ -106,6 +118,7 @@ final class Rule {
 		$this->target_category_id   = max( 0, $target_category_id );
 		$this->recommendation_count = self::normalize_recommendation_count( $recommendation_count );
 		$this->sort_strategy        = self::normalize_sort_strategy( $sort_strategy );
+		$this->priority             = self::normalize_priority( $priority );
 	}
 
 	/**
@@ -160,6 +173,13 @@ final class Rule {
 	}
 
 	/**
+	 * Returns the priority within the rule's specificity tier.
+	 */
+	public function priority(): int {
+		return $this->priority;
+	}
+
+	/**
 	 * Returns the supported sort strategies.
 	 *
 	 * @return string[]
@@ -183,6 +203,28 @@ final class Rule {
 		}
 
 		return min( self::MAX_RECOMMENDATION_COUNT, $count );
+	}
+
+	/**
+	 * Normalizes a priority to the supported inclusive range.
+	 *
+	 * @param int $priority Requested priority.
+	 */
+	public static function normalize_priority( int $priority ): int {
+		return min( self::MAX_PRIORITY, max( self::MIN_PRIORITY, $priority ) );
+	}
+
+	/**
+	 * Sanitizes an arbitrary metadata value as a priority.
+	 *
+	 * @param mixed $priority Raw metadata value.
+	 */
+	public static function sanitize_priority( $priority ): int {
+		if ( ! is_scalar( $priority ) || ! is_numeric( $priority ) ) {
+			return self::DEFAULT_PRIORITY;
+		}
+
+		return self::normalize_priority( (int) $priority );
 	}
 
 	/**

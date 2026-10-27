@@ -145,13 +145,53 @@ msgstr "جستجوی قوانین محصولات مکمل"
 msgid "Select a category"
 msgstr "یک دسته‌بندی انتخاب کنید"
 
-#: src/Admin/RuleAdmin.php:232
-msgid "Select a valid target category. The rule was disabled."
-msgstr "یک دسته‌بندی مقصد معتبر انتخاب کنید. قانون غیرفعال شد."
+#: src/Admin/RuleAdmin.php
+msgid "Select a valid target category. The saved rule was preserved."
+msgstr "یک دسته‌بندی مقصد معتبر انتخاب کنید. قانون ذخیره‌شده بدون تغییر باقی ماند."
 
-#: src/Admin/RuleAdmin.php:231
-msgid "Select at least one valid source category. The rule was disabled."
-msgstr "حداقل یک دسته‌بندی مبدأ معتبر انتخاب کنید. قانون غیرفعال شد."
+#: src/Admin/RuleAdmin.php
+msgid "Select at least one valid source category. The saved rule was preserved."
+msgstr "حداقل یک دسته‌بندی مبدأ معتبر انتخاب کنید. قانون ذخیره‌شده بدون تغییر باقی ماند."
+
+#: src/Admin/RuleAdmin.php src/Rules/RuleRepository.php
+msgid "Choose between one and six recommended products."
+msgstr "تعداد محصولات پیشنهادی را بین ۱ تا ۶ انتخاب کنید."
+
+#: src/Admin/RuleAdmin.php src/Rules/RuleRepository.php
+msgid "Priority must be between zero and one hundred."
+msgstr "اولویت باید عددی بین ۰ تا ۱۰۰ باشد."
+
+#: src/Admin/RuleAdmin.php src/Rules/RuleRepository.php
+msgid "Choose a supported sorting method."
+msgstr "یک روش مرتب‌سازی پشتیبانی‌شده انتخاب کنید."
+
+#: src/Admin/RuleMetaBox.php
+msgid "Select at least one existing source category."
+msgstr "حداقل یک دسته‌بندی مبدأ موجود انتخاب کنید."
+
+#: src/Admin/RuleMetaBox.php
+msgid "Select an existing target category."
+msgstr "یک دسته‌بندی مقصد موجود انتخاب کنید."
+
+#: src/Admin/RuleMetaBox.php
+msgid "Enter a whole number from one to six."
+msgstr "یک عدد صحیح بین ۱ تا ۶ وارد کنید."
+
+#: src/Admin/RuleMetaBox.php
+msgid "Choose one of the available sorting methods."
+msgstr "یکی از روش‌های مرتب‌سازی موجود را انتخاب کنید."
+
+#: src/Admin/RuleMetaBox.php
+msgid "Enter a whole number from zero to one hundred."
+msgstr "یک عدد صحیح بین ۰ تا ۱۰۰ وارد کنید."
+
+#: src/Admin/RuleMetaBox.php
+msgid "Invalid submitted value: %s"
+msgstr "مقدار ارسال‌شده نامعتبر است: %s"
+
+#: src/Admin/RuleMetaBox.php
+msgid "Unavailable category (#%d)"
+msgstr "دسته‌بندی در دسترس نیست (شناسه %d)"
 
 #: hamkharid.php:3
 msgid "Smart Category Complement – Hamkharid"
@@ -228,3 +268,195 @@ msgstr "شما اجازه مدیریت قوانین محصولات مکمل را
 #: src/Frontend/ProductRecommendations.php:163
 msgid "You may also like"
 msgstr "شاید این محصولات هم برای شما مناسب باشند"
+
+#: src/Frontend/ProductRecommendations.php
+msgid "Complete your purchase"
+msgstr "خریدتان را کامل کنید"
+
+#: src/Admin/RuleMetaBox.php src/Admin/RuleListTable.php
+msgid "Priority"
+msgstr "اولویت"
+
+#: src/Admin/RuleMetaBox.php
+msgid "A higher number wins among rules at the same category distance. A direct category match still wins over a parent category."
+msgstr "در قواعدی با فاصله دسته‌ای یکسان، عدد بزرگ‌تر مقدم است. تطبیق مستقیم دسته همچنان بر دسته والد اولویت دارد."
+
+#: src/Admin/DisplaySettings.php
+msgid "Hamkharid Display Settings"
+msgstr "تنظیمات نمایش هم‌خرید"
+
+#: src/Admin/DisplaySettings.php
+msgid "Complement Display"
+msgstr "نمایش محصولات مکمل"
+
+#: src/Admin/DisplaySettings.php
+msgid "You are not allowed to manage complement display settings."
+msgstr "اجازه مدیریت تنظیمات نمایش محصولات مکمل را ندارید."
+
+#: src/Admin/DisplaySettings.php
+msgid "Complement Display Settings"
+msgstr "تنظیمات نمایش محصولات مکمل"
+
+#: src/Admin/DisplaySettings.php
+msgid "Place recommendations manually with the dynamic block or shortcode, or choose one automatic product-page location."
+msgstr "پیشنهادها را با بلوک پویا یا شورت‌کد به‌صورت دستی جای‌گذاری کنید یا یک جایگاه خودکار در صفحه محصول برگزینید."
+
+#: src/Admin/DisplaySettings.php
+msgid "Display Mode"
+msgstr "روش نمایش"
+
+#: src/Admin/DisplaySettings.php
+msgid "Manual: use a block or shortcode"
+msgstr "دستی: استفاده از بلوک یا شورت‌کد"
+
+#: src/Admin/DisplaySettings.php
+msgid "Automatic: use one product-page location"
+msgstr "خودکار: استفاده از یک جایگاه در صفحه محصول"
+
+#: src/Admin/DisplaySettings.php
+msgid "Manual mode disables automatic placement. Enabling a rule does not insert a block into a page."
+msgstr "در حالت دستی، جای‌گذاری خودکار غیرفعال است. فعال‌کردن قانون، بلوکی به صفحه اضافه نمی‌کند."
+
+#: src/Admin/DisplaySettings.php
+msgid "Automatic Location"
+msgstr "جایگاه خودکار"
+
+#: src/Admin/DisplaySettings.php
+msgid "After product summary"
+msgstr "پس از خلاصه محصول"
+
+#: src/Admin/DisplaySettings.php
+msgid "After Add to Cart form"
+msgstr "پس از فرم افزودن به سبد خرید"
+
+#: src/Admin/DisplaySettings.php
+msgid "Persian Heading"
+msgstr "عنوان فارسی"
+
+#: src/Admin/DisplaySettings.php
+msgid "English Heading"
+msgstr "عنوان انگلیسی"
+
+#: src/Admin/DisplaySettings.php
+msgid "Leave blank to use the translated default heading."
+msgstr "برای استفاده از عنوان پیش‌فرض ترجمه‌شده، این فیلد را خالی بگذارید."
+
+#: src/Admin/DisplaySettings.php
+msgid "Backorders"
+msgstr "پیش‌سفارش"
+
+#: src/Admin/DisplaySettings.php
+msgid "Include products that WooCommerce allows customers to backorder."
+msgstr "محصولاتی را هم نمایش بده که ووکامرس اجازه پیش‌سفارش آن‌ها را می‌دهد."
+
+#: src/Admin/DisplaySettings.php
+msgid "Uninstall"
+msgstr "حذف افزونه"
+
+#: src/Admin/DisplaySettings.php
+msgid "Delete Hamkharid rules and settings when the plugin is deleted."
+msgstr "هنگام حذف افزونه، قوانین و تنظیمات هم‌خرید را پاک کن."
+
+#: src/Admin/DisplaySettings.php
+msgid "By default, your rules and settings are kept when the plugin is deleted. Orders and products are never removed."
+msgstr "به‌طور پیش‌فرض، قوانین و تنظیمات هنگام حذف افزونه حفظ می‌شوند. سفارش‌ها و محصولات هرگز پاک نمی‌شوند."
+
+#: assets/js/complements-block.js
+msgid "Hamkharid complements"
+msgstr "محصولات مکمل هم‌خرید"
+
+#: assets/js/complements-block.js
+msgid "Show category-based complementary products for a selected product."
+msgstr "محصولات مکمل دسته‌بندی‌شده را برای یک محصول انتخاب‌شده نمایش می‌دهد."
+
+#: assets/js/complements-block.js
+msgid "Products could not be loaded. Check your permissions and try again."
+msgstr "بارگذاری محصولات ممکن نشد. دسترسی خود را بررسی کنید و دوباره تلاش کنید."
+
+#: assets/js/complements-block.js
+msgid "Product"
+msgstr "محصول"
+
+#: assets/js/complements-block.js
+msgid "Product for recommendations"
+msgstr "محصول مبنای پیشنهادها"
+
+#: assets/js/complements-block.js
+msgid "Leave empty to use the product context in a single-product template."
+msgstr "برای استفاده از محصول جاری در قالب تک‌محصولی، خالی بگذارید."
+
+#: assets/js/complements-block.js
+msgid "Choose a product or place this block in a single-product template."
+msgstr "یک محصول انتخاب کنید یا این بلوک را در قالب تک‌محصولی قرار دهید."
+
+#: src/Admin/DisplaySettings.php
+msgid "Preview recommendations"
+msgstr "آزمایش پیشنهادها"
+
+#: src/Admin/DisplaySettings.php
+msgid "Choose a product to see the winning rule and the products the storefront engine would return. This preview does not change a rule or the cart."
+msgstr "یک محصول انتخاب کنید تا قانون برنده و محصولاتی را که موتور فروشگاه نمایش می‌دهد ببینید. این آزمایش قانون یا سبد خرید را تغییر نمی‌دهد."
+
+#: src/Admin/DisplaySettings.php
+msgid "Search products"
+msgstr "جست‌وجوی محصولات"
+
+#: src/Admin/DisplaySettings.php
+msgid "Preview"
+msgstr "آزمایش"
+
+#: src/Admin/DisplaySettings.php
+msgid "The preview request expired. Search for the product again."
+msgstr "درخواست آزمایش منقضی شد. محصول را دوباره جست‌وجو کنید."
+
+#: src/Admin/DisplaySettings.php
+msgid "Choose a published WooCommerce product."
+msgstr "یک محصول منتشرشده ووکامرس انتخاب کنید."
+
+#: src/Admin/DisplaySettings.php
+msgid "The selected product is invalid."
+msgstr "محصول انتخاب‌شده معتبر نیست."
+
+#: src/Admin/DisplaySettings.php
+msgid "No enabled rule matches this product."
+msgstr "هیچ قانون فعالی با این محصول تطبیق ندارد."
+
+#: src/Admin/DisplaySettings.php
+msgid "Matching rules point to deleted categories. Repair a rule target."
+msgstr "قواعد منطبق به دسته‌های حذف‌شده اشاره می‌کنند. مقصد قانون را اصلاح کنید."
+
+#: src/Admin/DisplaySettings.php
+msgid "The rule search reached its safety limit. Review the matching rules for deleted targets."
+msgstr "جست‌وجوی قانون به سقف ایمنی رسید. قواعد منطبق را برای مقصدهای حذف‌شده بررسی کنید."
+
+#: src/Admin/DisplaySettings.php
+msgid "No rule could be selected."
+msgstr "قانونی انتخاب نشد."
+
+#: src/Admin/DisplaySettings.php
+msgid "A rule matched, but no eligible products were found in its target category."
+msgstr "قانونی منطبق شد، اما محصول واجد شرایطی در دسته مقصد آن پیدا نشد."
+
+#: src/Admin/DisplaySettings.php
+msgid "Matched rule:"
+msgstr "قانون منطبق:"
+
+#: src/Admin/DisplaySettings.php
+msgid "Category distance:"
+msgstr "فاصله دسته‌ای:"
+
+#: src/Admin/DisplaySettings.php
+msgid "Recommended products:"
+msgstr "محصولات پیشنهادی:"
+
+#: assets/js/admin-preview.js
+msgid "No products found."
+msgstr "محصولی پیدا نشد."
+
+#: assets/js/admin-preview.js
+msgid "Searching…"
+msgstr "در حال جست‌وجو…"
+
+#: assets/js/admin-preview.js
+msgid "Product search failed."
+msgstr "جست‌وجوی محصول ناموفق بود."

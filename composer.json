@@ -30,6 +30,7 @@
             "@php -l src/Admin/RuleAdmin.php",
             "@php -l src/Admin/RuleMetaBox.php",
             "@php -l src/Admin/RuleListTable.php",
+            "@php -l src/Admin/DisplaySettings.php",
             "@php -l src/Matching/RuleMatcher.php",
             "@php -l src/Recommendations/RecommendationEngine.php",
             "@php -l src/Rules/Rule.php",
@@ -47,7 +48,10 @@
             "@php -l tests/integration-compatibility.php",
             "@php -l tests/integration-security.php",
             "@php -l tests/integration-localization.php",
-            "@php -l tests/integration-performance.php"
+            "@php -l tests/integration-performance.php",
+            "@php -l uninstall.php",
+            "@php -l tests/integration-uninstall.php",
+            "@php -l tests/e2e/fixture.php"
         ],
         "cs": "phpcs --standard=phpcs.xml.dist",
         "test": "phpunit --configuration phpunit.xml.dist",
@@ -67,6 +71,7 @@
         "test:localization": "@php tests/integration-localization.php",
         "test:security": "@php tests/integration-security.php",
         "test:performance": "@php tests/integration-performance.php",
+        "test:uninstall": "@php tests/integration-uninstall.php",
         "test:integration-all": [
             "@test:integration",
             "@test:admin",
@@ -78,7 +83,8 @@
             "@test:compatibility",
             "@test:localization",
             "@test:security",
-            "@test:performance"
+            "@test:performance",
+            "@test:uninstall"
         ],
         "test:all": [
             "@check",

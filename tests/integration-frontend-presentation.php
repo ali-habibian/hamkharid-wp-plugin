@@ -114,13 +114,14 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
 		foreach (
 			array(
-				'grid-template-columns: repeat(4, minmax(0, 1fr))',
-				'@media (max-width: 782px)',
-				'@media (max-width: 480px)',
+				'grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.75rem), 1fr))',
 				':focus-visible',
 				'overflow-wrap: anywhere',
 				'inline-size',
 				'block-size',
+				'min-inline-size: 0',
+				'max-inline-size: 100%',
+				'color: #5a430d',
 			) as $required_css
 		) {
 			if ( false === strpos( $css, $required_css ) ) {
@@ -128,8 +129,28 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			}
 		}
 
-		if ( false !== strpos( $css, '!important' ) ) {
-			throw new RuntimeException( 'The component stylesheet must not rely on !important.' );
+		$important_matches = array();
+		preg_match_all( '/([^{}]+)\{([^{}]*!important[^{}]*)\}/', $css, $important_matches, PREG_SET_ORDER );
+
+		$allowed_important = array(
+			array(
+				'selector'    => '.hamkharid-complements.related.products ul.products li.product .woocommerce-loop-product__title',
+				'declaration' => 'color: #5a430d !important',
+			),
+			array(
+				'selector'    => '.hamkharid-complements.related.products ul.products li.product',
+				'declaration' => 'margin: 0 !important',
+			),
+		);
+
+		if ( count( $allowed_important ) !== count( $important_matches ) ) {
+			throw new RuntimeException( 'The component stylesheet contains an unexpected important declaration.' );
+		}
+
+		foreach ( $important_matches as $index => $important_match ) {
+			if ( false === strpos( $important_match[1], $allowed_important[ $index ]['selector'] ) || false === strpos( $important_match[2], $allowed_important[ $index ]['declaration'] ) ) {
+				throw new RuntimeException( 'An important declaration is outside its scoped theme compatibility or contrast override.' );
+			}
 		}
 
 		if ( preg_match( '/(?:^|[;{]\s*)(?:left|right)\s*:|\b(?:margin|padding|border)-(?:left|right)\b/m', $css ) ) {
