@@ -412,6 +412,21 @@ try {
     await subscriberContext.close();
   });
 
+  await check('QA-130', 'Shop Manager with WooCommerce capability can manage rules and settings', async () => {
+    const shopManagerContext = await browser.newContext({ viewport: { width: 1200, height: 800 } });
+    const shopManagerPage = await shopManagerContext.newPage();
+    await login(shopManagerPage, state.urls.login, state.shop_manager);
+
+    const rulesResponse = await shopManagerPage.goto(state.urls.rules, { waitUntil: 'domcontentloaded' });
+    assert.equal(rulesResponse?.status(), 200);
+    assert.ok(await shopManagerPage.locator('#the-list').count() > 0);
+
+    const settingsResponse = await shopManagerPage.goto(state.urls.settings, { waitUntil: 'domcontentloaded' });
+    assert.equal(settingsResponse?.status(), 200);
+    assert.ok(await shopManagerPage.locator('form[action*="admin-post.php"] select[name="hamkharid_display_settings[mode]"]').count() > 0);
+    await shopManagerContext.close();
+  });
+
   await check('QA-205', 'Manual mode disables automatic output while shortcode and dynamic block render on pages', async () => {
     await adminPage.goto(state.urls.settings, { waitUntil: 'domcontentloaded' });
     await adminPage.locator('form[action*="admin-post.php"] select[name="hamkharid_display_settings[mode]"]').selectOption('manual');

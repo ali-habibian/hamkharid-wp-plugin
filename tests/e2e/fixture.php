@@ -230,11 +230,13 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 	};
 
 	try {
-		$admin_password      = wp_generate_password( 24, true, true );
-		$subscriber_password = wp_generate_password( 24, true, true );
-		$admin_username      = 'hamkharid_e2e_admin_' . $run_id;
-		$subscriber_username = 'hamkharid_e2e_sub_' . $run_id;
-		$admin_id            = wp_insert_user(
+		$admin_password        = wp_generate_password( 24, true, true );
+		$subscriber_password   = wp_generate_password( 24, true, true );
+		$shop_manager_password = wp_generate_password( 24, true, true );
+		$admin_username        = 'hamkharid_e2e_admin_' . $run_id;
+		$subscriber_username   = 'hamkharid_e2e_sub_' . $run_id;
+		$shop_manager_username = 'hamkharid_e2e_shop_manager_' . $run_id;
+		$admin_id              = wp_insert_user(
 			array(
 				'user_login' => $admin_username,
 				'user_pass'  => $admin_password,
@@ -242,7 +244,7 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 				'role'       => 'administrator',
 			)
 		);
-		$subscriber_id       = wp_insert_user(
+		$subscriber_id         = wp_insert_user(
 			array(
 				'user_login' => $subscriber_username,
 				'user_pass'  => $subscriber_password,
@@ -250,13 +252,22 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 				'role'       => 'subscriber',
 			)
 		);
+		$shop_manager_id       = wp_insert_user(
+			array(
+				'user_login' => $shop_manager_username,
+				'user_pass'  => $shop_manager_password,
+				'user_email' => $shop_manager_username . '@example.test',
+				'role'       => 'shop_manager',
+			)
+		);
 
-		if ( is_wp_error( $admin_id ) || is_wp_error( $subscriber_id ) ) {
+		if ( is_wp_error( $admin_id ) || is_wp_error( $subscriber_id ) || is_wp_error( $shop_manager_id ) ) {
 			throw new RuntimeException( 'Browser QA users could not be created.' );
 		}
 
 		update_user_meta( (int) $admin_id, $meta_key, $run_id );
 		update_user_meta( (int) $subscriber_id, $meta_key, $run_id );
+		update_user_meta( (int) $shop_manager_id, $meta_key, $run_id );
 
 		$source_parent_id = $create_term( 'Hamkharid E2E Source Parent ' . $run_id );
 		$source_child_id  = $create_term( 'Hamkharid E2E Source Child ' . $run_id, $source_parent_id );
@@ -366,6 +377,10 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 			'subscriber'     => array(
 				'username' => $subscriber_username,
 				'password' => $subscriber_password,
+			),
+			'shop_manager'   => array(
+				'username' => $shop_manager_username,
+				'password' => $shop_manager_password,
 			),
 			'ids'            => array(
 				'source_parent'    => $source_parent_id,
