@@ -297,6 +297,38 @@ try {
     );
   });
 
+  await check('QA-097', 'A 320 CSS-pixel layout at 200% page zoom keeps the recommendation controls in view', async () => {
+    await adminPage.setViewportSize({ width: 640, height: 1000 });
+    await adminPage.evaluate(() => {
+      document.documentElement.style.zoom = '2';
+    });
+
+    try {
+      const section = adminPage.locator('section.hamkharid-complements');
+      const sectionBounds = await section.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          left: rect.left,
+          right: rect.right,
+          width: rect.width,
+          viewportWidth: window.innerWidth,
+          scrollWidth: element.scrollWidth,
+          clientWidth: element.clientWidth,
+        };
+      });
+
+      assert.ok(sectionBounds.width > 0, 'Recommendation section disappeared at 200% zoom.');
+      assert.ok(sectionBounds.left >= -1 && sectionBounds.right <= sectionBounds.viewportWidth + 1, 'Recommendation section extends beyond the effective 320 CSS-pixel viewport.');
+      assert.ok(sectionBounds.scrollWidth <= sectionBounds.clientWidth + 1, 'Recommendation section has horizontal overflow at 200% zoom.');
+      assert.equal(await section.locator('a.button, button').first().isVisible(), true, 'The primary recommendation control is not visible at 200% zoom.');
+    } finally {
+      await adminPage.evaluate(() => {
+        document.documentElement.style.zoom = '';
+      });
+      await adminPage.setViewportSize({ width: 1280, height: 900 });
+    }
+  });
+
   await check('QA-VISUAL', 'Capture repeatable desktop and mobile screenshots for visual review', async () => {
     const artifactDirectory = resolve(process.env.HAMKHARID_E2E_ARTIFACTS || 'tests/e2e/artifacts');
     mkdirSync(artifactDirectory, { recursive: true });
