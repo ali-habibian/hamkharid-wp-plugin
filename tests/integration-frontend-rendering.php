@@ -105,6 +105,9 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		$GLOBALS['wp_query']->is_page           = false;
 		$GLOBALS['wp_query']->queried_object    = $current_post;
 		$GLOBALS['wp_query']->queried_object_id = $current_product_id;
+		$automatic_settings                     = DisplaySettings::get();
+		$automatic_settings['mode']             = 'automatic';
+		update_option( DisplaySettings::OPTION_NAME, $automatic_settings, false );
 
 		$renderer = new ProductRecommendations(
 			new RuleMatcher( $repository ),

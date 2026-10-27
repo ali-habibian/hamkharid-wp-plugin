@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import { mkdirSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { chromium } from 'playwright';
+
+const require = createRequire(import.meta.url);
+const axeSource = require('axe-core').source;
 
 const headed = process.argv.includes('--headed');
 const wordpressRoot = process.env.HAMKHARID_WP_ROOT;
@@ -379,6 +383,24 @@ try {
     assert.ok(buttonContrast >= 4.5, `Add-to-Cart button contrast is ${buttonContrast.toFixed(2)}:1; expected at least 4.5:1.`);
   });
 
+  await check('QA-104', 'Automated WCAG 2.2 A/AA audit reports no violations inside the recommendation section', async () => {
+    await adminPage.addScriptTag({ content: axeSource });
+    const result = await adminPage.evaluate(async () => window.axe.run(
+      document.querySelector('section.hamkharid-complements'),
+      { runOnly: { type: 'tag', values: [ 'wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22a', 'wcag22aa' ] } },
+    ));
+
+    assert.deepEqual(
+      result.violations.map((violation) => ({
+        id: violation.id,
+        impact: violation.impact,
+        nodes: violation.nodes.map((node) => ({ target: node.target, summary: node.failureSummary })),
+      })),
+      [],
+      'The recommendation section has automated WCAG A/AA violations.',
+    );
+  });
+
   await check('QA-130, QA-131', 'Administrator can manage rules while Subscriber cannot', async () => {
     const subscriberContext = await browser.newContext({ viewport: { width: 1200, height: 800 } });
     const subscriberPage = await subscriberContext.newPage();
@@ -458,6 +480,20 @@ try {
     await localePage.goto(state.urls.block_page, { waitUntil: 'domcontentloaded' });
     assert.equal(await localePage.locator('html').evaluate((element) => element.getAttribute('dir') || getComputedStyle(element).direction), 'rtl');
     assert.equal((await localePage.locator('section.hamkharid-complements > h2').innerText()).trim(), 'خریدتان را کامل کنید');
+    await localePage.addScriptTag({ content: axeSource });
+    const rtlAudit = await localePage.evaluate(async () => window.axe.run(
+      document.querySelector('section.hamkharid-complements'),
+      { runOnly: { type: 'tag', values: [ 'wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22a', 'wcag22aa' ] } },
+    ));
+    assert.deepEqual(
+      rtlAudit.violations.map((violation) => ({
+        id: violation.id,
+        impact: violation.impact,
+        nodes: violation.nodes.map((node) => ({ target: node.target, summary: node.failureSummary })),
+      })),
+      [],
+      'The Persian RTL recommendation section has automated WCAG A/AA violations.',
+    );
     await localePage.close();
 
     fixture('switch-locale', state.locale);

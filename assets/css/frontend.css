@@ -37,6 +37,7 @@
 }
 
 .hamkharid-complements.related.products ul.products li.product {
+	background-color: #fff !important;
 	box-sizing: border-box;
 	float: none;
 	inline-size: auto;

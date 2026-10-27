@@ -122,6 +122,7 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 				'min-inline-size: 0',
 				'max-inline-size: 100%',
 				'color: #5a430d',
+				'background-color: #fff !important',
 				'background-color: #5a430d !important',
 				'color: #fff !important',
 			) as $required_css
@@ -156,6 +157,13 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 		foreach ( $important_matches as $index => $important_match ) {
 			if ( false === strpos( $important_match[1], $allowed_important[ $index ]['selector'] ) || false === strpos( $important_match[2], $allowed_important[ $index ]['declaration'] ) ) {
 				throw new RuntimeException( 'An important declaration is outside its scoped theme compatibility or contrast override.' );
+			}
+
+			if (
+				'.hamkharid-complements.related.products ul.products li.product' === $allowed_important[ $index ]['selector']
+				&& false === strpos( $important_match[2], 'background-color: #fff !important' )
+			) {
+				throw new RuntimeException( 'The theme-scoped product card background must remain explicitly white for text contrast.' );
 			}
 		}
 
