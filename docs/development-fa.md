@@ -5,7 +5,7 @@
 ## محیط و وابستگی
 
 - ریشه فعلی: `D:\laragon\www\hamkharid`؛ shell فعلی PowerShell است.
-- نسخه‌های محیط محلی بررسی‌شده: حداقل WP 6.2.14/WC 8.2.0/PHP 7.4.33 و جاری WP 7.1.3/WC 11.2.1/PHP 8.4.1؛ Node 26.7.0، npm 11.19.0 و Composer 2.8.3. قالب‌ها شامل Luxury Shop 1.9.4، Storefront 4.6.2، Twenty Twenty-Three و Twenty Twenty-Five هستند. Chromium 151.0.7922.34، Firefox 153.0 و WebKit 26.5 آزموده شدند؛ این ماتریس ادعای پوشش همهٔ نسخه‌ها/سیستم‌عامل‌ها نیست.
+- نسخه‌های محیط محلی بررسی‌شده: حداقل WP 6.2.14/WC 8.2.0/PHP 7.4.33 و جاری WP 7.1.3/WC 11.2.1/PHP 8.4.1؛ Node 26.7.0، npm 11.19.0 و Composer 2.8.3. قالب‌ها شامل Luxury Shop 1.9.4، Storefront 4.6.2، Twenty Twenty-Three و Twenty Twenty-Five هستند. Chromium 151.0.7922.34، Firefox 153.0 و WebKit 26.5 در هر دو stack E2E شدند. Elementor 4.3.5 و SiteOrigin 2.38.0 فقط frontend shortcode smoke دارند؛ editor workflow تأیید نشده است. این ماتریس ادعای پوشش همهٔ نسخه‌ها/سیستم‌عامل‌ها نیست.
 - PHP CLI، PHP وب و تنظیمات extension آن‌ها ممکن است متفاوت باشند. مسیر پوشه Laragon اثبات نمی‌کند PHP از Laragon اجرا می‌شود؛ در بررسی قبلی CLI از `C:\xampp\php\php.exe` resolve شد، پیش از اجرا دوباره بررسی شود.
 - WordPress/WooCommerce و DB محلی برای integration لازم‌اند؛ root وردپرس خارج از ریشه افزونه است. نام DB، حساب و رمز در مستندات/مخزن ثبت نشوند.
 - runtime به `vendor/autoload.php` نیاز دارد. ابزارهای dev از `composer.lock` و Playwright از `package-lock.json`/`package.json` می‌آیند. دسترسی اسناد و ابزارهای لازم در clone تمیز `a075c21fb10c359622eb96dc9b36cd7000daa766` تأیید شد؛ `git check-ignore` آن‌ها را ignoreشده گزارش نکرد. اصلاح `.gitignore` در `da914d3` ثبت شده است.
@@ -110,4 +110,4 @@ Rollback هدف: غیرفعال‌سازی افزونه باید افزودن ع
 
 برای هر run این اطلاعات را کنار QA نتیجه ثبت کنید: تاریخ، commit و diff محلی، محیط/locale/HPOS، فرمان، تعداد و نتیجه، خطا، screenshot یا log بدون secret، موارد Skip با علت و تصمیم پذیرش.
 
-شواهد و موارد آزموده‌نشده در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. اجرای PHP 8.1 و 8.4 و Browser QA تکمیلی، Storefront classic و blockified Single Product در Twenty Twenty-Five و Elementor page-level را پوشش داد؛ Elementor Theme Builder و ماتریس سازگاری گسترده بازند. artifact ZIP قبلی نسبت به CSS فعلی stale است؛ lifecycle تازه باید پس از build انجام شود. benchmark فقط در local envelope منتخب E-15 پاس است، نه SLA عمومی/محصولی. native `fa_IR` RTL و بقیهٔ موارد ثبت‌شده در گزارش QA پاس شدند.
+شواهد و موارد آزموده‌نشده در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. اجرای PHP 8.1 و 8.4 و Browser QA تکمیلی، Storefront classic و blockified Single Product در Twenty Twenty-Five و frontend shortcode probe محدود Elementor/SiteOrigin را پوشش داد؛ UI authoring/save در builderها و Elementor Theme Builder بازند. artifact ZIP قبلی نسبت به CSS فعلی stale است؛ lifecycle تازه باید پس از build انجام شود. benchmark فقط در local envelope منتخب E-15 پاس است، نه SLA عمومی/محصولی. native `fa_IR` RTL و بقیهٔ موارد ثبت‌شده در گزارش QA پاس شدند.
