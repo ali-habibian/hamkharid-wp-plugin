@@ -334,6 +334,9 @@ try {
   });
 
   await check('QA-VISUAL', 'Capture repeatable desktop and mobile screenshots for visual review', async () => {
+    const listStyle = await adminPage.locator('section.hamkharid-complements ul.products > li.product').first().evaluate((element) => getComputedStyle(element).listStyleType);
+    assert.equal(listStyle, 'none', 'Recommendation product cards should not show theme list markers.');
+
     const artifactDirectory = resolve(process.env.HAMKHARID_E2E_ARTIFACTS || 'tests/e2e/artifacts');
     mkdirSync(artifactDirectory, { recursive: true });
 

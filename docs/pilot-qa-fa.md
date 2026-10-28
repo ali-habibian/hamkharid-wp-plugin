@@ -1,10 +1,10 @@
 # گزارش QA محلی هم‌خرید
 
-تاریخ بازبینی: ۲۰۲۶-۱۰-۲۸. code/test commit `5d468e0c2909f3ef78088ebeccae8db008e33766` tracked و pushed است. E2E run=`1aa89a2c28a1` پیش از commit اجرا شد؛ منطق تست با نسخه commit‌شده یکسان است و تفاوت فقط whitespace اصلاح‌شده با PHPCBF است. M4 برای ZIP SHA-256 `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` از source تمیز `7b3ac0f4d7d8f1ca6bd5a7ef1c87e3842de1ae92` پاس شد؛ جزئیات و محدودیت‌ها در بخش lifecycle آمده‌اند.
+تاریخ بازبینی: ۲۰۲۶-۱۰-۲۸. commit `5d468e0c2909f3ef78088ebeccae8db008e33766` tracked و pushed است. پس از آن، CSS گرید در دو مورد اصلاح شد و regression test مرورگری افزوده شد؛ اجرای نهایی E2E `551465d97590` این تغییرها را ۱۷/۱۷ پاس کرد. ZIP SHA-256 `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پیش از این اصلاحات lifecycle شد و artifact جاری محسوب نمی‌شود؛ جزئیات و محدودیت‌ها در بخش lifecycle قبلی و addendum M3 آمده‌اند.
 
 ## نتیجه
 
-روی code/test commit `5d468e0c2909f3ef78088ebeccae8db008e33766`، `composer run test:all` با exit 0 تمام شد: PHPCS ۲۸/۲۸، PHPUnit ۸/۸ با ۱۳ assertion و integration برابر ۱۲/۱۲. `npm run check:js` و `node --check` نیز پاس شدند. E2E run=`1aa89a2c28a1`، Browser QA را ۱۷/۱۷ گذراند؛ اجرا پیش از commit بود و منطق تست یکسان است، با تفاوت صرفاً whitespace اصلاح‌شده با PHPCBF. پوشش شامل QA-097، QA-130 دسترسی واقعی Shop Manager به rules/settings، Subscriber denial و axe-core 4.13.0 در `en_US`/LTR و `fa_IR`/RTL بود. axe با tagهای `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22a`, `wcag22aa` تخلفی گزارش نکرد. بازبینی بصری screenshotهای ۱۲۰۰px و ۴۲۰px، contrast کارت و layout را تأیید کرد. fixtureها پس از اجرا پاک شدند. HPOS روشن/خاموش، WooCommerce فعال/غیرفعال، widget area و multi-embed نیز در QAهای ثبت‌شده پوشش دارند؛ Elementor مرورگری، screen reader و ماتریس گستردهٔ سازگاری بازند. M4 lifecycle برای ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` از source تمیز `7b3ac0f4d7d8f1ca6bd5a7ef1c87e3842de1ae92` پاس شد. NFR-02/E-15 فقط در envelope محلی اندازه‌گیری‌شده PASS است و SLA عمومی نیست.
+روی code/test commit `5d468e0c2909f3ef78088ebeccae8db008e33766`، `composer run test:all` با exit 0 تمام شد: PHPCS ۲۸/۲۸، PHPUnit ۸/۸ با ۱۳ assertion و integration برابر ۱۲/۱۲. `npm run check:js` و `node --check` نیز پاس شدند. E2E run=`1aa89a2c28a1`، Browser QA را ۱۷/۱۷ گذراند؛ اجرا پیش از commit بود و منطق تست یکسان است، با تفاوت صرفاً whitespace اصلاح‌شده با PHPCBF. پوشش شامل QA-097، QA-130 دسترسی واقعی Shop Manager به rules/settings، Subscriber denial و axe-core 4.13.0 در `en_US`/LTR و `fa_IR`/RTL بود. axe با tagهای `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22a`, `wcag22aa` تخلفی گزارش نکرد. بازبینی بصری screenshotهای ۱۲۰۰px و ۴۲۰px، contrast کارت و layout را تأیید کرد. fixtureها پس از اجرا پاک شدند. HPOS روشن/خاموش، WooCommerce فعال/غیرفعال، widget area و multi-embed نیز در QAهای ثبت‌شده پوشش دارند؛ Elementor page-level smoke شد و Theme Builder و ماتریس گسترده بازند. کاربر گزارش Narrator را برای QA-207 اعلام کرد. M4 lifecycle ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` از source تمیز `7b3ac0f4d7d8f1ca6bd5a7ef1c87e3842de1ae92` پاس شد، اما artifact پیش از CSS جاری ساخته شده است. NFR-02/E-15 فقط در envelope محلی اندازه‌گیری‌شده PASS است و SLA عمومی نیست.
 
 ## محیط
 
@@ -53,13 +53,38 @@ QAهای سازگاری ثبت‌شدهٔ جداگانه شامل HPOS روشن 
 
 مسیر محلی پوشه شواهد: `C:\Users\HP\.codex\visualizations\2026\10\27\01a17ea3-2fb8-7403-b60e-3f15d61b0241\qa`.
 
+## اجرای تکمیلی M3 — محتوا، جهت و عرض
+
+در ۲۰۲۶-۱۰-۲۸، روی WordPress محلی `wordpress.test` و fixture مصنوعی E2E با run=`b12cf7b46acf`، محصول توصیه‌شدهٔ fixture فقط برای آزمون محتوای بلند تغییر موقت کرد؛ نام ترکیبی فارسی/لاتین/عدد و SKU برابر `SKU-FA-EN-2026-ABCD-1234567890` داشت. خود fixture محافظت‌شده با `_hamkharid_e2e_run` بود؛ بعد از بررسی cleanup اجرا می‌شود. هیچ داده‌ای از هاست یا فروشگاه واقعی استفاده نشد.
+
+| عرض CSS | ستون کارت | عرض section/card | عرض سند | نتیجه |
+|---:|---:|---:|---:|---|
+| ۳۲۰px | ۱ | ۲۴۸px | ۳۲۰px | عنوان بلند می‌شکند؛ قیمت و دکمه داخل کارت می‌مانند |
+| ۴۲۰px | ۱ | ۳۴۸px | ۴۲۰px | بدون overflow |
+| ۷۰۰px | ۲ | ۲۲۲px هر کارت | ۷۰۰px | متن مختلط و CTA بدون بریدگی |
+| ۱۲۰۰px | ۳ | ۲۴۹px هر کارت | ۱۲۰۰px | متن و CTA داخل کارت می‌مانند |
+
+در `fa_IR`, صفحه HTML و section هر دو RTL بودند؛ در `en_US`، `<html lang="en-US">` و section LTR شد و عنوان فارسی/لاتین در کارت همچنان قابل‌خواندن ماند. قیمت تست‌شده از WooCommerce با raw/regular price برابر `29` و currency=`IRR` آمد؛ renderer افزونه تبدیل مجددی به تومان/ریال انجام نداد. صفحهٔ محصول همان دادهٔ عنوان/SKU را در ۳۲۰/۴۲۰/۷۰۰/۱۲۰۰px نشان داد، `documentElement.scrollWidth` برابر viewport ماند و دکمهٔ اصلی ۱۵۷px عرض داشت. در traversal واقعی Tab، لینک محصول و دکمه‌های کارت در Tabهای ۲۳–۲۸ قابل‌دسترسی و outline محاسبه‌شده `solid 2px` بود؛ نام accessible دکمه عنوان کامل محصول را داشت. این شاهد DOM/keyboard است و تأیید گفتاری screen reader محسوب نمی‌شود.
+
+شواهد بیرون مخزن: `m3-responsive-long-content.txt`, `m3-product-detail-metrics.txt`, `m3-keyboard-product-section.txt`, `m3-section-long-content-320-verified.png`, `m3-section-long-content-700.png`, `m3-section-long-content-700-ltr.png`, `m3-section-long-content-1200.png` و `m3-user-visual-confirmation.png` در پوشهٔ QA بالا. تصویر آخر و گزارش کاربر سه کارت، عنوان بلند و CTA در گرید RTL دسکتاپ بدون overflow را تأیید می‌کنند.
+
+### بازآزمایی رفع نقص، قالب‌ها و builder — ۲۰۲۶-۱۰-۲۸
+
+در clone مستقل M4 با WordPress 7.1.3، WooCommerce 11.2.1، PHP 8.4.1 و Twenty Twenty-Five، اجرای E2E `551465d97590` پس از دو اصلاح CSS (جعبه‌بندی تصویر placeholder و حذف markerهای فهرست) **۱۷/۱۷** گذراند. اندازه‌گیری عنوان/SKU بلند در ۳۲۰/۴۲۰/۷۰۰/۱۲۰۰px، document width برابر viewport و overflow داخلی صفر بود؛ سه کارت حفظ شدند. regression تازه در E2E مقدار `list-style-type: none` را نیز کنترل می‌کند. تصاویر در `m3-final-artifacts/hamkharid-551465d97590-{420,700,1200}.png` و log در `m3-final-e2e-php84.log` هستند.
+
+PHP 8.1.10، WordPress 7.1.3، WooCommerce 11.2.1 و Twenty Twenty-Five: full PHP suite پس از تنظیم fixture به حالت automatic پاس شد (PHPCS 28/28، PHPUnit 8/8 با 13 assertion، integration 12/12) و E2E پس از رفع overflow تصویر ۱۷/۱۷ پاس شد. تغییر نهایی marker فهرست در همین clone PHP 8.4 تست شد، نه در PHP 8.1.
+
+Storefront 4.6.2 در همان clone با صفحهٔ shortcode بررسی شد: سه کارت در چهار عرض، سرریز سند/section صفر و list marker برابر `none`. این نتیجه، بررسی classic single-product hook در Storefront نیست. Elementor 4.3.5 در صفحهٔ عادی، Shortcode widget و dynamic block را در frontend render کرد؛ product template در Theme Builder بررسی نشد و با PHP 8.4 deprecation در editor دیده شد. شواهد: `m3-storefront-responsive.txt`, `m3-elementor-browser-evidence.txt`, `m3-elementor-editor.png`, `m3-elementor-frontend.png` و `m3-dynamic-block-frontend.png`.
+
+در پایان، fixtureهای clone پاک شدند؛ زبان به `en_US`، قالب به Twenty Twenty-Five و تنظیم mode به manual برگشت؛ markerهای fixture صفر و فقط Hamkharid/WooCommerce فعال بودند. Storefront برای این آزمون در پوشهٔ قالب clone اضافه شد و فایل‌های آن clone محلی است. اجرای main fixture کاربر روی `wordpress.test` برای گزارش Narrator عمداً دست‌نخورده ماند.
+
 ## موارد آزموده‌نشده و gateهای باز
 
-- Elementor و rendering مرورگری سایر page builderهای خاص.
+- Product Template در Elementor Theme Builder، همهٔ کانتینرهای builder و rendering مرورگری page builderهای دیگر.
 - screen reader؛ smoke keyboard/focus و سنجش zoom معادل ارزیابی WCAG کامل نیستند.
 - ماتریس گسترده نسخه‌های WordPress/WooCommerce/PHP و مرورگرها.
 - پذیرش عمومی/محصولی performance: گیت محلی E-15 را پاس کرده‌ایم؛ این نتیجه SLA عمومی نیست. مقایسه با محصولات/محیط‌های دیگر یا تعهد عملکردی سراسری خارج از این شاهد است.
-- موارد باقی‌مانده برای آمادگی کلی: Elementor مرورگری، screen reader و دامنهٔ سازگاری گسترده آزموده/تأیید نشده‌اند. M4 برای artifact ثبت‌شده پاس شد؛ این به‌تنهایی تأیید عمومی یا اعلام آمادگی کلی پایلوت نیست.
+- موارد باقی‌مانده برای آمادگی کلی: Elementor Theme Builder، screen reader و دامنهٔ سازگاری گسترده آزموده/تأیید نشده‌اند. M4 برای artifact ثبت‌شده پاس شد؛ این به‌تنهایی تأیید عمومی یا اعلام آمادگی کلی پایلوت نیست.
 
 ### شواهد اولیه M4 روی package قبلی
 
@@ -73,7 +98,7 @@ artifact دقیق با SHA-256 `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e
 
 نصب تمیز و تنظیم پیش‌فرض manual پاس شدند. update با تغییر header نصب‌شده به marker مصنوعی `0.0.9` شبیه‌سازی شد، نه با ZIP تاریخی. update rule/settings و محصول/دسته/سفارش را حفظ کرد. uninstall پیش‌فرض تنظیمات و rule را نگه داشت؛ opt-in فقط rule/settings هم‌خرید را حذف کرد و محصولات، دسته‌ها، سفارش‌ها و داده‌های WooCommerce را حفظ کرد. rollback محافظت‌شده DB کلون ۵۲ جدولی و فایل‌های plugin قبلی را برگرداند؛ سپس همان ZIP با hash ثبت‌شده دوباره نصب و فعال شد. پاک‌سازی در پایان صفر HHQA fixture باقی گذاشت. contrast متن و دکمهٔ کارت renderشده 9.3608:1 بود.
 
-M4 lifecycle برای همین SHA پاس است. پس از نصب language pack رسمی WordPress `fa_IR` در clone و بازگردانی تنظیم زبان، native RTL در `WPLANG=fa_IR` تأیید شد: `is_rtl=true`، HTML برابر `lang=fa-IR` و `dir=rtl`، نمایش shortcode و auto section با Persian target، CSS 200، بدون خطای مرورگر و computed direction کارت `rtl`. برای این آزمون DevTools override استفاده نشد. تنظیمات clone برای بازگشت به locale/manual و پاک‌سازی صفر fixture در حال restore است. Elementor مرورگری، screen reader، سازگاری گسترده و Chrome uploader باز/آزموده‌نشده‌اند. این نتیجه آمادگی عمومی پایلوت را به‌تنهایی اثبات نمی‌کند؛ NFR-02 فقط در envelope محلی E-15 پاس است. شواهد lifecycle: `C:\Users\HP\.codex\visualizations\2026\10\27\01a17ea3-2fb8-7403-b60e-3f15d61b0241\qa\zip-install\m4-final-9d6b427-evidence.txt`; شواهد native RTL در همان پوشهٔ QA محلی ثبت شده است.
+M4 lifecycle برای همین SHA پاس بود. پس از نصب language pack رسمی WordPress `fa_IR` در clone، native RTL در `WPLANG=fa_IR` تأیید شد: `is_rtl=true`، HTML برابر `lang=fa-IR` و `dir=rtl`، نمایش shortcode و auto section با Persian target، CSS 200 و computed direction کارت `rtl`. برای این آزمون DevTools override استفاده نشد. clone به حالت locale/manual برگشت و fixtureها پاک شدند. Elementor page-level smoke شده؛ Theme Builder و ماتریس گسترده بازند. کاربر QA-207 را با تأیید Narrator تکمیل کرد. artifact این بخش پیش از CSS جاری است و آمادگی/چرخهٔ artifact تازه را اثبات نمی‌کند؛ NFR-02 فقط در envelope محلی E-15 پاس است.
 
 ## یافته تازه ممیزی کد و وضعیت بازآزمایی
 
@@ -98,4 +123,4 @@ SQL ساختاری ثبت‌شده: matcher سرد 28 query با 10 rule و 108 
 
 ## جمع‌بندی gate
 
-M1 و مسیرهای اصلی M2 بر اساس شواهد پاس‌اند. E2E `1aa89a2c28a1` روی working tree پیش از commit `5d468e0`، ۱۷/۱۷ را گذراند و QA-097/QA-104/QA-130 و axe-core 4.13.0 در دو locale را پوشش داد؛ منطق تست با commit tracked/pushed یکسان است و فقط whitespace PHPCBF تفاوت دارد. بازبینی screenshotهای ۱۲۰۰/۴۲۰px کارت و layout را تأیید کرد و fixtureها پاک شدند. native `fa_IR` RTL نیز در clone با language pack رسمی بدون DevTools override پاس شد؛ تنظیمات clone به حالت اولیه برگشت و fixtureها پاک شدند. NFR-02 با E-15 در محدوده‌ای که کاربر تأیید کرده، برای همین محیط pass است و SLA عمومی یا تعهد محصولی نیست. M4 برای ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` از source `7b3ac0f4d7d8f1ca6bd5a7ef1c87e3842de1ae92` پاس شد؛ Elementor مرورگری، screen reader، سازگاری گسترده و Chrome uploader هنوز بازند. این گزارش مجوز انتشار یا ارسال ZIP نیست.
+M1 و مسیرهای اصلی M2 بر اساس شواهد پاس‌اند. M3: E2E نهایی `551465d97590` پس از اصلاحات CSS برابر ۱۷/۱۷ شد؛ Storefront در چهار عرض و Elementor 4.3.5 page-level بررسی شدند. کاربر گزارش کرد Narrator heading، نام بلند محصول، قیمت و نام/نقش دکمه را اعلام کرده است. Elementor Theme Builder، QA-110 classic single product در Storefront و سازگاری گسترده بازند. native `fa_IR` RTL نیز در clone با language pack رسمی بدون DevTools override پاس شد؛ fixtureهای clone و fixture اصلی `wordpress.test` پاک و تنظیمات restore شدند. NFR-02 با E-15 در محدودهٔ موردتأیید کاربر، فقط برای همین محیط pass است و SLA عمومی نیست. M4 lifecycle برای ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پاس بود، اما آن artifact پیش از اصلاح CSS فعلی ساخته شده است؛ ZIP جاری هنوز lifecycle نشده. این گزارش مجوز انتشار یا ارسال ZIP نیست.

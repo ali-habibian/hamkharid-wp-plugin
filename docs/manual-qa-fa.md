@@ -1,12 +1,12 @@
 # چک‌لیست QA دستی افزونه هم‌خرید
 
-> مرجع فعلی محصول و توسعه: [فهرست مستندات](README.md)، [PRD](prd-fa.md) و [وضعیت و نقشه راه](roadmap-fa.md). شماره‌های Phase 15/16 در این سند نام‌گذاری تاریخی‌اند، نه شاهد تکمیل. E2E پس از اصلاح کنتراست کارت پاس شد؛ M4 و native locale-driven `fa_IR` RTL در clone نیز پاس شدند. Chrome uploader آزموده نشد.
+> مرجع فعلی محصول و توسعه: [فهرست مستندات](README.md)، [PRD](prd-fa.md) و [وضعیت و نقشه راه](roadmap-fa.md). شماره‌های Phase 15/16 در این سند نام‌گذاری تاریخی‌اند، نه شاهد تکمیل. E2E نهایی `551465d97590` پس از دو اصلاح CSS پاس شد و کاربر Narrator را برای QA-207 تأیید کرد. ZIP قبلی M4 و native locale-driven `fa_IR` RTL در clone pass شدند؛ artifact ZIP جاری پس از CSS هنوز lifecycle نشده است. Chrome uploader آزموده نشد.
 >
 > اصلاح دامنه ۲۰۲۶-۱۰-۲۷: طبق D-08، بلوک پویا و shortcode در MVP قرار دارند و جای‌گذاری به قالب خاص محدود نمی‌شود. E2E run=`1aa89a2c28a1` روی working tree پیش از commit `5d468e0`، ۱۷/۱۷ سناریو را گذراند؛ منطق تست با commit tracked/pushed یکسان است و فقط whitespace اصلاح‌شده با PHPCBF تفاوت دارد. پوشش شامل QA-097، QA-130 دسترسی واقعی Shop Manager و axe-core 4.13.0 در `en_US`/LTR و `fa_IR`/RTL با صفر تخلف در tagهای WCAG 2.0/2.1/2.2 A/AA بود. بازبینی screenshotهای ۱۲۰۰/۴۲۰px contrast کارت و layout را تأیید کرد و fixtureها پاک شدند. M4 lifecycle برای ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` از source تمیز `7b3ac0f4d7d8f1ca6bd5a7ef1c87e3842de1ae92` پاس شد؛ native `fa_IR` RTL در clone نیز pass شد. Chrome uploader آزموده نشد.
 
 این سند برای QA دستی MVP افزونه **Smart Category Complement – Hamkharid** است. هدف این مرحله، تأیید رفتار واقعی افزونه در WordPress/WooCommerce و ثبت یک اجرای قابل تکرار قبل از آماده‌سازی مارکت است.
 
-> برچسب Phase 15/16 از چک‌لیست قدیمی مانده است؛ M4 برای artifact ثبت‌شده پاس است. Elementor مرورگری، screen reader و چند gate دیگر M3 همچنان بازند.
+> برچسب Phase 15/16 از چک‌لیست قدیمی مانده است؛ ZIP قبلی M4 lifecycle شد اما CSS فعلی پس از آن تغییر کرده و ZIP جاری هنوز باید lifecycle شود. Elementor page-level smoke پاس است؛ Narrator، Elementor Theme Builder و چند gate دیگر M3 بازند.
 
 ## 1. اطلاعات اجرای QA
 
@@ -158,21 +158,21 @@ Rule دیگری با Source مستقیم `QA Source Child` و همان Target ب
 
 ### RTL
 
-- [ ] **QA-090** سایت را روی فارسی/RTL تست کنید؛ فاصله‌ها، heading، کارت‌ها و دکمه‌ها بدون overlap هستند.
-- [ ] **QA-091** متن فارسی طولانی باعث horizontal overflow در section نمی‌شود.
+- [x] **QA-090** fixture فارسی/RTL در ۳۲۰، ۷۰۰ و ۱۲۰۰px مرور شد؛ heading، سه کارت و CTA در گرید RTL overlap نداشتند؛ run=`m3-content-b12cf7b46acf` و تصویر ارسالی کاربر.
+- [x] **QA-091** عنوان بلند فارسی با عبارت‌های لاتین و عدد در section آزموده شد؛ متن می‌شکند و horizontal overflow ایجاد نمی‌کند؛ run=`m3-content-b12cf7b46acf`.
 
 ### LTR
 
-- [ ] **QA-092** زبان/جهت تست را LTR کنید؛ همان section بدون نیاز به CSS جداگانه درست نمایش داده می‌شود.
+- [x] **QA-092** همان section در `en_US`/LTR با heading و CTA انگلیسی در ۷۰۰px نمایش داده شد؛ گرید دو ستون ماند و overflow ایجاد نشد؛ run=`m3-content-b12cf7b46acf`.
 
 ### Viewport
 
 از DevTools یا Device Mode استفاده کنید.
 
-- [ ] **QA-093** گرید بر اساس عرض واقعی کانتینر و حداقل عرض کارت‌ها واکنش نشان می‌دهد؛ تعداد ستون ثابت به breakpoint قالب وابسته نیست.
-- [ ] **QA-094** در viewport متوسط، ستون‌ها متناسب با فضای والد کم می‌شوند و کارت‌ها زیر حداقل عرض تعریف‌شده نمی‌روند.
-- [ ] **QA-095** در viewport باریک گرید تک‌ستونه می‌شود.
-- [ ] **QA-096** در هیچ‌یک از سه حالت horizontal page overflow ناشی از Hamkharid ایجاد نمی‌شود.
+- [x] **QA-093** گرید بر اساس عرض واقعی کانتینر واکنش نشان می‌دهد؛ run=`m3-content-b12cf7b46acf` در ۳۲۰/۴۲۰/۷۰۰/۱۲۰۰ CSS px به‌ترتیب ۱/۱/۲/۳ ستون نشان داد.
+- [x] **QA-094** در عرض متوسط ۷۰۰px دو ستون ۲۲۲px و در ۱۲۰۰px سه ستون ۲۴۹px شدند؛ حداقل عرض کارت رعایت شد؛ شواهد run=`m3-content-b12cf7b46acf`.
+- [x] **QA-095** در viewportهای باریک ۳۲۰ و ۴۲۰ CSS px گرید تک‌ستونه شد؛ شواهد run=`m3-content-b12cf7b46acf`.
+- [x] **QA-096** `document.documentElement.scrollWidth` در چهار عرض دقیقاً با viewport برابر بود؛ run=`m3-content-b12cf7b46acf` و اجرای نهایی TT5/Storefront این نتیجه را پس از رفع overflow دوپیکسلی تصویر placeholder بازآزمایی کردند. E2E نهایی `551465d97590` برابر ۱۷/۱۷ پاس شد.
 - [x] **QA-097** در عرض مؤثر ۳۲۰ CSS px و zoom صفحهٔ ۲۰۰٪ کنترل‌ها و محتوای ضروری قابل‌استفاده می‌مانند؛ E2E run=`1aa89a2c28a1`.
 
 ## 10. Accessibility پایه
@@ -187,11 +187,11 @@ Rule دیگری با Source مستقیم `QA Source Child` و همان Target ب
 
 حداقل دو Theme را بررسی کنید: Storefront و یک Theme WooCommerce دیگر که برای بازار هدف/محیط تست مناسب است.
 
-- [ ] **QA-110** Storefront + Classic single product: recommendationها در محل صحیح و فقط یک بار نمایش داده می‌شوند.
-- [ ] **QA-111** Theme دوم + Classic single product: recommendationها usable هستند و DOM theme شکسته نمی‌شود.
+- [ ] **QA-110** Storefront + Classic single product: recommendationها در محل صحیح و فقط یک بار نمایش داده می‌شوند. Storefront با صفحهٔ shortcode جداگانه smoke شد؛ سه کارت در ۳۲۰/۴۲۰/۷۰۰/۱۲۰۰px بدون overflow و bullet اضافه نمایش داده شدند، اما این معیار hook صفحهٔ محصول را می‌خواهد.
+- [x] **QA-111** قالب کلاسیک Luxury Shop + صفحهٔ محصول: auto placement در E2E قبلی `1aa89a2c28a1`؛ این run پیش از آخرین اصلاح CSS است. Storefront + shortcode و Twenty Twenty-Five shortcode/dynamic block نیز جداگانه بررسی شدند.
 - [ ] **QA-112** یک Block Theme / blockified Single Product را تست کنید؛ صفحه بدون fatal error باز می‌شود.
-- [ ] **QA-113** در Block Theme section recommendation در صورت match شدن Rule نمایش داده می‌شود و duplicate نیست.
-- [ ] **QA-114** اگر Elementor روی محیط QA فعال است، مشاهده/ویرایش Product Template با Elementor به‌دلیل Hamkharid خراب نمی‌شود؛ Widget اختصاصی Hamkharid نباید وجود داشته باشد.
+- [x] **QA-113** در Twenty Twenty-Five، dynamic block با Rule منطبق در frontend نمایش داده شد؛ E2E نهایی `551465d97590`.
+- [ ] **QA-114** صفحهٔ Elementor با Shortcode widget و dynamic block مرورگری render شد؛ Product Template در Theme Builder بررسی نشد، چون Elementor Pro در clone در دسترس نیست؛ کاربر خواست این بخش آزموده‌نشده ثبت شود. Widget اختصاصی Hamkharid وجود ندارد.
 
 ## 12. HPOS و Dependency Behavior
 
@@ -301,23 +301,23 @@ Runner داده‌های موقت، Administrator و Subscriber اختصاصی �
 
 پوشش اجرا شامل admin preview، manual mode بدون auto placement، shortcode و dynamic block در editor و frontend، قالب کلاسیک Luxury Shop و Twenty Twenty-Five، `en_US`/LTR و `fa_IR`/RTL بود. Keyboard/focus smoke و سنجش contrast عنوان/قیمت/دکمه پاس شدند. axe-core 4.13.0 در هر دو locale برای tagهای `wcag2a/aa`, `wcag21a/aa`, `wcag22a/aa` صفر تخلف گزارش کرد. بازبینی screenshotهای ۱۲۰۰px desktop و ۴۲۰px mobile نیز contrast کارت و layout را تأیید کرد. Cleanup exit 0 داشت و fixtureها پاک شدند.
 
-موارد باز شامل rendering مرورگری Elementor و page builderهای خاص، Screen Reader و ماتریس گسترده مرورگر/نسخه است. QAهای ثبت‌شده HPOS روشن/خاموش، WooCommerce فعال/غیرفعال، ناحیهٔ widget موجود و multi-embed/duplicate را پوشش دادند؛ E2E اخیر دسترسی واقعی حساب Shop Manager به rules/settings را نیز گذراند. Benchmark مقیاس PASS محدود محلی E-15 است و SLA عمومی نیست؛ variable-heavy test فقط exploratory است.
+موارد باز شامل Screen Reader گفتاری، Elementor Theme Builder و ماتریس گسترده مرورگر/نسخه است. Elementor 4.3.5 در صفحهٔ عادی با Shortcode widget و dynamic block smoke شد. QAهای ثبت‌شده HPOS روشن/خاموش، WooCommerce فعال/غیرفعال، widget area و multi-embed/duplicate را پوشش دادند؛ E2E دسترسی Shop Manager به rules/settings را گذراند. Benchmark مقیاس PASS محدود محلی E-15 است و SLA عمومی نیست؛ variable-heavy test فقط exploratory است.
 
 ## 17. تکمیل QA پس از اجرای نیازمندی‌های جدید
 
-وضعیت: suite ثبت‌شده با `composer run test:all` exit 0 پاس شد (PHPCS 28/28، PHPUnit 8/8 با 13 assertion و integration 12/12)؛ `npm run check:js` و `node --check` نیز پاس شدند. E2E `1aa89a2c28a1`، ۱۷/۱۷ بود و axe-core/WCAG A/AA، Shop Manager و بازبینی بصری کارت را پوشش داد؛ fixtureها پاک شدند. تغییر test-only اکنون در commit `5d468e0c2909f3ef78088ebeccae8db008e33766` tracked و pushed است؛ E2E پیش از commit ولی با همان منطق تست اجرا شد. M4 lifecycle برای ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` از source تمیز `7b3ac0f4d7d8f1ca6bd5a7ef1c87e3842de1ae92` پاس است. وجود تست یا تیک به‌تنهایی معیار پذیرش نیست.
+وضعیت: PHP full suite و JS checks پاس شدند؛ PHP 8.1 full suite و E2E ۱۷/۱۷ (پیش از اصلاح marker)، PHP 8.4 E2E نهایی `551465d97590` با دو اصلاح CSS و regression جدید نیز ۱۷/۱۷ پاس شدند. E2Eهای پایه axe/WCAG A/AA، Shop Manager و RTL/LTR را پوشش دادند. کاربر Narrator را برای QA-207 تأیید کرد. Storefront shortcode و Elementor page-level smoke پاس‌اند؛ QA-110 classic single product در Storefront، QA-112 blockified product template و Elementor Theme Builder بازند. ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` مربوط به artifact پیش از CSS جاری است و lifecycle آن نتیجهٔ ZIP تازه را ثابت نمی‌کند. وجود تست یا تیک به‌تنهایی معیار پذیرش نیست.
 
 - [ ] **QA-200 / FR-03** دسته مستقیم، والد نزدیک، priority هم‌سطح و tie-ID؛ قواعد قدیمی بدون meta همان نتیجه قبلی را بدهند.
 - [ ] **QA-201 / FR-04** مقصد حذف‌شده به قانون معتبر بعدی همان سطح و سپس والد برسد؛ مقصد معتبر ولی خالی به قانون دیگر fallback نکند؛ دلیل در preview دیده شود.
 - [ ] **QA-202 / FR-02** POST نامعتبر، نام/مبدأ/مقصد نامعتبر و مقدار تعداد فارسی؛ ورودی فرم حفظ و قانون سالم قبلی ناخواسته غیرفعال نشود. وجود normalization در Repository جایگزین پذیرش ورودی نامعتبر نیست.
 - [ ] **QA-203 / FR-05/06** ساده/متغیر با variationهای موجود و ناموجود، backorder روشن/خاموش و محصول بی‌قیمت؛ خارجی/گروهی حذف؛ ظرفیت با محصول واجد شرایط و query محدود پر شود. سقف variation: حداکثر ۵۰۰ candidate در هر `recommend()`، page حداکثر ۲۴؛ رسیدن به سقف باید در preview هشدار دهد. regression مصنوعی ۵۰۱ variation در اجرای تازه `composer run test:all` پاس شد؛ آزمون دستی preview/لبه‌های دیگر همچنان جداست.
 - [ ] **QA-204 / FR-07** preview همان موتور فروشگاه، بدون تغییر rule/cart، با احراز capability/nonce؛ نمایش علت no-match و no-eligible-products.
-- [x] **QA-205 / FR-10 — browser smoke subset** E2E `1aa89a2c28a1`، manual mode، shortcode و block/editor/frontend را در دو قالب smoke کرد؛ product_id/contextهای لبه و Elementor مرورگری هنوز جداگانه pending هستند.
-- [ ] **QA-206 / FR-08/10 — subset** ناحیهٔ widget موجود و multi-embed/duplicate behavior در QAهای ثبت‌شده پوشش یافت؛ Elementor و builderهای خاص، همهٔ کانتینرها و یکتایی heading ID در ماتریس کامل هنوز gate باز دارند.
-- [ ] **QA-207 / NFR-03/05** zoom صفحهٔ ۲۰۰٪ در عرض مؤثر ۳۲۰ CSS px زیر QA-097 آزموده شد؛ ارزیابی نام/SKUهای طولانی، keyboard/screen reader، قیمت WC و عدم تبدیل مجدد تومان/ریال همچنان نیازمند QA است.
+- [x] **QA-205 / FR-10 — browser smoke subset** E2E نهایی `551465d97590`، ۱۷/۱۷، manual mode، shortcode و block/editor/frontend را پوشش داد؛ smoke جداگانهٔ Elementor 4.3.5 نیز Shortcode widget و dynamic block را render کرد. product_id/contextهای لبه و Theme Builder هنوز جداگانه باز هستند.
+- [ ] **QA-206 / FR-08/10 — subset** ناحیهٔ widget موجود و multi-embed/duplicate behavior در QAهای ثبت‌شده پوشش یافت؛ Elementor 4.3.5 در صفحهٔ معمولی Shortcode widget و dynamic block را render کرد. همهٔ کانتینرها و یکتایی heading ID در ماتریس کامل هنوز gate باز دارند.
+- [x] **QA-207 / NFR-03/05** در fixture محلی، عنوان بلند فارسی/لاتین/عدد و SKU در صفحهٔ محصول و کارت بدون overflow در ۳۲۰/۴۲۰/۷۰۰/۱۲۰۰px (`fa_IR`) و ۷۰۰px (`en_US`)؛ قیمت raw/regular=`29` با `currency=IRR`؛ دکمه‌ها با outline `solid 2px` و نام accessible کامل در Tab sequence. کاربر بصری جا شدن سه کارت/عنوان/دکمه‌ها و نبود overflow را تأیید کرد و سپس گزارش داد Narrator heading، نام بلند محصول، قیمت و نام/نقش دکمه را اعلام کرده است (۲۰۲۶-۱۰-۲۸). QA-097 zoom ۲۰۰٪ در عرض مؤثر ۳۲۰px نیز پاس است. شواهد DOM/keyboard/E2E و تأییدهای کاربر در گفتگو؛ فایل‌های `m3-responsive-long-content.txt`, `m3-product-detail-metrics.txt`, `m3-keyboard-product-section.txt`, `m3-final-e2e-php84.log` و `m3-user-visual-confirmation.png` در پوشهٔ QA.
 - [x] **QA-208 / FR-09** در ZIP با SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6`، uninstall پیش‌فرض rule/settings و product/category/order را حفظ کرد؛ opt-in فقط rule/settings را حذف کرد و داده‌های WooCommerce ماندند.
 - [x] **QA-209 / NFR-04/07 — ZIP lifecycle subset** ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` از source تمیز `7b3ac0f4d7d8f1ca6bd5a7ef1c87e3842de1ae92` با هستهٔ WordPress `Plugin_Upgrader` نصب/نصب مجدد، update شبیه‌سازی‌شده با header marker `0.0.9`، uninstall پیش‌فرض/opt-in، rollback clone و نصب نهایی شد؛ HHQA fixture صفر ماند. Chrome uploader به‌دلیل policy انتخاب فایل محلی آزموده نشد؛ downgrade با ZIP تاریخی واقعی نبود. شواهد در [گزارش QA پایلوت](pilot-qa-fa.md).
 - [x] **QA-211 / NFR-04/07 — compatibility subset** HPOS روشن/خاموش و WooCommerce فعال/غیرفعال آزموده شدند؛ E2E run=`1aa89a2c28a1` دسترسی واقعی role=`shop_manager` را نیز تأیید کرد.
 - [x] **QA-210 / NFR-02 — local envelope only** benchmark ماتریس با gate محلی E-15، طبق انتخاب صریح کاربر برای پذیرش محدود به همین محیط، PASS است؛ پیکربندی محیط، thresholdها و maxima در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. این پذیرش SLA عمومی/محصولی نیست. Variable-heavy n=5 exploratory است و از پذیرش خارج است.
 
-gateها: suite PHP/JS و E2E روی commit `5d468e0` پاس شدند؛ E2E پیش از commit و با همان منطق تست اجرا شد، با تفاوت whitespace PHPCBF. axe-core صفر تخلف در tagهای ذکرشده برای هر دو locale گزارش کرد. HPOS دو حالت، WooCommerce فعال/غیرفعال، widget area، multi-embed و Shop Manager access پوشش دارند؛ M4 lifecycle برای ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` از source `7b3ac0f4d7d8f1ca6bd5a7ef1c87e3842de1ae92` پاس شد. native RTL در clone پس از نصب language pack رسمی `fa_IR` پاس شد: `WPLANG=fa_IR`، `is_rtl=true`، `<html lang="fa-IR" dir="rtl">`، نمایش shortcode و auto section با Persian target، CSS 200، بدون خطای مرورگر و جهت محاسبه‌شدهٔ کارت RTL. تنظیمات locale/manual بازگردانده شد و fixtureها پاک شدند. Elementor مرورگری، screen reader، سازگاری گسترده و Chrome uploader بازند. NFR-02 فقط در envelope محلی E-15 پاس است؛ آمادگی کلی پایلوت اعلام نمی‌شود. اجرای integration/E2E و پاک‌سازی فقط روی محیط QA محلی و fixtureهای آزمایشی باشد.
+gateها: suite PHP/JS، E2Eهای ثبت‌شده، Storefront و Elementor page-level smoke پاس شدند؛ E2E نهایی `551465d97590` پس از اصلاح overflow تصویر و marker فهرست ۱۷/۱۷ است. کاربر تأیید Narrator را برای heading/نام/قیمت/دکمه گزارش کرد. Elementor Theme Builder و ماتریس نسخه بازند؛ Chrome uploader محدودیت دارد. ZIP قبلی SHA-256 `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پیش از CSS جاری lifecycle شد و artifact جاری باید دوباره build/lifecycle شود. native RTL در clone با language pack رسمی `fa_IR` پاس شد. در clone Storefront fixtureها صفر، locale=`en_US`، theme=`twentytwentyfive`، mode=`manual` و فقط افزونهٔ هم‌خرید/WooCommerce فعال بود. fixture اصلی `wordpress.test` پس از گزارش Narrator پاک‌سازی شد؛ locale=`fa_IR`، theme=`luxury-shop`، mode=`manual` و markerهای fixture صفر تأیید شدند. NFR-02 فقط در envelope محلی E-15 پاس است؛ آمادگی کلی پایلوت اعلام نمی‌شود. اجرای integration/E2E و پاک‌سازی فقط روی محیط QA محلی و fixtureهای آزمایشی باشد.
