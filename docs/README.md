@@ -1,6 +1,6 @@
 # مرجع مستندات هم‌خرید
 
-تاریخ بازبینی: ۲۰۲۶-۱۰-۲۸ — E2E نهایی `551465d97590` روی PHP 8.4 با هر دو اصلاح CSS، Storefront classic E2E=`4d1a0a7d67cb` و blockified product template در Twenty Twenty-Five E2E=`9d3c296f10e1` هرکدام ۱۷/۱۷ پاس شدند؛ اجرای PHP 8.1 نیز پس از رفع overflow تصویر، ۱۷/۱۷ پاس شد (پیش از اصلاح marker). `list-style:none` regression مرورگری دارد. Storefront چهار عرض را با سه کارت و بدون overflow گذراند؛ Elementor 4.3.5 صفحهٔ معمولی Shortcode widget و dynamic block را render کرد. PHP 8.1 full suite (PHPCS 28/28، PHPUnit 8/8 و integration 12/12) پاس شد. کاربر گزارش کرد Narrator heading، نام بلند محصول، قیمت و نام/نقش دکمه را اعلام کرده است. Elementor Theme Builder و ماتریس نسخه‌های گسترده هنوز بازند. اصلاحات CSS فعلی هنوز در ZIP قبلی `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` نیستند؛ برای M4 artifact باید ZIP تازه build و lifecycle شود. کاربر gate محلی E-15 را برای همین محیط تأیید کرد؛ این SLA عمومی نیست.
+تاریخ بازبینی: ۲۰۲۶-۱۰-۲۸ — M3 اکنون در Chromium/Firefox/WebKit، هرکدام ۱۸/۱۸، و حداقل WP 6.2.14/WC 8.2.0/PHP 7.4.33 با Chromium ۱۸/۱۸ بررسی شده است. `composer run test:all` سبز است (PHPCS 28/28، PHPUnit 8/8 با 13 assertion و تمام integrationها). QA-124 reactivation و QA-206 multi-embed subset پاس شدند؛ Narrator را کاربر تأیید کرد. Tab traversal در WebKit ادعا نمی‌شود؛ Elementor Pro Theme Builder بنا به تصمیم کاربر آزموده‌نشده می‌ماند. اصلاح `.mo` برای وردپرس حداقل در گزارش ثبت شده است. ZIP موجود `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پیش از CSS/ترجمهٔ جاری ساخته شد؛ M4 برای ZIP تازه هنوز نیازمند build و lifecycle است. گیت E-15 صرفاً در محدودهٔ محلی تأییدشده است و SLA عمومی نیست.
 
 این صفحه نقطه شروع و فهرست مرجع توسعه است. اسناد موجود شامل PRD مصوب، معماری، UX، دفتر تصمیم‌ها، roadmap، راهنمای توسعه و QA هستند. کد، target design و نتایج محیط QA شواهد جدا دارند؛ وضعیت جاری و موارد باز را از جدول وضعیت و گزارش QA بخوانید.
 
@@ -26,7 +26,7 @@
 - اگر کد با هدف محصول اختلاف دارد، هر دو را با برچسب صحیح ثبت کنید؛ کد رفتار فعلی را تعیین می‌کند و PRD رفتار مطلوب را، نه اینکه یکی را بی‌صدا جای دیگری بنشانیم.
 - تصمیم مهم باز در [دفتر تصمیم‌ها](decisions-fa.md) ثبت می‌شود. فرضیه بدون پاسخ کاربر «تأییدشده» نشود.
 - اجرای جاری شامل پیاده‌سازی و QA محلی مجاز تا آماده‌سازی ZIP پایلوت است. به داده یا هاست واقعی دست زده نشده و انتشار، استقرار یا ارسال بیرونی بدون مجوز انجام نمی‌شود.
-- PHP 8.1 full suite و E2E (۱۷/۱۷؛ پیش از اصلاح marker) پاس شدند؛ PHP 8.4 baseline، Storefront classic و blockified product template در Twenty Twenty-Five هرکدام E2E برابر ۱۷/۱۷ شدند. Elementor page-level smoke شد؛ کاربر Narrator را برای QA-207 تأیید کرد. فقط Elementor Theme Builder و ماتریس نسخه بازند. artifact ZIP قبلی نسبت به CSS فعلی stale است و M4 lifecycle باید برای ZIP تازه تکرار شود. جزئیات و محدودیت‌ها در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. NFR-02 فقط در envelope محلی E-15 pass است.
+- E2Eهای نهایی M3 روی سه engine، حداقل نسخهٔ اعلام‌شده و QA-124/206 در [گزارش QA پایلوت](pilot-qa-fa.md) ثبت شده‌اند. Theme Builder طبق دستور کاربر آزموده‌نشده است؛ Tab traversal در WebKit و پوشش تمام قالب‌ها/builderها نیز ادعا نمی‌شود. artifact ZIP قبلی نسبت به CSS/ترجمهٔ جاری stale است و M4 lifecycle برای ZIP تازه هنوز لازم است. NFR-02 فقط در envelope محلی E-15 pass است.
 
 ## نسخه‌پذیری و checkout تمیز
 

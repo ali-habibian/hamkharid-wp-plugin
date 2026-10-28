@@ -5,7 +5,7 @@
 ## محیط و وابستگی
 
 - ریشه فعلی: `D:\laragon\www\hamkharid`؛ shell فعلی PowerShell است.
-- نسخه‌های محیط محلی بررسی‌شده: PHP 8.4.1، WordPress 7.1.3، WooCommerce 11.2.1، Node 26.7.0، npm 11.19.0 و Composer 2.8.3؛ قالب فعال Luxury Shop 1.9.4، locale=`fa_IR`/RTL و HPOS روشن. این ماتریس ادعای پوشش همه نسخه‌های سربرگ نیست.
+- نسخه‌های محیط محلی بررسی‌شده: حداقل WP 6.2.14/WC 8.2.0/PHP 7.4.33 و جاری WP 7.1.3/WC 11.2.1/PHP 8.4.1؛ Node 26.7.0، npm 11.19.0 و Composer 2.8.3. قالب‌ها شامل Luxury Shop 1.9.4، Storefront 4.6.2، Twenty Twenty-Three و Twenty Twenty-Five هستند. Chromium 151.0.7922.34، Firefox 153.0 و WebKit 26.5 آزموده شدند؛ این ماتریس ادعای پوشش همهٔ نسخه‌ها/سیستم‌عامل‌ها نیست.
 - PHP CLI، PHP وب و تنظیمات extension آن‌ها ممکن است متفاوت باشند. مسیر پوشه Laragon اثبات نمی‌کند PHP از Laragon اجرا می‌شود؛ در بررسی قبلی CLI از `C:\xampp\php\php.exe` resolve شد، پیش از اجرا دوباره بررسی شود.
 - WordPress/WooCommerce و DB محلی برای integration لازم‌اند؛ root وردپرس خارج از ریشه افزونه است. نام DB، حساب و رمز در مستندات/مخزن ثبت نشوند.
 - runtime به `vendor/autoload.php` نیاز دارد. ابزارهای dev از `composer.lock` و Playwright از `package-lock.json`/`package.json` می‌آیند. دسترسی اسناد و ابزارهای لازم در clone تمیز `a075c21fb10c359622eb96dc9b36cd7000daa766` تأیید شد؛ `git check-ignore` آن‌ها را ignoreشده گزارش نکرد. اصلاح `.gitignore` در `da914d3` ثبت شده است.
@@ -44,11 +44,11 @@ npm run e2e:install
 | `composer run check` | lint + cs + unit | آماده‌بودن فروشگاه را ثابت نمی‌کند |
 | `composer run test:integration-all` | ۱۲ integration فعلی شامل uninstall | WordPress را load می‌کند و fixture/کاربر/محصول می‌سازد و پاک می‌کند؛ فقط محیط محلی QA |
 | `composer run test:all` | check + integration-all | شامل E2E مرورگر نیست؛ ممکن است DB را تغییر دهد |
-| `npm run test:e2e` | Chromium smoke | fixture می‌سازد و برای بازبینی نگه می‌دارد؛ در اجرای بعد fixtureهای علامت‌دار قبلی پاک می‌شوند |
+| `npm run test:e2e` | Chromium smoke؛ `-- --browser=firefox|webkit` برای engine دیگر | fixture می‌سازد و برای بازبینی نگه می‌دارد؛ در اجرای بعد fixtureهای علامت‌دار قبلی پاک می‌شوند؛ برای engine جایگزین `npx playwright install firefox webkit` لازم است |
 | `npm run test:e2e:headed` | همان تست با مرورگر دیدنی | QA بصری دستی مستقل همچنان لازم است |
 | `npm run e2e:cleanup` | حذف fixtureهای E2E | عملیات حذف DB است؛ تست read-only نیست |
 
-آخرین بازآزمایی CSS پس از دو اصلاح (جعبه‌بندی placeholder و حذف bullet کارت) E2E `551465d97590` روی PHP 8.4 را ۱۷/۱۷ گذراند؛ PHP 8.1 نیز full suite و E2E پس از اصلاح overflow تصویر گذراند (پیش از اصلاح marker). Storefront classic product در E2E `4d1a0a7d67cb` و blockified product template ووکامرس در Twenty Twenty-Five در E2E `9d3c296f10e1` هر دو ۱۷/۱۷ شدند؛ Elementor 4.3.5 در صفحهٔ عادی برای Shortcode widget/dynamic block بررسی شد. کاربر QA-207 و اعلام Narrator را تأیید کرد؛ Elementor Theme Builder و ماتریس نسخه بازند. ZIP قبلی `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پیش از CSS فعلی ساخته شده و lifecycle آن، artifact فعلی را پوشش نمی‌دهد؛ باید پس از rebuild دوباره lifecycle شود.
+آخرین gateهای M3 در [گزارش QA](pilot-qa-fa.md) هستند: current-stack Chromium/Firefox/WebKit هرکدام ۱۸/۱۸، حداقل-stack Chromium ۱۸/۱۸، `composer run test:all` و `npm run check:js` سبز؛ QA-124/205/206 و ترجمهٔ native WP 6.2.14 نیز بررسی شدند. فایل `.mo` با compiler خود WordPress 6.2 از همان `.po` تولید شد تا parser حداقل نسخه ترجمه را بخواند. Elementor Theme Builder بنا به تصمیم کاربر آزموده‌نشده؛ Tab traversal در WebKit و all-builder coverage ادعا نمی‌شود. ZIP قبلی `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پیش از CSS/ترجمهٔ سازگار جاری ساخته شده و برای M4 باید ZIP تازه build و lifecycle شود.
 
 ### ثبت اجرای benchmark و گیت محلی NFR-02
 

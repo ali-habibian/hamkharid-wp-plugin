@@ -191,7 +191,7 @@ Rule دیگری با Source مستقیم `QA Source Child` و همان Target ب
 - [x] **QA-111** قالب کلاسیک Luxury Shop + صفحهٔ محصول: auto placement در E2E قبلی `1aa89a2c28a1`؛ این run پیش از آخرین اصلاح CSS است. Storefront + shortcode و Twenty Twenty-Five shortcode/dynamic block نیز جداگانه بررسی شدند.
 - [x] **QA-112** در clone مستقل WP 7.1.3/WC 11.2.1 با Twenty Twenty-Five، درخواست `woocommerce//single-product` به `twentytwentyfive//single-product` با `source=plugin` حل شد؛ صفحهٔ محصول با auto placement و سه محصول، native add-to-cart و بدون fatal error نمایش داده شد. E2E=`9d3c296f10e1`، ۱۷/۱۷؛ جزئیات در `m3-block-template-e2e/template-resolution.txt`.
 - [x] **QA-113** در Twenty Twenty-Five، dynamic block با Rule منطبق در frontend نمایش داده شد؛ E2E نهایی `551465d97590`.
-- [ ] **QA-114** صفحهٔ Elementor 4.3.5 با Shortcode widget و dynamic block مرورگری render شد؛ Product Template در Theme Builder بررسی نشد، چون Elementor Pro در clone در دسترس نیست؛ کاربر خواست این بخش آزموده‌نشده ثبت شود. Widget اختصاصی Hamkharid وجود ندارد.
+- [ ] **QA-114** Elementor 4.3.5 در صفحهٔ عادی با Shortcode widget و dynamic block render شد؛ Product Template در Theme Builder آزموده‌نشده است، چون به Pro نیاز دارد و کاربر صریحاً خواست همین‌طور ثبت شود. Widget اختصاصی Hamkharid وجود ندارد.
 
 ## 12. HPOS و Dependency Behavior
 
@@ -199,13 +199,13 @@ Rule دیگری با Source مستقیم `QA Source Child` و همان Target ب
 - [x] **QA-121** با HPOS روشن، Admin Ruleها و frontend recommendationها کار کردند.
 - [x] **QA-122** در clone QA با WooCommerce غیرفعال، Hamkharid fatal error ایجاد نکرد.
 - [x] **QA-123** در حالت WooCommerce غیرفعال، notice نیاز به WooCommerce دیده شد.
-- [ ] **QA-124** WooCommerce را دوباره فعال کنید؛ Hamkharid بدون نیاز به repair دستی به کار برمی‌گردد.
+- [x] **QA-124** در clone محلی WP 7.1.3/WC 11.2.1، WooCommerce از API همان clone غیرفعال و دوباره فعال شد؛ storefront بدون Woo section را پنهان کرد و پس از فعال‌سازی section برگشت. هر دو پاسخ 200 و بدون fatal بودند؛ fixture پاک شد.
 
 ## 13. Permission و Admin Safety Smoke Test
 
 - [x] **QA-130** در E2E run=`1aa89a2c28a1` حساب role=`shop_manager` توانست Rules/settings را باز کند و مدیریت کند.
 - [x] **QA-131** در همان E2E کاربر Subscriber به مدیریت Ruleها دسترسی نداشت.
-- [ ] **QA-132** Enable/Disable و Save در استفاده معمول، redirect/fatal/blank page ایجاد نمی‌کنند.
+- [x] **QA-132** E2Eهای نهایی Firefox=`9c0587b75dfd` و Chromium=`e99dc306ab14` ساخت/ذخیره/Enable/Disable قانون و ذخیرهٔ تنظیمات manual را بدون fatal یا blank page گذراندند.
 
 ## 14. Regression نهایی End-to-End
 
@@ -275,6 +275,14 @@ npm install
 npm run e2e:install
 ```
 
+runner به‌صورت پیش‌فرض Chromium را اجرا می‌کند. برای اجرای cross-browser، engineهای لازم را جداگانه نصب کنید و گزینهٔ مرورگر را بدهید:
+
+```powershell
+npx playwright install firefox webkit
+npm run test:e2e -- --browser=firefox
+npm run test:e2e -- --browser=webkit
+```
+
 اجرای headless:
 
 ```powershell
@@ -301,23 +309,39 @@ Runner داده‌های موقت، Administrator و Subscriber اختصاصی �
 
 پوشش اجرا شامل admin preview، manual mode بدون auto placement، shortcode و dynamic block در editor و frontend، قالب کلاسیک Luxury Shop و Twenty Twenty-Five، `en_US`/LTR و `fa_IR`/RTL بود. Keyboard/focus smoke و سنجش contrast عنوان/قیمت/دکمه پاس شدند. axe-core 4.13.0 در هر دو locale برای tagهای `wcag2a/aa`, `wcag21a/aa`, `wcag22a/aa` صفر تخلف گزارش کرد. بازبینی screenshotهای ۱۲۰۰px desktop و ۴۲۰px mobile نیز contrast کارت و layout را تأیید کرد. Cleanup exit 0 داشت و fixtureها پاک شدند.
 
-موارد باز شامل Elementor Theme Builder و ماتریس گسترده مرورگر/نسخه است. گزارش کاربر از Narrator برای QA-207 ثبت شده است. Elementor 4.3.5 در صفحهٔ عادی با Shortcode widget و dynamic block smoke شد. QAهای ثبت‌شده HPOS روشن/خاموش، WooCommerce فعال/غیرفعال، widget area و multi-embed/duplicate را پوشش دادند؛ E2E دسترسی Shop Manager به rules/settings را گذراند. Benchmark مقیاس PASS محدود محلی E-15 است و SLA عمومی نیست؛ variable-heavy test فقط exploratory است.
+Elementor 4.3.5 در صفحهٔ عادی با Shortcode widget و dynamic block smoke شد؛ Theme Builder به تصمیم کاربر آزموده‌نشده می‌ماند. ماتریس اجرایی فعلی در بخش ۱۸ ثبت شده و پوشش جامع همهٔ نسخه‌ها/قالب‌ها نیست. گزارش کاربر از Narrator برای QA-207 ثبت شده است. QAهای ثبت‌شده HPOS روشن/خاموش، WooCommerce فعال/غیرفعال و reactivation، widget area و multi-embed/duplicate را پوشش دادند؛ E2E دسترسی Shop Manager به rules/settings را گذراند. Benchmark مقیاس PASS محدود محلی E-15 است و SLA عمومی نیست؛ variable-heavy test فقط exploratory است.
 
 ## 17. تکمیل QA پس از اجرای نیازمندی‌های جدید
 
-وضعیت: PHP full suite و JS checks پاس شدند؛ PHP 8.1 full suite و E2E ۱۷/۱۷ (پیش از اصلاح marker)، PHP 8.4 E2E نهایی `551465d97590` و Storefront E2E=`4d1a0a7d67cb` هر دو ۱۷/۱۷ شدند. روی Twenty Twenty-Five، blockified product template نیز در E2E=`9d3c296f10e1` با ۱۷/۱۷ آزموده شد. E2Eهای پایه axe/WCAG A/AA، Shop Manager و RTL/LTR را پوشش دادند. کاربر Narrator را برای QA-207 تأیید کرد. Elementor page-level smoke پاس است؛ فقط Product Template در Elementor Theme Builder و ماتریس گسترده نسخه/مرورگر بازند. ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` مربوط به artifact پیش از CSS جاری است و lifecycle آن نتیجهٔ ZIP تازه را ثابت نمی‌کند. وجود تست یا تیک به‌تنهایی معیار پذیرش نیست.
+وضعیت تاریخی runهای قبلی در گزارش QA آمده؛ نتایج نهایی M3 با runهای بخش ۱۸ جایگزین ماتریس مرورگر قبلی هستند. Elementor page-level smoke پاس است؛ Theme Builder به تصمیم کاربر آزموده‌نشده می‌ماند. ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` مربوط به artifact پیش از CSS فعلی است و lifecycle آن نتیجهٔ ZIP تازه را ثابت نمی‌کند. وجود تست یا تیک به‌تنهایی معیار پذیرش نیست.
 
 - [ ] **QA-200 / FR-03** دسته مستقیم، والد نزدیک، priority هم‌سطح و tie-ID؛ قواعد قدیمی بدون meta همان نتیجه قبلی را بدهند.
 - [ ] **QA-201 / FR-04** مقصد حذف‌شده به قانون معتبر بعدی همان سطح و سپس والد برسد؛ مقصد معتبر ولی خالی به قانون دیگر fallback نکند؛ دلیل در preview دیده شود.
 - [ ] **QA-202 / FR-02** POST نامعتبر، نام/مبدأ/مقصد نامعتبر و مقدار تعداد فارسی؛ ورودی فرم حفظ و قانون سالم قبلی ناخواسته غیرفعال نشود. وجود normalization در Repository جایگزین پذیرش ورودی نامعتبر نیست.
 - [ ] **QA-203 / FR-05/06** ساده/متغیر با variationهای موجود و ناموجود، backorder روشن/خاموش و محصول بی‌قیمت؛ خارجی/گروهی حذف؛ ظرفیت با محصول واجد شرایط و query محدود پر شود. سقف variation: حداکثر ۵۰۰ candidate در هر `recommend()`، page حداکثر ۲۴؛ رسیدن به سقف باید در preview هشدار دهد. regression مصنوعی ۵۰۱ variation در اجرای تازه `composer run test:all` پاس شد؛ آزمون دستی preview/لبه‌های دیگر همچنان جداست.
 - [ ] **QA-204 / FR-07** preview همان موتور فروشگاه، بدون تغییر rule/cart، با احراز capability/nonce؛ نمایش علت no-match و no-eligible-products.
-- [x] **QA-205 / FR-10 — browser smoke subset** E2E `551465d97590` روی PHP 8.4 و `4d1a0a7d67cb` روی Storefront، هر دو ۱۷/۱۷، manual mode، shortcode و block/editor/frontend را پوشش دادند؛ smoke جداگانهٔ Elementor 4.3.5 نیز Shortcode widget و dynamic block را render کرد. product_id/contextهای لبه و Theme Builder هنوز جداگانه باز هستند.
-- [ ] **QA-206 / FR-08/10 — subset** ناحیهٔ widget موجود و multi-embed/duplicate behavior در QAهای ثبت‌شده پوشش یافت؛ Elementor 4.3.5 در صفحهٔ معمولی Shortcode widget و dynamic block را render کرد. همهٔ کانتینرها و یکتایی heading ID در ماتریس کامل هنوز gate باز دارند.
+- [x] **QA-205 / FR-10 — browser smoke subset** runهای Chromium=`e99dc306ab14`، Firefox=`9c0587b75dfd` و WebKit=`77ff991fe78b` هرکدام ۱۸/۱۸؛ حالت manual، preview، shortcode و dynamic block در editor/frontend و fa_IR/RTL + en_US/LTR را گذراندند. حداقل‌نسخه‌ها نیز در run Chromium=`9e4eb28921dc` روی WP 6.2.14/WC 8.2.0/PHP 7.4.33 با ۱۸/۱۸ پاس شدند. Elementor page-level smoke جداگانه ثبت است؛ Theme Builder طبق تصمیم کاربر آزموده‌نشده است.
+- [x] **QA-206 / FR-08/10 — subset** در همان سه run مرورگری، shortcode + block + shortcode تکراری روی دو محصول منبع آزمایش شد: دقیقاً دو section یکتا، هرکدام سه محصول؛ heading IDها با product ID مورد انتظار تطابق داشتند و `aria-labelledby` به heading همان section اشاره کرد؛ asset CSS حاضر بود. این شاهد رفتار چند embed است، نه پوشش همهٔ containerها یا builderهای ممکن. تمام موارد یکتایی/تکرار در این subset پاس شدند.
 - [x] **QA-207 / NFR-03/05** در fixture محلی، عنوان بلند فارسی/لاتین/عدد و SKU در صفحهٔ محصول و کارت بدون overflow در ۳۲۰/۴۲۰/۷۰۰/۱۲۰۰px (`fa_IR`) و ۷۰۰px (`en_US`)؛ قیمت raw/regular=`29` با `currency=IRR`؛ دکمه‌ها با outline `solid 2px` و نام accessible کامل در Tab sequence. کاربر بصری جا شدن سه کارت/عنوان/دکمه‌ها و نبود overflow را تأیید کرد و سپس گزارش داد Narrator heading، نام بلند محصول، قیمت و نام/نقش دکمه را اعلام کرده است (۲۰۲۶-۱۰-۲۸). QA-097 zoom ۲۰۰٪ در عرض مؤثر ۳۲۰px نیز پاس است. شواهد DOM/keyboard/E2E و تأییدهای کاربر در گفتگو؛ فایل‌های `m3-responsive-long-content.txt`, `m3-product-detail-metrics.txt`, `m3-keyboard-product-section.txt`, `m3-final-e2e-php84.log` و `m3-user-visual-confirmation.png` در پوشهٔ QA.
 - [x] **QA-208 / FR-09** در ZIP با SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6`، uninstall پیش‌فرض rule/settings و product/category/order را حفظ کرد؛ opt-in فقط rule/settings را حذف کرد و داده‌های WooCommerce ماندند.
 - [x] **QA-209 / NFR-04/07 — ZIP lifecycle subset** ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` از source تمیز `7b3ac0f4d7d8f1ca6bd5a7ef1c87e3842de1ae92` با هستهٔ WordPress `Plugin_Upgrader` نصب/نصب مجدد، update شبیه‌سازی‌شده با header marker `0.0.9`، uninstall پیش‌فرض/opt-in، rollback clone و نصب نهایی شد؛ HHQA fixture صفر ماند. Chrome uploader به‌دلیل policy انتخاب فایل محلی آزموده نشد؛ downgrade با ZIP تاریخی واقعی نبود. شواهد در [گزارش QA پایلوت](pilot-qa-fa.md).
-- [x] **QA-211 / NFR-04/07 — compatibility subset** HPOS روشن/خاموش و WooCommerce فعال/غیرفعال آزموده شدند؛ E2E run=`1aa89a2c28a1` دسترسی واقعی role=`shop_manager` را نیز تأیید کرد.
+- [x] **QA-211 / NFR-04/07 — compatibility subset** WP 6.2.14/WC 8.2.0/PHP 7.4.33 و WP 7.1.3/WC 11.2.1/PHP 8.4.1؛ Playwright Chromium 151.0.7922.34, Firefox 153.0, WebKit 26.5. E2Eها در engineهای جاری ۱۸/۱۸ شدند؛ PHP 8.1 full suite قبلی، HPOS روشن/خاموش، WooCommerce خاموش/روشن (شامل QA-124)، Storefront، Luxury Shop و Twenty Twenty-Five نیز ثبت‌اند. این ماتریس تمام نسخه‌های مرورگر، سیستم‌عامل‌ها یا قالب‌ها را پوشش نمی‌دهد. Tab traversal در WebKit جداگانه پاس ادعا نمی‌شود؛ focus outline و فعال‌سازی Enter در آن engine بررسی شد، Tab traversal در runهای Chromium=`8c532c357888` و Firefox=`5ef9edb25fc3` بررسی شده است.
 - [x] **QA-210 / NFR-02 — local envelope only** benchmark ماتریس با gate محلی E-15، طبق انتخاب صریح کاربر برای پذیرش محدود به همین محیط، PASS است؛ پیکربندی محیط، thresholdها و maxima در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. این پذیرش SLA عمومی/محصولی نیست. Variable-heavy n=5 exploratory است و از پذیرش خارج است.
 
-gateها: suite PHP/JS، E2Eهای ثبت‌شده، Storefront classic product، Twenty Twenty-Five blockified product template و Elementor page-level smoke پاس شدند؛ E2Eهای `551465d97590`, `4d1a0a7d67cb` و `9d3c296f10e1` هرکدام ۱۷/۱۷ هستند. کاربر تأیید Narrator را برای heading/نام/قیمت/دکمه گزارش کرد. فقط Elementor Theme Builder و ماتریس نسخه بازند؛ Chrome uploader محدودیت دارد. ZIP قبلی SHA-256 `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پیش از CSS جاری lifecycle شد و artifact جاری باید دوباره build/lifecycle شود. native RTL در clone با language pack رسمی `fa_IR` پاس شد. در cloneها fixtureها پاک و تنظیمات theme/locale/mode restore شدند؛ در clone block-template theme=`twentytwentyfive`, mode=`manual`, markerهای product/page/rule/user برابر صفر بود. fixture اصلی `wordpress.test` نیز پس از گزارش Narrator پاک شد؛ locale=`fa_IR`، theme=`luxury-shop`، mode=`manual` و markerهای fixture صفر تأیید شدند. NFR-02 فقط در envelope محلی E-15 پاس است؛ آمادگی کلی پایلوت اعلام نمی‌شود. اجرای integration/E2E و پاک‌سازی فقط روی محیط QA محلی و fixtureهای آزمایشی باشد.
+gateهای PHP/JS، rendering، ۳ engine مرورگر جاری، حداقل نسخهٔ اعلام‌شده، QA-124، multi-embed subset و گزارش Narrator پاس شدند. جزئیات/حدود در بخش ۱۸ و [گزارش QA](pilot-qa-fa.md) است. Elementor Theme Builder طبق تصمیم کاربر آزموده‌نشده می‌ماند؛ Tab traversal در WebKit و همهٔ containerها/page builderها نیز ادعا نمی‌شوند. Chrome uploader محدودیت دارد. ZIP قبلی SHA-256 `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پیش از CSS جاری lifecycle شد و artifact جاری باید در M4 دوباره build/lifecycle شود. cloneهای QA پس از اجرا پاک و تنظیمات/fixtureهایشان restore شدند؛ fixture اصلی `wordpress.test` دست‌نخورده ماند و قبلاً پاک/restore تأیید شده است. NFR-02 فقط در envelope محلی E-15 پاس است؛ این گزارش مجوز انتشار/تحویل نیست.
+
+## 18. تکمیل M3 — مرورگر، نسخهٔ حداقل و وابستگی
+
+تاریخ اجرا: ۲۰۲۶-۱۰-۲۸. همهٔ E2Eها روی cloneهای محلی با fixture مصنوعی اجرا شدند. در cloneهای مرورگر، `WP_HTTP_BLOCK_EXTERNAL=true` بود تا update/API وردپرس برای شبکهٔ بیرونی منتظر نماند؛ این تغییر فقط در clone QA بود.
+
+| ماتریس | اجرا | نتیجه |
+|---|---|---|
+| WP 7.1.3 / WC 11.2.1 / PHP 8.4.1، Playwright Chromium 151.0.7922.34 | run=`e99dc306ab14`، ۱۸/۱۸ | CRUD، matching/render، cart، ۴ viewport + zoom ۲۰۰٪، keyboard/focus، axe WCAG A/AA، role smoke، manual/preview، shortcode/block editor/frontend، دو locale و QA-206 |
+| همان stack، Firefox 153.0 | run=`9c0587b75dfd`، ۱۸/۱۸ | همان مسیرهای E2E؛ QA-205/206 پاس |
+| همان stack، WebKit 26.5 | run=`77ff991fe78b`، ۱۸/۱۸ | focus outline، فعال‌سازی Enter و axe پاس؛ دنبالهٔ Tab در این محیط WebKit به‌عنوان pass ثبت نشده است |
+| WP 6.2.14 / WC 8.2.0 / PHP 7.4.33 / Twenty Twenty-Three، Chromium | run=`9e4eb28921dc`، ۱۸/۱۸ | E2E کامل شامل admin، matching/cart، responsive/zoom، axe، role، RTL/LTR، editor و multi-embed |
+| WP 7.1.3 / WC 11.2.1، reactivation | QA-124 local | با Woo غیرفعال frontend پاسخ 200، بدون section/fatal؛ پس از فعال‌سازی مجدد section برگشت. این probe برای storefront بود؛ admin Plugins screen به‌علت وابستگی API WordPress.org از این آزمون کنار گذاشته شد. |
+
+در حداقل WordPress، `hamkharid-fa_IR.mo` قبلی با POMO parser وردپرس 6.2 خوانده نمی‌شد: جهت سند RTL می‌شد ولی heading انگلیسی می‌ماند. فایل از همان `languages/hamkharid-fa_IR.po` با MO compiler خود WP 6.2.14 دوباره تولید شد؛ hash نسخهٔ اصلاح‌شده `6e06c2d508095702e7cc16bfc9f4eef0be285019cb960cc75c3b451feb6d5676` است. پس از اصلاح، boot واقعی WP 6.2.14 مقدار `locale=fa_IR`, `rtl=true` و heading فارسی را داد؛ E2E حداقل‌نسخه نیز ۱۸/۱۸ پاس شد و کل `composer run test:all` دوباره سبز شد.
+
+شواهد تصویری browser runها در `C:\Users\HP\.codex\visualizations\2026\10\27\01a17ea3-2fb8-7403-b60e-3f15d61b0241\qa\m3-browser-chromium-final`, `...\m3-browser-firefox-final`, `...\m3-browser-webkit` و `...\m3-minimum-stack\artifacts-final` هستند. در پایان cloneهای WP 7.1.3 و WP 6.2.14 fixture marker post/user هر دو صفر، WooCommerce فعال، locale=`en_US` و تنظیم mode/theme به مقدار snapshot بازگشته بودند. هیچ دادهٔ هاست یا واقعی استفاده نشد.

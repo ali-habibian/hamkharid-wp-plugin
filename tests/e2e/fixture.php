@@ -303,21 +303,25 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 		$target_child_id  = $create_term( 'Hamkharid E2E Target Child ' . $run_id, $target_parent_id );
 		$admin_source_id  = $create_term( 'Hamkharid E2E Admin Source ' . $run_id );
 
-		$current_product_id = $create_simple_product(
+		$current_product_id       = $create_simple_product(
 			'Hamkharid E2E Current ' . $run_id,
 			array( $source_child_id, $target_parent_id )
 		);
-		$simple_product_id  = $create_simple_product( 'Hamkharid E2E Simple ' . $run_id, array( $target_parent_id ) );
-		$child_product_id   = $create_simple_product(
+		$second_source_product_id = $create_simple_product(
+			'Hamkharid E2E Second Source ' . $run_id,
+			array( $source_child_id )
+		);
+		$simple_product_id        = $create_simple_product( 'Hamkharid E2E Simple ' . $run_id, array( $target_parent_id ) );
+		$child_product_id         = $create_simple_product(
 			'Hamkharid E2E Target Child Product ' . $run_id,
 			array( $target_child_id )
 		);
-		$out_of_stock_id    = $create_simple_product(
+		$out_of_stock_id          = $create_simple_product(
 			'Hamkharid E2E Out Of Stock ' . $run_id,
 			array( $target_parent_id ),
 			'outofstock'
 		);
-		$hidden_product_id  = $create_simple_product(
+		$hidden_product_id        = $create_simple_product(
 			'Hamkharid E2E Hidden ' . $run_id,
 			array( $target_parent_id ),
 			'instock',
@@ -368,7 +372,7 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 
 		$mark_post( (int) $rule_id );
 
-		$shortcode_page_id = wp_insert_post(
+		$shortcode_page_id   = wp_insert_post(
 			array(
 				'post_title'   => 'Hamkharid E2E Shortcode Page ' . $run_id,
 				'post_content' => '[hamkharid_complements product_id="' . $current_product_id . '"]',
@@ -377,7 +381,7 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 			),
 			true
 		);
-		$block_page_id     = wp_insert_post(
+		$block_page_id       = wp_insert_post(
 			array(
 				'post_title'   => 'Hamkharid E2E Block Page ' . $run_id,
 				'post_content' => '<!-- wp:hamkharid/complements {"productId":' . $current_product_id . '} /-->',
@@ -386,18 +390,29 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 			),
 			true
 		);
+		$multi_embed_page_id = wp_insert_post(
+			array(
+				'post_title'   => 'Hamkharid E2E Multi Embed Page ' . $run_id,
+				'post_content' => '[hamkharid_complements product_id="' . $current_product_id . '"]<!-- wp:hamkharid/complements {"productId":' . $second_source_product_id . '} /-->[hamkharid_complements product_id="' . $current_product_id . '"]',
+				'post_status'  => 'publish',
+				'post_type'    => 'page',
+			),
+			true
+		);
 
-		if ( is_wp_error( $shortcode_page_id ) || is_wp_error( $block_page_id ) ) {
+		if ( is_wp_error( $shortcode_page_id ) || is_wp_error( $block_page_id ) || is_wp_error( $multi_embed_page_id ) ) {
 			throw new RuntimeException( 'Browser QA embed pages could not be created.' );
 		}
 
 		$mark_post( (int) $shortcode_page_id );
 		$mark_post( (int) $block_page_id );
+		$mark_post( (int) $multi_embed_page_id );
 
 		$state = array(
 			'run_id'         => $run_id,
 			'locale'         => get_locale(),
 			'theme_template' => get_stylesheet(),
+			'block_theme'    => wp_get_theme( 'twentytwentyfive' )->exists() ? 'twentytwentyfive' : 'twentytwentythree',
 			'admin'          => array(
 				'username' => $admin_username,
 				'password' => $admin_password,
@@ -411,20 +426,22 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 				'password' => $shop_manager_password,
 			),
 			'ids'            => array(
-				'source_parent'    => $source_parent_id,
-				'source_child'     => $source_child_id,
-				'target_parent'    => $target_parent_id,
-				'target_child'     => $target_child_id,
-				'admin_source'     => $admin_source_id,
-				'current_product'  => $current_product_id,
-				'simple_product'   => $simple_product_id,
-				'child_product'    => $child_product_id,
-				'variable_product' => $variable_product_id,
-				'out_of_stock'     => $out_of_stock_id,
-				'hidden_product'   => $hidden_product_id,
-				'base_rule'        => (int) $rule_id,
-				'shortcode_page'   => (int) $shortcode_page_id,
-				'block_page'       => (int) $block_page_id,
+				'source_parent'         => $source_parent_id,
+				'source_child'          => $source_child_id,
+				'target_parent'         => $target_parent_id,
+				'target_child'          => $target_child_id,
+				'admin_source'          => $admin_source_id,
+				'current_product'       => $current_product_id,
+				'second_source_product' => $second_source_product_id,
+				'simple_product'        => $simple_product_id,
+				'child_product'         => $child_product_id,
+				'variable_product'      => $variable_product_id,
+				'out_of_stock'          => $out_of_stock_id,
+				'hidden_product'        => $hidden_product_id,
+				'base_rule'             => (int) $rule_id,
+				'shortcode_page'        => (int) $shortcode_page_id,
+				'block_page'            => (int) $block_page_id,
+				'multi_embed_page'      => (int) $multi_embed_page_id,
 			),
 			'names'          => array(
 				'simple_product' => get_the_title( $simple_product_id ),
@@ -436,6 +453,7 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 				'current_product'  => get_permalink( $current_product_id ),
 				'shortcode_page'   => get_permalink( (int) $shortcode_page_id ),
 				'block_page'       => get_permalink( (int) $block_page_id ),
+				'multi_embed_page' => get_permalink( (int) $multi_embed_page_id ),
 				'settings'         => admin_url( 'admin.php?page=hamkharid-display-settings' ),
 				'block_editor'     => admin_url( 'post.php?post=' . (int) $block_page_id . '&action=edit' ),
 				'variable_product' => get_permalink( $variable_product_id ),

@@ -3,13 +3,21 @@ import { mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { chromium } from 'playwright';
+import { chromium, firefox, webkit } from 'playwright';
 
 const require = createRequire(import.meta.url);
 const axeSource = require('axe-core').source;
 
 const headed = process.argv.includes('--headed');
+const browserName = process.argv.find((argument) => argument.startsWith('--browser='))?.split('=')[1] || 'chromium';
+const browserTypes = { chromium, firefox, webkit };
+const timeoutMs = Number(process.env.HAMKHARID_E2E_TIMEOUT_MS || 30000);
 const wordpressRoot = process.env.HAMKHARID_WP_ROOT;
+
+if (!Object.hasOwn(browserTypes, browserName)) {
+  console.error(`Unsupported browser "${browserName}". Choose chromium, firefox, or webkit.`);
+  process.exit(1);
+}
 
 if (!wordpressRoot) {
   console.error('Set HAMKHARID_WP_ROOT before running browser QA.');
@@ -35,12 +43,14 @@ function fixture(action, argument = '') {
 }
 
 async function login(page, loginUrl, credentials, expectDashboard = true) {
+  page.setDefaultTimeout(timeoutMs);
+  page.setDefaultNavigationTimeout(timeoutMs);
   await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
   await page.locator('#user_login').fill(credentials.username);
   await page.locator('#user_pass').fill(credentials.password);
   await Promise.all([
     page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
-    page.locator('#wp-submit').click(),
+    page.locator('#wp-submit').click({ noWaitAfter: true }),
   ]);
   if (expectDashboard) {
     assert.match(page.url(), /\/wp-admin\//, 'WordPress login did not reach wp-admin.');
@@ -153,10 +163,12 @@ async function check(ids, title, callback) {
 
 try {
   state = JSON.parse(fixture('setup'));
-  browser = await chromium.launch({ headless: !headed });
+  browser = await browserTypes[browserName].launch({ headless: !headed });
 
   const adminContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const adminPage = await adminContext.newPage();
+  adminPage.setDefaultTimeout(timeoutMs);
+  adminPage.setDefaultNavigationTimeout(timeoutMs);
   await login(adminPage, state.urls.login, state.admin);
 
   await check('QA-005, QA-006', 'Rule admin loads without Quick Edit or Bulk Edit', async () => {
@@ -177,14 +189,64 @@ try {
     await adminPage.locator('#hamkharid-recommendation-count').fill('1');
     await adminPage.locator('#hamkharid-sort-strategy').selectOption('random');
 
-    await Promise.all([
-      adminPage.waitForURL(/post\.php\?post=\d+&action=edit/),
-      adminPage.locator('#publish').click(),
-    ]);
-
-    const match = adminPage.url().match(/[?&]post=(\d+)/);
-    assert.ok(match, 'Created rule ID was not present in the edit URL.');
+    const savedRuleTitle = `Hamkharid E2E UI Rule ${state.run_id}`;
+    const adminPostRequests = [];
+    let ruleSaveRequest = null;
+    const captureAdminPost = (request) => {
+      const pathname = new URL(request.url()).pathname;
+      if ('POST' !== request.method() || !pathname.includes('/wp-admin/')) return;
+      adminPostRequests.push(pathname);
+      if ((request.postData() || '').includes('hamkharid_rule_nonce')) ruleSaveRequest = request;
+    };
+    const reportAdminPostResponse = (response) => {
+      if ('POST' !== response.request().method() || !new URL(response.url()).pathname.includes('/wp-admin/')) return;
+      console.log(`QA admin response ${browserName}: ${response.status()} ${new URL(response.url()).pathname}`);
+    };
+    const reportAdminPostFailure = (request) => {
+      if ('POST' === request.method() && new URL(request.url()).pathname.includes('/wp-admin/')) {
+        console.log(`QA admin request failed ${browserName}: ${new URL(request.url()).pathname} ${request.failure()?.errorText || 'unknown error'}`);
+      }
+    };
+    adminPage.on('request', captureAdminPost);
+    adminPage.on('response', reportAdminPostResponse);
+    adminPage.on('requestfailed', reportAdminPostFailure);
+    const saveResponse = await Promise.all([
+      adminPage.waitForResponse((response) => {
+        const request = response.request();
+        return request === ruleSaveRequest
+          && 'POST' === request.method()
+          && new URL(response.url()).pathname.endsWith('/wp-admin/post.php');
+      }),
+      adminPage.locator('#publish').click({ noWaitAfter: true }),
+    ]).then(([response]) => response);
+    adminPage.off('request', captureAdminPost);
+    adminPage.off('response', reportAdminPostResponse);
+    adminPage.off('requestfailed', reportAdminPostFailure);
+    console.log(`QA form POST ${browserName}: admin_paths=${adminPostRequests.join(',') || 'none'}`);
+    assert.equal(saveResponse.status(), 302, 'The native rule form did not redirect after saving.');
+    assert.ok(ruleSaveRequest, 'The native rule form save request was not observed.');
+    const submittedFields = new URLSearchParams(ruleSaveRequest.postData() || '');
+    const submittedSourceIds = submittedFields.getAll('hamkharid_source_category_ids[]').sort();
+    const expectedSourceIds = [String(state.ids.admin_source), String(state.ids.target_child)].sort();
+    console.log(
+      `QA form POST ${browserName}: nonce=${submittedFields.has('hamkharid_rule_nonce')} `
+      + `sources=${submittedSourceIds.length} target=${submittedFields.get('hamkharid_target_category_id') || 'missing'} `
+      + `count=${submittedFields.get('hamkharid_recommendation_count') || 'missing'} sort=${submittedFields.get('hamkharid_sort_strategy') || 'missing'}`
+    );
+    assert.ok(submittedFields.has('hamkharid_rule_nonce'), 'The native rule form nonce was absent from the save request.');
+    assert.deepEqual(submittedSourceIds, expectedSourceIds, 'Selected source categories were absent from the save request.');
+    assert.equal(submittedFields.get('hamkharid_target_category_id'), String(state.ids.target_parent));
+    assert.equal(submittedFields.get('hamkharid_recommendation_count'), '1');
+    assert.equal(submittedFields.get('hamkharid_sort_strategy'), 'random');
+    await adminPage.goto(state.urls.rules, { waitUntil: 'domcontentloaded' });
+    const savedRuleRow = adminPage.locator('#the-list tr').filter({ hasText: savedRuleTitle }).first();
+    await savedRuleRow.waitFor();
+    const savedRuleRowId = await savedRuleRow.getAttribute('id');
+    const match = savedRuleRowId?.match(/^post-(\d+)$/);
+    assert.ok(match, 'Created rule ID was not present in the matching rule-list row.');
     state.ui_rule_id = Number(match[1]);
+
+    await adminPage.goto(new URL(`post.php?post=${state.ui_rule_id}&action=edit`, state.urls.new_rule).href, { waitUntil: 'domcontentloaded' });
 
     assert.equal(await adminPage.locator('#hamkharid-target-category').inputValue(), String(state.ids.target_parent));
     assert.equal(await adminPage.locator('#hamkharid-recommendation-count').inputValue(), '1');
@@ -359,19 +421,27 @@ try {
     assert.ok((await focusables.count()) > 0);
     assert.equal(await focusables.first().evaluate((element) => element.tabIndex >= 0), true);
 
-    await focusables.first().focus();
-    await adminPage.keyboard.press('Tab');
-    const focusState = await adminPage.evaluate(() => {
+    const firstFocusable = focusables.first();
+    await firstFocusable.focus();
+    const focusState = await firstFocusable.evaluate((element) => {
       const active = document.activeElement;
-      if (!(active instanceof HTMLElement) || !active.closest('.hamkharid-complements')) {
-        return null;
-      }
+      if (!(active instanceof HTMLElement) || active !== element) return null;
       const style = getComputedStyle(active);
       return { outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth };
     });
-    assert.ok(focusState, 'Keyboard focus left the recommendation section unexpectedly.');
+    assert.ok(focusState, 'The first recommendation control did not receive focus.');
     assert.notEqual(focusState.outlineStyle, 'none');
     assert.notEqual(focusState.outlineWidth, '0px');
+    await firstFocusable.evaluate((element) => element.addEventListener('click', (event) => {
+      event.preventDefault();
+      window.__hamkharid_keyboard_activation = true;
+    }, { once: true }));
+    await firstFocusable.press('Enter');
+    assert.equal(
+      await adminPage.evaluate(() => window.__hamkharid_keyboard_activation === true),
+      true,
+      'Enter did not activate the focused recommendation link.',
+    );
 
     const productTitle = section.locator('li.product .woocommerce-loop-product__title').first();
     const contrast = await textContrastRatio(productTitle);
@@ -463,9 +533,10 @@ try {
 
     await adminPage.goto(state.urls.block_editor, { waitUntil: 'domcontentloaded' });
     await adminPage.waitForFunction(() => {
+      const blocks = window.wp?.data?.select('core/editor')?.getBlocks?.();
       return Boolean(
         window.wp?.blocks?.getBlockType('hamkharid/complements')
-        && window.wp?.data?.select('core/editor')?.getBlocks
+        && blocks?.some((block) => 'hamkharid/complements' === block.name)
       );
     });
     const editorBlockTypes = await adminPage.evaluate(() => {
@@ -481,7 +552,7 @@ try {
       'The dynamic block editor script did not register the Hamkharid block.'
     );
 
-    fixture('switch-theme', 'twentytwentyfive');
+    fixture('switch-theme', state.block_theme);
     await adminPage.goto(state.urls.shortcode_page, { waitUntil: 'domcontentloaded' });
     assert.equal(await adminPage.locator('section.hamkharid-complements').count(), 1);
     await adminPage.goto(state.urls.block_page, { waitUntil: 'domcontentloaded' });
@@ -524,10 +595,34 @@ try {
     ]);
   });
 
+  await check('QA-206', 'Mixed shortcode and block embeds deduplicate products and keep heading IDs unique', async () => {
+    const response = await adminPage.goto(state.urls.multi_embed_page, { waitUntil: 'domcontentloaded' });
+    assert.equal(response?.status(), 200);
+
+    const sections = adminPage.locator('section.hamkharid-complements');
+    assert.equal(await sections.count(), 2, 'Repeated embed of one product should render once; the second product should render once.');
+
+    const headings = await sections.locator(':scope > h2').evaluateAll((elements) => elements.map((element) => element.id));
+    const labelledBy = await sections.evaluateAll((elements) => elements.map((element) => element.getAttribute('aria-labelledby')));
+    const expectedHeadings = [
+      `hamkharid-complements-title-${state.ids.current_product}`,
+      `hamkharid-complements-title-${state.ids.second_source_product}`,
+    ].sort();
+    assert.equal(new Set(headings).size, 2, 'Each recommendation section should have a unique heading ID.');
+    assert.deepEqual([...headings].sort(), expectedHeadings, 'The expected source products should each have their own heading ID.');
+    assert.deepEqual(labelledBy, headings, 'Each section should be labelled by its own heading.');
+
+    for (let index = 0; index < await sections.count(); index += 1) {
+      assert.equal(await sections.nth(index).locator('li.product').count(), 3);
+    }
+
+    assert.ok(await adminPage.locator('link[href*="frontend.css"]').count() > 0, 'Embed page CSS was not enqueued.');
+  });
+
   await adminContext.close();
 
   const passed = results.filter((result) => result.passed).length;
-  console.log(`Browser QA passed: ${passed}/${results.length} smoke checks.`);
+  console.log(`Browser QA passed in ${browserName}: ${passed}/${results.length} smoke checks.`);
 } catch (error) {
   console.error(error instanceof Error ? error.stack : String(error));
   process.exitCode = 1;
