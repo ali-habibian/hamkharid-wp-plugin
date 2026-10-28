@@ -72,19 +72,25 @@ QAهای سازگاری ثبت‌شدهٔ جداگانه شامل HPOS روشن 
 
 در clone مستقل M4 با WordPress 7.1.3، WooCommerce 11.2.1، PHP 8.4.1 و Twenty Twenty-Five، اجرای E2E `551465d97590` پس از دو اصلاح CSS (جعبه‌بندی تصویر placeholder و حذف markerهای فهرست) **۱۷/۱۷** گذراند. اندازه‌گیری عنوان/SKU بلند در ۳۲۰/۴۲۰/۷۰۰/۱۲۰۰px، document width برابر viewport و overflow داخلی صفر بود؛ سه کارت حفظ شدند. regression تازه در E2E مقدار `list-style-type: none` را نیز کنترل می‌کند. تصاویر در `m3-final-artifacts/hamkharid-551465d97590-{420,700,1200}.png` و log در `m3-final-e2e-php84.log` هستند.
 
+برای Storefront 4.6.2، قالب در clone فعال شد و E2E کامل `4d1a0a7d67cb` **۱۷/۱۷** گذراند؛ شامل صفحهٔ محصول کلاسیک، auto placement یکتا با سه recommendation واجد شرایط، خرید native، اندازه‌های responsive، keyboard و axe در دو locale. screenshotهای `m3-storefront-final-e2e/hamkharid-4d1a0a7d67cb-{420,700,1200}.png` بصری بازبینی شدند. این run QA-110 را می‌بندد.
+
 PHP 8.1.10، WordPress 7.1.3، WooCommerce 11.2.1 و Twenty Twenty-Five: full PHP suite پس از تنظیم fixture به حالت automatic پاس شد (PHPCS 28/28، PHPUnit 8/8 با 13 assertion، integration 12/12) و E2E پس از رفع overflow تصویر ۱۷/۱۷ پاس شد. تغییر نهایی marker فهرست در همین clone PHP 8.4 تست شد، نه در PHP 8.1.
 
 Storefront 4.6.2 در همان clone با صفحهٔ shortcode بررسی شد: سه کارت در چهار عرض، سرریز سند/section صفر و list marker برابر `none`. این نتیجه، بررسی classic single-product hook در Storefront نیست. Elementor 4.3.5 در صفحهٔ عادی، Shortcode widget و dynamic block را در frontend render کرد؛ product template در Theme Builder بررسی نشد و با PHP 8.4 deprecation در editor دیده شد. شواهد: `m3-storefront-responsive.txt`, `m3-elementor-browser-evidence.txt`, `m3-elementor-editor.png`, `m3-elementor-frontend.png` و `m3-dynamic-block-frontend.png`.
 
-در پایان، fixtureهای clone پاک شدند؛ زبان به `en_US`، قالب به Twenty Twenty-Five و تنظیم mode به manual برگشت؛ markerهای fixture صفر و فقط Hamkharid/WooCommerce فعال بودند. Storefront برای این آزمون در پوشهٔ قالب clone اضافه شد و فایل‌های آن clone محلی است. اجرای main fixture کاربر روی `wordpress.test` برای گزارش Narrator عمداً دست‌نخورده ماند.
+در clone Storefront، fixtureها پاک شدند؛ زبان به `en_US`، قالب به Twenty Twenty-Five و تنظیم mode به manual برگشت؛ markerهای fixture صفر و فقط Hamkharid/WooCommerce فعال بودند. قالب Storefront و WordPress `fa_IR` language pack رسمی (فایل‌هایی که در clone پیش‌تر غایب بودند) برای تکرار QA در clone باقی ماندند. اصلاح `tests/e2e/fixture.php` اکنون option زبان را وقتی از ابتدا وجود ندارد می‌سازد و در cleanup همان فقدان را restore می‌کند؛ همچنین runner پیش از E2E تنظیم mode قبلی را snapshot می‌کند، automatic را برای صفحهٔ محصول فعال می‌کند و در cleanup mode قبلی را برمی‌گرداند. پیش از اصلاح، switch-locale در clone بدون `fa_IR.mo` نمی‌توانست locale را عوض کند و صفحهٔ محصول در سایت تازه با تنظیم manual، خودکار section نداشت. اجرای main fixture کاربر روی `wordpress.test` پس از گزارش Narrator پاک شد.
+
+### QA-112 — قالب بلوکی Single Product
+
+در clone مستقل `zip-install` با WP 7.1.3، WC 11.2.1 و Twenty Twenty-Five، درخواست `get_block_template('woocommerce//single-product', 'wp_template')` به `twentytwentyfive//single-product` با `source=plugin` حل شد؛ این نشان می‌دهد محصول از fallback blockified ووکامرس render شده است. E2E=`9d3c296f10e1` برابر ۱۷/۱۷ شد. صفحهٔ محصول، auto placement یکتای سه محصول، خرید native، responsive، keyboard و axe را گذراند. screenshotهای `m3-block-template-e2e/hamkharid-9d3c296f10e1-{420,700,1200}.png` ثبت شدند و نمای ۱۲۰۰px بصری مرور شد. جزئیات template در `m3-block-template-e2e/template-resolution.txt` است. Clone پس از اجرا پاکسازی شد: fixtureهای محصول/صفحه/rule/user صفر، mode=`manual` و theme=`twentytwentyfive`.
 
 ## موارد آزموده‌نشده و gateهای باز
 
-- Product Template در Elementor Theme Builder، همهٔ کانتینرهای builder و rendering مرورگری page builderهای دیگر.
-- screen reader؛ smoke keyboard/focus و سنجش zoom معادل ارزیابی WCAG کامل نیستند.
+- Product Template در Elementor Theme Builder (Pro در دسترس نبود؛ بنا به تصمیم کاربر آزموده‌نشده ثبت شد) و rendering مرورگری page builderهای دیگر.
+- screen readerهای دیگر؛ کاربر Narrator را برای QA-207 تأیید کرده است. smoke keyboard/focus و سنجش zoom معادل ارزیابی WCAG کامل نیستند.
 - ماتریس گسترده نسخه‌های WordPress/WooCommerce/PHP و مرورگرها.
 - پذیرش عمومی/محصولی performance: گیت محلی E-15 را پاس کرده‌ایم؛ این نتیجه SLA عمومی نیست. مقایسه با محصولات/محیط‌های دیگر یا تعهد عملکردی سراسری خارج از این شاهد است.
-- موارد باقی‌مانده برای آمادگی کلی: Elementor Theme Builder، screen reader و دامنهٔ سازگاری گسترده آزموده/تأیید نشده‌اند. M4 برای artifact ثبت‌شده پاس شد؛ این به‌تنهایی تأیید عمومی یا اعلام آمادگی کلی پایلوت نیست.
+- موارد باقی‌مانده برای آمادگی کلی: Elementor Theme Builder و دامنهٔ سازگاری گسترده آزموده/تأیید نشده‌اند. QA-207 Narrator طبق گزارش کاربر پاس است. M4 برای artifact ثبت‌شده پاس شد؛ این به‌تنهایی تأیید عمومی یا اعلام آمادگی کلی پایلوت نیست.
 
 ### شواهد اولیه M4 روی package قبلی
 
@@ -123,4 +129,4 @@ SQL ساختاری ثبت‌شده: matcher سرد 28 query با 10 rule و 108 
 
 ## جمع‌بندی gate
 
-M1 و مسیرهای اصلی M2 بر اساس شواهد پاس‌اند. M3: E2E نهایی `551465d97590` پس از اصلاحات CSS برابر ۱۷/۱۷ شد؛ Storefront در چهار عرض و Elementor 4.3.5 page-level بررسی شدند. کاربر گزارش کرد Narrator heading، نام بلند محصول، قیمت و نام/نقش دکمه را اعلام کرده است. Elementor Theme Builder، QA-110 classic single product در Storefront و سازگاری گسترده بازند. native `fa_IR` RTL نیز در clone با language pack رسمی بدون DevTools override پاس شد؛ fixtureهای clone و fixture اصلی `wordpress.test` پاک و تنظیمات restore شدند. NFR-02 با E-15 در محدودهٔ موردتأیید کاربر، فقط برای همین محیط pass است و SLA عمومی نیست. M4 lifecycle برای ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پاس بود، اما آن artifact پیش از اصلاح CSS فعلی ساخته شده است؛ ZIP جاری هنوز lifecycle نشده. این گزارش مجوز انتشار یا ارسال ZIP نیست.
+M1 و مسیرهای اصلی M2 بر اساس شواهد پاس‌اند. M3: E2Eهای `551465d97590`، `4d1a0a7d67cb` و `9d3c296f10e1` هرکدام ۱۷/۱۷ شدند؛ به‌ترتیب baseline به‌روز، Storefront classic product و blockified Single Product در clone Twenty Twenty-Five. Storefront در چهار عرض و Elementor 4.3.5 page-level بررسی شدند. کاربر گزارش کرد Narrator heading، نام محصول، قیمت و نام/نقش دکمه را اعلام کرده است. فقط Elementor Theme Builder و سازگاری گسترده بازند. native `fa_IR` RTL نیز در clone با language pack رسمی بدون DevTools override پاس شد؛ fixtureهای clone و fixture اصلی `wordpress.test` پاک و تنظیمات restore شدند. NFR-02 با E-15 در محدودهٔ موردتأیید کاربر، فقط برای همین محیط pass است و SLA عمومی نیست. M4 lifecycle برای ZIP SHA `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پاس بود، اما آن artifact پیش از اصلاح CSS فعلی ساخته شده است؛ ZIP جاری هنوز lifecycle نشده. این گزارش مجوز انتشار یا ارسال ZIP نیست.

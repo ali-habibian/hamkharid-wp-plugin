@@ -57,7 +57,17 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 		$original_locale = get_option( $locale_snapshot_option, null );
 
 		if ( null !== $original_locale ) {
-			update_option( 'WPLANG', $original_locale );
+			if ( is_array( $original_locale ) && array_key_exists( 'exists', $original_locale ) ) {
+				if ( $original_locale['exists'] ) {
+					update_option( 'WPLANG', $original_locale['value'] );
+				} else {
+					delete_option( 'WPLANG' );
+				}
+			} else {
+				// Older fixture snapshots stored only the original locale value.
+				update_option( 'WPLANG', $original_locale );
+			}
+
 			delete_option( $locale_snapshot_option );
 		}
 
@@ -159,11 +169,26 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 		}
 
 		if ( false === get_option( $locale_snapshot_option, false ) ) {
-			add_option( $locale_snapshot_option, get_option( 'WPLANG', '' ), '', false );
+			$missing_locale_sentinel = '__hamkharid_e2e_missing_locale__';
+			$original_locale         = get_option( 'WPLANG', $missing_locale_sentinel );
+			add_option(
+				$locale_snapshot_option,
+				array(
+					'exists' => $missing_locale_sentinel !== $original_locale,
+					'value'  => $missing_locale_sentinel === $original_locale ? '' : $original_locale,
+				),
+				'',
+				false
+			);
 		}
 
 		$stored_locale = 'en_US' === $locale ? '' : $locale;
-		update_option( 'WPLANG', $stored_locale );
+
+		if ( false === get_option( 'WPLANG', false ) ) {
+			add_option( 'WPLANG', $stored_locale );
+		} else {
+			update_option( 'WPLANG', $stored_locale );
+		}
 		echo 'Locale switched to ' . esc_html( $locale ) . ".\n";
 		return;
 	}
@@ -176,6 +201,9 @@ use Hamkharid\SmartCategoryComplement\Admin\DisplaySettings;
 
 	$delete_stale_fixtures();
 	add_option( $settings_snapshot_option, get_option( DisplaySettings::OPTION_NAME, false ), '', false );
+	$test_settings         = DisplaySettings::get();
+	$test_settings['mode'] = 'automatic';
+	update_option( DisplaySettings::OPTION_NAME, $test_settings, false );
 
 	$run_id = substr( str_replace( '-', '', wp_generate_uuid4() ), 0, 12 );
 

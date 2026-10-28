@@ -48,7 +48,7 @@ npm run e2e:install
 | `npm run test:e2e:headed` | همان تست با مرورگر دیدنی | QA بصری دستی مستقل همچنان لازم است |
 | `npm run e2e:cleanup` | حذف fixtureهای E2E | عملیات حذف DB است؛ تست read-only نیست |
 
-آخرین بازآزمایی CSS پس از دو اصلاح (جعبه‌بندی placeholder و حذف bullet کارت) E2E `551465d97590` روی PHP 8.4 را ۱۷/۱۷ گذراند؛ PHP 8.1 نیز full suite و E2E پس از اصلاح overflow تصویر گذراند (پیش از اصلاح marker). Storefront در چهار viewport و Elementor 4.3.5 در صفحهٔ عادی برای Shortcode widget/dynamic block مرورگری بررسی شدند. کاربر Narrator را برای QA-207 تأیید کرد؛ Elementor Theme Builder باز است. ZIP قبلی `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پیش از CSS فعلی ساخته شده و lifecycle آن، artifact فعلی را پوشش نمی‌دهد؛ باید پس از rebuild دوباره lifecycle شود.
+آخرین بازآزمایی CSS پس از دو اصلاح (جعبه‌بندی placeholder و حذف bullet کارت) E2E `551465d97590` روی PHP 8.4 را ۱۷/۱۷ گذراند؛ PHP 8.1 نیز full suite و E2E پس از اصلاح overflow تصویر گذراند (پیش از اصلاح marker). Storefront classic product در E2E `4d1a0a7d67cb` و blockified product template ووکامرس در Twenty Twenty-Five در E2E `9d3c296f10e1` هر دو ۱۷/۱۷ شدند؛ Elementor 4.3.5 در صفحهٔ عادی برای Shortcode widget/dynamic block بررسی شد. کاربر QA-207 و اعلام Narrator را تأیید کرد؛ Elementor Theme Builder و ماتریس نسخه بازند. ZIP قبلی `9d6b427da69510ceb89e82cc29d644219615b55e6c4ca54e54ca393cf71c6ee6` پیش از CSS فعلی ساخته شده و lifecycle آن، artifact فعلی را پوشش نمی‌دهد؛ باید پس از rebuild دوباره lifecycle شود.
 
 ### ثبت اجرای benchmark و گیت محلی NFR-02
 
@@ -110,4 +110,4 @@ Rollback هدف: غیرفعال‌سازی افزونه باید افزودن ع
 
 برای هر run این اطلاعات را کنار QA نتیجه ثبت کنید: تاریخ، commit و diff محلی، محیط/locale/HPOS، فرمان، تعداد و نتیجه، خطا، screenshot یا log بدون secret، موارد Skip با علت و تصمیم پذیرش.
 
-شواهد و موارد آزموده‌نشده در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. اجرای PHP 8.1 و 8.4 و Browser QA تکمیلی، Storefront و Elementor page-level را پوشش داد؛ آزمون Narrator گفتاری و Elementor Theme Builder بازند. artifact ZIP قبلی نسبت به CSS فعلی stale است؛ lifecycle تازه باید پس از build انجام شود. benchmark فقط در local envelope منتخب E-15 پاس است، نه SLA عمومی/محصولی. native `fa_IR` RTL و بقیهٔ موارد ثبت‌شده در گزارش QA پاس شدند.
+شواهد و موارد آزموده‌نشده در [گزارش QA پایلوت](pilot-qa-fa.md) آمده‌اند. اجرای PHP 8.1 و 8.4 و Browser QA تکمیلی، Storefront classic و blockified Single Product در Twenty Twenty-Five و Elementor page-level را پوشش داد؛ Elementor Theme Builder و ماتریس سازگاری گسترده بازند. artifact ZIP قبلی نسبت به CSS فعلی stale است؛ lifecycle تازه باید پس از build انجام شود. benchmark فقط در local envelope منتخب E-15 پاس است، نه SLA عمومی/محصولی. native `fa_IR` RTL و بقیهٔ موارد ثبت‌شده در گزارش QA پاس شدند.
