@@ -92,8 +92,8 @@ final class RuleMetaBox {
 		$source_category_ids  = isset( $form_values['source_category_ids'] ) && is_array( $form_values['source_category_ids'] )
 			? array_map( 'absint', $form_values['source_category_ids'] )
 			: $source_category_ids;
-		$target_category_id   = isset( $form_values['target_category_id'] ) && is_numeric( $form_values['target_category_id'] )
-			? absint( $form_values['target_category_id'] )
+		$target_category_id   = array_key_exists( 'target_category_id', $form_values )
+			? ( is_numeric( $form_values['target_category_id'] ) ? absint( $form_values['target_category_id'] ) : 0 )
 			: $target_category_id;
 		$recommendation_count = isset( $form_values['recommendation_count'] )
 			? sanitize_text_field( (string) $form_values['recommendation_count'] )
@@ -104,6 +104,13 @@ final class RuleMetaBox {
 		$priority             = isset( $form_values['priority'] )
 			? sanitize_text_field( (string) $form_values['priority'] )
 			: $priority;
+
+		$recommendation_count_display = isset( $form_values['recommendation_count'] )
+			? (string) $recommendation_count
+			: RuleAdmin::format_human_number( (int) $recommendation_count );
+		$priority_display             = isset( $form_values['priority'] )
+			? (string) $priority
+			: RuleAdmin::format_human_number( (int) $priority );
 
 		wp_nonce_field( RuleAdmin::NONCE_ACTION, RuleAdmin::NONCE_NAME );
 		?>
@@ -133,7 +140,7 @@ final class RuleMetaBox {
 					<th scope="row"><label for="hamkharid-target-category"><?php esc_html_e( 'Target Category', 'hamkharid' ); ?></label></th>
 					<td>
 						<select id="hamkharid-target-category" name="hamkharid_target_category_id" class="widefat" required>
-							<option value=""><?php esc_html_e( 'Select a category', 'hamkharid' ); ?></option>
+							<option value="" <?php selected( 0, (int) $target_category_id ); ?>><?php esc_html_e( 'Select a category', 'hamkharid' ); ?></option>
 							<?php $this->render_missing_category_options( array( $target_category_id ), $categories ); ?>
 							<?php $this->render_category_options( $categories, array( $target_category_id ) ); ?>
 						</select>
@@ -143,7 +150,7 @@ final class RuleMetaBox {
 				</tr>
 				<tr>
 					<th scope="row"><label for="hamkharid-recommendation-count"><?php esc_html_e( 'Recommendation Count', 'hamkharid' ); ?></label></th>
-					<td><input type="number" id="hamkharid-recommendation-count" name="hamkharid_recommendation_count" value="<?php echo esc_attr( (string) $recommendation_count ); ?>" min="<?php echo esc_attr( (string) Rule::MIN_RECOMMENDATION_COUNT ); ?>" max="<?php echo esc_attr( (string) Rule::MAX_RECOMMENDATION_COUNT ); ?>" step="1" class="small-text" required /><?php $this->render_field_error( $error_code, 'hamkharid_recommendation_count_invalid' ); ?></td>
+					<td><input type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]+" id="hamkharid-recommendation-count" name="hamkharid_recommendation_count" value="<?php echo esc_attr( $recommendation_count_display ); ?>" class="small-text" required /><?php $this->render_field_error( $error_code, 'hamkharid_recommendation_count_invalid' ); ?></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="hamkharid-sort-strategy"><?php esc_html_e( 'Sort Strategy', 'hamkharid' ); ?></label></th>
@@ -163,7 +170,7 @@ final class RuleMetaBox {
 				<tr>
 					<th scope="row"><label for="hamkharid-priority"><?php esc_html_e( 'Priority', 'hamkharid' ); ?></label></th>
 					<td>
-						<input type="number" id="hamkharid-priority" name="hamkharid_priority" value="<?php echo esc_attr( (string) $priority ); ?>" min="<?php echo esc_attr( (string) Rule::MIN_PRIORITY ); ?>" max="<?php echo esc_attr( (string) Rule::MAX_PRIORITY ); ?>" step="1" class="small-text" />
+						<input type="text" inputmode="numeric" pattern="-?[0-9۰-۹٠-٩]+" id="hamkharid-priority" name="hamkharid_priority" value="<?php echo esc_attr( $priority_display ); ?>" class="small-text" />
 						<?php $this->render_field_error( $error_code, 'hamkharid_priority_invalid' ); ?>
 						<p class="description"><?php esc_html_e( 'A higher number wins among rules at the same category distance. A direct category match still wins over a parent category.', 'hamkharid' ); ?></p>
 					</td>

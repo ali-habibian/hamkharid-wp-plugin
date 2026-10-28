@@ -26,6 +26,28 @@ final class RuleAdmin {
 	private const ERROR_QUERY_ARG         = 'hamkharid_rule_error';
 	private const TOGGLED_QUERY_ARG       = 'hamkharid_rule_toggled';
 	private const FORM_VALUES_META_PREFIX = '_hamkharid_invalid_rule_form_';
+	private const DIGIT_TRANSLATION       = array(
+		'۰' => '0',
+		'۱' => '1',
+		'۲' => '2',
+		'۳' => '3',
+		'۴' => '4',
+		'۵' => '5',
+		'۶' => '6',
+		'۷' => '7',
+		'۸' => '8',
+		'۹' => '9',
+		'٠' => '0',
+		'١' => '1',
+		'٢' => '2',
+		'٣' => '3',
+		'٤' => '4',
+		'٥' => '5',
+		'٦' => '6',
+		'٧' => '7',
+		'٨' => '8',
+		'٩' => '9',
+	);
 
 	/**
 	 * Rule persistence gateway.
@@ -213,6 +235,35 @@ final class RuleAdmin {
 	}
 
 	/**
+	 * Formats a human-facing integer using Persian digits in a Persian admin locale.
+	 *
+	 * @param int $value Number to format.
+	 */
+	public static function format_human_number( int $value ): string {
+		$locale = get_user_locale();
+
+		if ( 0 !== strpos( $locale, 'fa_' ) ) {
+			return (string) $value;
+		}
+
+		return strtr(
+			(string) $value,
+			array(
+				'0' => '۰',
+				'1' => '۱',
+				'2' => '۲',
+				'3' => '۳',
+				'4' => '۴',
+				'5' => '۵',
+				'6' => '۶',
+				'7' => '۷',
+				'8' => '۸',
+				'9' => '۹',
+			)
+		);
+	}
+
+	/**
 	 * Parses a submitted integer without silently clamping invalid values.
 	 *
 	 * @param mixed $value Submitted value.
@@ -223,6 +274,7 @@ final class RuleAdmin {
 		}
 
 		$value = trim( sanitize_text_field( (string) $value ) );
+		$value = strtr( $value, self::DIGIT_TRANSLATION );
 
 		return 1 === preg_match( '/^-?\d+$/', $value ) ? (int) $value : PHP_INT_MIN;
 	}

@@ -201,6 +201,18 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 			throw new RuntimeException( 'The validation error was not added to the admin redirect.' );
 		}
 
+		ob_start();
+		$meta_box->render( get_post( $rule_id ) );
+		$invalid_target_form = (string) ob_get_clean();
+
+		$empty_target_selected = 1 === preg_match( '/<option value=""[^>]*selected/', $invalid_target_form );
+		$saved_target_selected = 1 === preg_match( '/<option value="' . preg_quote( esc_attr( (string) $created_terms[2] ), '/' ) . '"[^>]*selected/', $invalid_target_form );
+
+		if ( ! $empty_target_selected || $saved_target_selected ) {
+			preg_match( '/<select id="hamkharid-target-category"[\s\S]*?<\/select>/', $invalid_target_form, $target_markup );
+			throw new RuntimeException( 'An invalid empty target selection was not preserved in the edit form: ' . ( $target_markup[0] ?? 'target select not found' ) );
+		}
+
 		$list_table   = new RuleListTable( $repository );
 		$bulk_actions = $list_table->bulk_actions(
 			array(
@@ -220,6 +232,35 @@ use Hamkharid\SmartCategoryComplement\Rules\RuleRepository;
 
 		if ( isset( $row_actions['inline hide-if-no-js'] ) || ! isset( $row_actions['hamkharid_toggle'] ) ) {
 			throw new RuntimeException( 'Rule row actions did not replace Quick Edit with the secure status action.' );
+		}
+
+		$_POST = array(
+			RuleAdmin::NONCE_NAME            => wp_create_nonce( RuleAdmin::NONCE_ACTION ),
+			'hamkharid_enabled'              => '1',
+			'hamkharid_source_category_ids'  => array( (string) $created_terms[0] ),
+			'hamkharid_target_category_id'   => (string) $created_terms[2],
+			'hamkharid_recommendation_count' => '۴',
+			'hamkharid_sort_strategy'        => Rule::SORT_RANDOM,
+			'hamkharid_priority'             => '٢',
+		);
+		$admin->save( $rule_id, get_post( $rule_id ), true );
+		$localized_rule = $repository->find( $rule_id );
+
+		if ( null === $localized_rule || 4 !== $localized_rule->recommendation_count() || 2 !== $localized_rule->priority() ) {
+			throw new RuntimeException( 'The admin form did not normalize Persian numerals for count and priority.' );
+		}
+
+		update_user_meta( $user_id, 'locale', 'fa_IR' );
+		ob_start();
+		$meta_box->render( get_post( $rule_id ) );
+		$localized_form = (string) ob_get_clean();
+		ob_start();
+		$list_table->render_column( 'hamkharid_count', $rule_id );
+		$list_table->render_column( 'hamkharid_priority', $rule_id );
+		$localized_columns = (string) ob_get_clean();
+
+		if ( false === strpos( $localized_form, 'value="۴"' ) || false === strpos( $localized_form, 'value="۲"' ) || false === strpos( $localized_columns, '۴۲' ) ) {
+			throw new RuntimeException( 'Human-facing rule counts and priority were not displayed with Persian digits in the Persian admin locale.' );
 		}
 
 		$_POST = array();
